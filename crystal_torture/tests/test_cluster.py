@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock
 from crystal_torture import Cluster, Node
 
-class GraphTestCase( unittest.TestCase ):
+class ClusterTestCase( unittest.TestCase ):
     """ Test for Graph Class"""
 
     def setUp( self ):

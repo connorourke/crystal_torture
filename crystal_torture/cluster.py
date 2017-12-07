@@ -16,3 +16,4 @@ class Cluster:
 
         self.nodes = nodes
         
+
