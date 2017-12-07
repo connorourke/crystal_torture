@@ -17,7 +17,13 @@ class ClusterTestCase( unittest.TestCase ):
     def test_cluster_is_initialised( self ):
         self.assertEqual( self.cluster.nodes, self.mock_nodes)
  
-
+    def test_merge_cluster( self ):
+        nodes1 = self.mock_nodes
+        cluster1 = Cluster(self.mock_nodes[0:4])
+        cluster2 = Cluster(self.mock_nodes[4:7])
+ 
+        combined_cluster = cluster1.merge(cluster2)
+        self.assertEqual(combined_cluster.nodes,self.mock_nodes)    
 
 if __name__ =='__main__':
     unittest.main()

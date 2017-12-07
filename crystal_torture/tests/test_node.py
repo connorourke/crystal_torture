@@ -17,6 +17,8 @@ class NodeTestCase( unittest.TestCase ):
         self.assertEqual( self.node.labels,self.labels)
         self.assertEqual( self.node.neighbours, self.neighbours)
 
+         
+        
     
 
 if __name__ =='__main__':

@@ -14,3 +14,4 @@ class Graph:
         """
 
         self.clusters = clusters
+

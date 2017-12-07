@@ -16,4 +16,18 @@ class Cluster:
 
         self.nodes = nodes
         
+    def merge(self, other_cluster):
+        """
+        Merge to clusters into one
+ 
+        Args:
+            other_cluster (Cluster): cluster to be joined
+        """
 
+        new_cluster = Cluster( self.nodes + other_cluster.nodes )
+
+        return new_cluster
+
+
+
+ 
