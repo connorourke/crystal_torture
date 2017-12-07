@@ -1,17 +1,17 @@
 from crystal_torture.node import  Node
 
 
-class Graph:
+class Cluster:
     """
-    Graph class
+    Cluster class: group of connected nodes within graph
     """
 
     def __init__(self,nodes):
         """
-        Initialise a graph.
+        Initialise a cluster.
 
         Args:
-            nodes (list(Node)): list of nodes in the graph.
+            nodes (list(Node)): list of nodes in the cluster.
         """
 
         self.nodes = nodes
