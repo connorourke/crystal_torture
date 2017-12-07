@@ -1,1 +1,5 @@
 crystal_torture/devel
+*/**/*.swp
+*/**/__pycache__
+*.swp
+*pyc
