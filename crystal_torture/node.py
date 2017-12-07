@@ -12,7 +12,8 @@ class Node:
         Args:
             index (Int): node index
             element (Str): element on node
-            label(Dict(Int:Str)): dictionary of labels associated to the node. 
+            labels(Dict(Int:Str)): dictionary of labels associated to the node.
+            neighbours(list[int]): list of neighbours of the node  
         """    
         self.index = index
         self.element = element
