@@ -34,7 +34,7 @@ class Cluster:
         Check if one cluster of nodes is connected to another
         """
 
-        return bool( self.nodes & other_cluster.neighbours) 
+        return bool( self.nodes & other_cluster.nodes ) 
 
     def grow_cluster(self):
         """

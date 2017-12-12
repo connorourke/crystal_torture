@@ -13,7 +13,8 @@ class Node:
             index (Int): node index
             element (Str): element on node
             labels(Dict(Int:Str)): dictionary of labels associated to the node.
-            neighbours_ind(set{int}): set of neighbours indices for the node  
+            neighbours_ind(set{int}): set of neighbour indices for the node 
+            neighbours_ind(set{Node}): set of neighbour Nodes for the node
         """    
         self.index = index
         self.element = element

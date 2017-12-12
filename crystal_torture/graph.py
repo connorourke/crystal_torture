@@ -10,7 +10,7 @@ class Graph:
         Initialise a graph.
 
         Args:
-            nodes (list(Cluster)): list of clusters in the graph.
+            nodes (set(Cluster)): set of clusters in the graph.
         """
 
         self.clusters = clusters

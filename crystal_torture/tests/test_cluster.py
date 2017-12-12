@@ -6,7 +6,7 @@ class ClusterTestCase( unittest.TestCase ):
     """ Test for Graph Class"""
 
     def setUp( self ):
- 
+        print("setting up") 
         self.labels = ['A','B','O','A','B','O']
         self.elements = ["Mg","Al","O","Mg","Al","O"]
         self.node_ids = [ 0,1,2,3,4,5 ]
@@ -26,14 +26,17 @@ class ClusterTestCase( unittest.TestCase ):
         self.assertEqual( self.cluster.nodes, self.mock_nodes)
  
     def test_merge_cluster( self ):
- 
         combined_cluster = self.cluster1.merge(self.cluster2)
         self.assertEqual(combined_cluster.nodes,self.mock_nodes)    
+
+    def test_is_neighbour( self ):
+        self.assertTrue(self.cluster1.is_neighbour(self.cluster2))
 
     def test_grow_cluster(self):
        
         self.cluster1.grow_cluster()
         self.assertEqual(self.cluster1.nodes,self.cluster.nodes)
+
 
 if __name__ =='__main__':
     unittest.main()
