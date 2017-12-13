@@ -6,7 +6,6 @@ class ClusterTestCase( unittest.TestCase ):
     """ Test for Graph Class"""
 
     def setUp( self ):
-        print("setting up") 
         self.labels = ['A','B','O','A','B','O']
         self.elements = ["Mg","Al","O","Mg","Al","O"]
         self.node_ids = [ 0,1,2,3,4,5 ]

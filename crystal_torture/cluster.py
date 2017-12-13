@@ -14,11 +14,12 @@ class Cluster:
             nodes (set(Node)): set of nodes in the cluster.
         """
 
-        self.nodes = set(nodes)
-        
+        self.nodes = nodes
+        self.periodic = [False, False, False]
+
     def merge(self, other_cluster):
         """
-        Merge to clusters into one
+        Merge two clusters into one
  
         Args:
             other_cluster (Cluster): cluster to be joined
@@ -38,7 +39,7 @@ class Cluster:
 
     def grow_cluster(self):
         """
-        Grow cluster by checking through neighbours and merging
+        Grow cluster by adding neighbours
  
         Args:
             None

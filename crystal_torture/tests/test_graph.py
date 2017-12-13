@@ -7,16 +7,21 @@ class GraphTestCase( unittest.TestCase ):
 
     def setUp( self ):
  
-        cluster1 = Cluster([Mock(spec=Node),Mock(spec=Node),Mock(spec=Node),Mock(spec=Node)])
-        cluster2 = Cluster([Mock(spec=Node),Mock(spec=Node),Mock(spec=Node),Mock(spec=Node)])
-        
-        self.clusters = set([cluster1,cluster2])
-        
-        self.graph = Graph(self.clusters)
+        self.labels = ['A','B','O','A','B','O']
+        self.elements = ["Mg","Al","O","Mg","Al","O"]
+        self.node_ids = [ 0,1,2,3,4,5 ]
+        self.neighbours = [[1,2,3,5],[0,2,4,5],[1,0,4,3],[0,4,5,2],[1,2,3,5],[4,3,0,1]]
+        self.nodes = [ Mock( spec=Node, index = i , element = e , labels = l , neighbours_ind = n, neigbours = None ) for i, e, l, n in zip(self.node_ids, self.elements, self.labels, self.neighbours)]
+
+        for node in self.nodes:
+            node.neighbours = [self.nodes[n] for n in node.neighbours_ind]
+            node.neighbours = set(node.neighbours)
+
+        self.nodes = set(self.nodes)
+        self.graph = Graph(self.nodes)
 
     def test_graph_is_initialised( self ):
-        self.assertEqual( self.graph.clusters, self.clusters)
-        self.assertEqual([c.nodes for c in self.graph.clusters],[c.nodes for c in self.clusters]) 
+        self.assertEqual( self.graph.nodes, self.nodes)
 
             
 

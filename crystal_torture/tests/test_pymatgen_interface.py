@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
-from crystal_torture import Node
-from crystal_torture.pymatgen_interface import nodes_from_file
+from crystal_torture import Node, Cluster
+from crystal_torture.pymatgen_interface import nodes_from_structure, clusters_from_file
 from pymatgen import Structure
 
 class PymatgenTestCase( unittest.TestCase ):
@@ -25,17 +25,30 @@ class PymatgenTestCase( unittest.TestCase ):
             node.neighbours = [self.mock_nodes[n] for n in node.neighbours_ind]
             node.neighbours = set(node.neighbours)
         self.mock_nodes = set(self.mock_nodes)
+        self.cluster = Cluster(set(self.mock_nodes)) 
         
 
-    def test_nodes_from_file(self):
+#    def test_nodes_from_file(self):
 
-        nodes = nodes_from_file("crystal_torture/tests/POSCAR_test.vasp", 4.0)
-        mock_neigh_ind = set([frozenset(node.neighbours_ind) for node in self.mock_nodes])
-        neigh_ind = set([frozenset(node.neighbours_ind) for node in nodes])
+        #nodes = nodes_from_file("crystal_torture/tests/POSCAR_test.vasp", 4.0)
+#        mock_neigh_ind = set([frozenset(node.neighbours_ind) for node in self.mock_nodes])
+#        neigh_ind = set([frozenset(node.neighbours_ind) for node in nodes])
 
-        self.assertEqual(set([node.index for node in self.mock_nodes]),set([node.index for node in nodes]))
-        self.assertEqual(set([node.element for node in self.mock_nodes]),set([node.element for node in nodes]))
-        self.assertEqual(mock_neigh_ind,neigh_ind)
+#        self.assertEqual(mock_neigh_ind,neigh_ind)
+#        self.assertEqual(set([node.index for node in self.mock_nodes]),set([node.index for node in nodes]))
+#        self.assertEqual(set([node.element for node in self.mock_nodes]),set([node.element for node in nodes]))
+
+#        node=set()
+#        node.add(nodes.pop())
+#        cluster1 = Cluster(node)
+#        cluster1.grow_cluster()
+#        self.assertEqual(set([node.index for node in self.cluster.nodes]),set([node.index for node in cluster1.nodes]))
+#        self.assertEqual(set([node.element for node in self.cluster.nodes]),set([node.element for node in cluster1.nodes]))
+
+    def test_clusters_from_file(self): 
+        
+        clusters = clusters_from_file("crystal_torture/tests/POSCAR_test.vasp",2.0)
+
 
 if __name__ =='__main__':
     unittest.main()
