@@ -47,7 +47,7 @@ class PymatgenTestCase( unittest.TestCase ):
 
     def test_clusters_from_file(self): 
         
-        clusters = clusters_from_file("crystal_torture/tests/POSCAR_test.vasp",2.0)
+        clusters = clusters_from_file("crystal_torture/tests/POSCAR_test.vasp",4.0)
 
 
 if __name__ =='__main__':

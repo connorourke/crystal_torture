@@ -3,3 +3,4 @@ crystal_torture/devel
 */**/__pycache__
 *.swp
 *pyc
+*/activate/*

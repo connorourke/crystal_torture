@@ -19,7 +19,6 @@ def nodes_from_structure(structure, rcut):
   
     """ 
     
-#    structure = Structure.from_file(filename)
     nodes = []
 
     for i,site  in enumerate(structure.sites):
@@ -37,6 +36,35 @@ def nodes_from_structure(structure, rcut):
     return set(nodes)
 
 
+def set_cluster_periodic(clusters, structure, rcut):
+
+    for cluster in clusters:
+
+      species = [structure.sites[node.index].species_string for node in cluster.nodes]
+      coords = [structure.sites[node.index].coords for node in cluster.nodes]
+
+      for axis in range(3):
+          halo = Structure(structure.lattice,species,coords,coords_are_cartesian=True)
+          super_scale = [1,1,1]
+          super_scale[axis]+=1
+          halo.make_supercell(super_scale)
+
+          halo_nodes = nodes_from_structure (halo, rcut)
+          temp_clusters = set()
+
+          while halo_nodes:
+             temp_cluster = Cluster({halo_nodes.pop()})
+             temp_cluster.grow_cluster()
+             halo_nodes.difference_update(temp_cluster.nodes)
+             temp_clusters.add(temp_cluster)
+
+          if len(temp_clusters) > 1:
+             
+             cluster.periodic[axis] = False
+          else:
+             cluster.periodic[axis] = True
+
+
 def clusters_from_file(filename, rcut):
     
     structure = Structure.from_file(filename)
@@ -51,35 +79,9 @@ def clusters_from_file(filename, rcut):
          nodes.difference_update(cluster.nodes)
          clusters.add(cluster)
 
+    set_cluster_periodic(clusters, structure, rcut)
 
-    structure.add_site_property("orig_label", [str(i) for i in range(len(structure.sites))] )
- 
-   
     for cluster in clusters:
-  
-      species = [structure.sites[node.index].species_string for node in cluster.nodes]
-      coords = [structure.sites[node.index].coords for node in cluster.nodes]
+       print(cluster.periodic)
 
-      for axis in range(3):
-          halo = Structure(structure.lattice,species,coords)
-          super_scale = [1,1,1]
-          super_scale[axis]+=1
-          halo.make_supercell(super_scale)
-          
-          halo_nodes = nodes_from_structure (halo, rcut)      
-          
-          temp_clusters = set()
-
-          while halo_nodes:
-             temp_cluster = Cluster({halo_nodes.pop()})
-             temp_cluster.grow_cluster()
-             halo_nodes.difference_update(cluster.nodes)
-             temp_clusters.add(temp_cluster)
-    
-          if len(temp_clusters) > 1:
-             print(" false")
-          else:
-             print("true")
- 
-
-
+    return clusters
