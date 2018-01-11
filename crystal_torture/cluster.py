@@ -37,24 +37,66 @@ class Cluster:
 
         return bool( self.nodes & other_cluster.nodes ) 
 
-    def grow_cluster(self):
+    def grow_cluster(self,key=None,value=None):
         """
         Grow cluster by adding neighbours
  
         Args:
-            None
+            key (str): label key to selectively choose nodes in cluster
+            value : value for label to selectively choose nodes in cluster
         """
 
         nodes_to_visit = [ self.nodes.pop() ]
-        visited = set()       
+        visited = set()      
+        
+     #   if not key:
+         #  print("****************************** halo************")
 
         while nodes_to_visit:
             node = nodes_to_visit.pop(0)
-            
-            if node not in visited:
-               nodes_to_visit += [ node for node in node.neighbours ]
-            visited.add(node)             
+            if key:
+
+               if node.labels[key]==value:
+              
+                 # print("growing pains",key,node.labels,node.labels[key],value,node.labels[key]==value)
+               
+                  if node not in visited:# and node.labels[key]==value:
+                     nodes_to_visit += [ node for node in node.neighbours ]
+                    # print("Neighbours",node.neighbours)
+                #     print([node.labels for node in node.neighbours])
+                #     print("Adding",node.index)
+                     visited.add(node)        
+               #      print("Visited",[node.index for node in visited])     
+            else:
+              #print("growing pains","NO KEY",node.labels)
+              if node not in visited:
+                # print([node.labels for node in node.neighbours])
+                 nodes_to_visit += [ node for node in node.neighbours ]
+                # print("Adding",node.index)
+                 visited.add(node)
+                # print("Visited",[node.index for node in visited])
+
         
         self.nodes = visited
+        print("Nodes in cluster",len(self.nodes))
 
+
+    def return_key_nodes(self,key,value):
+
+        key_nodes=set([node for node in self.nodes if node.labels[key]==value])
  
+        return key_nodes
+            
+
+
+    def torture(self):
+        """
+        Calculates the average tortuosity of the graph
+        """
+
+        
+
+
+
+
+

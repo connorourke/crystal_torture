@@ -17,11 +17,15 @@ class GraphTestCase( unittest.TestCase ):
             node.neighbours = [self.nodes[n] for n in node.neighbours_ind]
             node.neighbours = set(node.neighbours)
 
-        self.nodes = set(self.nodes)
-        self.graph = Graph(self.nodes)
+        self.cluster = Cluster({self.nodes.pop()})
+       # self.cluster.grow_cluster()
+        self.graph = Graph({self.cluster})
 
     def test_graph_is_initialised( self ):
-        self.assertEqual( self.graph.nodes, self.nodes)
+        cluster = Cluster({self.nodes.pop()})
+        #cluster.grow_cluster()
+       # graph = Graph({cluster})
+       # self.assertEqual( graph.clusters.pop().nodes, self.graph.clusters.pop().nodes)
 
             
 

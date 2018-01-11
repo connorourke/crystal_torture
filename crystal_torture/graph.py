@@ -1,39 +1,23 @@
-from crystal_torture.cluster import  Cluster
+#from crystal_torture.cluster import  Cluster
+from crystal_torture.pymatgen_interface import clusters_from_file
 
 class Graph:
     """
     Graph class: group of disconnected clusters making up full graph
     """
 
-    def __init__(self, nodes):
+    def __init__(self, clusters):
         """
         Initialise a graph.
 
         Args:
-            nodes  (set(Nodes)): set of unit-cell nodes in graph.
-            halo   (set(Nodes)): set of halo image nodes in graph.
+            clusters  (set(Clusters)): set of clusters in the graph
 
         """
 
         
-        self.nodes = nodes
-#        self.halo = halo
-        self.clusters = None
-#        self.halo_clusters = None
+        self.clusters = clusters
         
 
-    def obtain_clusters(self):
-        """
-        Search through the nodes in the graph and return the set of connected clusters
-
-        """
-
-
-
-#        cluster_to_grow  = Cluster(self.nodes.pop(0))
-#        clusters = set()
-        
-#        while 
-            
         
 

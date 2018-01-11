@@ -45,9 +45,23 @@ class PymatgenTestCase( unittest.TestCase ):
 #        self.assertEqual(set([node.index for node in self.cluster.nodes]),set([node.index for node in cluster1.nodes]))
 #        self.assertEqual(set([node.element for node in self.cluster.nodes]),set([node.element for node in cluster1.nodes]))
 
-    def test_clusters_from_file(self): 
+#    def test_clusters_from_file(self): 
         
-        clusters = clusters_from_file("crystal_torture/tests/POSCAR_test.vasp",4.0)
+#        clusters1 = clusters_from_file("crystal_torture/tests/POSCAR_1_cluster.vasp",4.0)
+#        clusters2  = clusters_from_file("crystal_torture/tests/POSCAR_2_cluster.vasp",3.5)
+#        self.assertEqual(len(clusters1),1)
+#        self.assertEqual(len(clusters2),2)
+        
+    def test_cluster_periodic(self):
+   
+#        clusters1 = clusters_from_file("crystal_torture/tests/POSCAR_1_cluster.vasp",4.0)
+        clusters2  = clusters_from_file("crystal_torture/tests/POSCAR_2_cluster.vasp",3.5)
+#        self.assertTrue([cluster.periodic[:] for cluster in clusters1])
+#        if clusters2.pop().periodic == [False,False,False]:
+#           self.assertEqual(clusters2.pop().periodic,[True,True,True])
+#        else:
+#           self.assertEqual(clusters2.pop().periodic,[False,False,False])
+
 
 
 if __name__ =='__main__':
