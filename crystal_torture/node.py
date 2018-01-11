@@ -23,8 +23,6 @@ class Node:
         self.labels = labels
         self.neighbours_ind = neighbours_ind
         self.neighbours = neighbours
-#        self.halo_neigh_ind = halo_neigh_ind
-#        self.halo_neigh = halo_neigh
 
 
     

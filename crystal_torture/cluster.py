@@ -49,45 +49,41 @@ class Cluster:
         nodes_to_visit = [ self.nodes.pop() ]
         visited = set()      
         
-     #   if not key:
-         #  print("****************************** halo************")
-
         while nodes_to_visit:
             node = nodes_to_visit.pop(0)
             if key:
 
                if node.labels[key]==value:
               
-                 # print("growing pains",key,node.labels,node.labels[key],value,node.labels[key]==value)
-               
                   if node not in visited:# and node.labels[key]==value:
                      nodes_to_visit += [ node for node in node.neighbours ]
-                    # print("Neighbours",node.neighbours)
-                #     print([node.labels for node in node.neighbours])
-                #     print("Adding",node.index)
                      visited.add(node)        
-               #      print("Visited",[node.index for node in visited])     
             else:
-              #print("growing pains","NO KEY",node.labels)
               if node not in visited:
-                # print([node.labels for node in node.neighbours])
                  nodes_to_visit += [ node for node in node.neighbours ]
-                # print("Adding",node.index)
                  visited.add(node)
-                # print("Visited",[node.index for node in visited])
-
         
         self.nodes = visited
         print("Nodes in cluster",len(self.nodes))
 
 
     def return_key_nodes(self,key,value):
+        """
+        Returns the nodes in a cluster corresponding to a particular label
+
+        Args:
+           key (str): Dictionary key for filtering nodes
+           value    : value held in dictionary for label key
+
+        Returns:
+           key_nodes (set(Node)): set of nodes in cluster for which (node.labels[key] == value)
+       
+        """
 
         key_nodes=set([node for node in self.nodes if node.labels[key]==value])
  
         return key_nodes
             
-
 
     def torture(self):
         """
