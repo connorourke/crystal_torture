@@ -23,6 +23,6 @@ class Node:
         self.labels = labels
         self.neighbours_ind = neighbours_ind
         self.neighbours = neighbours
-
+        self.tortuosity = None
 
     

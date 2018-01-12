@@ -18,7 +18,6 @@ def create_halo(structure):
         None
     """
 
-#    structure.add_site_property("UC_index", [str(i) for i in range(len(structure.sites))] )
 
     uc_index = [((site * 3**3 ) +13) for site in range(len(structure.sites))]
     uc_index.reverse()
@@ -37,8 +36,6 @@ def create_halo(structure):
         structure_sorted.sites.append(site)
 
     return structure_sorted
-
-#    print("Structure inside",structure)
 
 def nodes_from_structure(structure, rcut, get_halo=False):
     """
@@ -59,6 +56,7 @@ def nodes_from_structure(structure, rcut, get_halo=False):
     nodes = []
 
     no_nodes = len(structure.sites)
+
     if get_halo == True:
        structure = create_halo(structure)
 
@@ -75,10 +73,10 @@ def nodes_from_structure(structure, rcut, get_halo=False):
        node.neighbours = set()
        for neighbour_ind in node.neighbours_ind:
            node.neighbours.add(nodes[neighbour_ind])
-     
-    for node in nodes:
-       print(node.index, node.labels,node.neighbours_ind)
-
+       print(node.labels)  
+#    for node in nodes:
+#       print(node.index, node.labels, node.neighbours_ind)
+   
     return set(nodes)
 
 
@@ -111,10 +109,15 @@ def set_cluster_periodic(clusters, structure, rcut):
              cluster.periodic[axis] = True
 
 
-def clusters_from_file(filename, rcut):
+def clusters_from_file(filename, rcut):# elements):
     
     structure = Structure.from_file(filename)
-    structure_temp = Structure.from_file(filename) 
+    
+    elements={"Li","X","X0+"}
+    all_elements = set([species for species in structure.symbol_set])
+    remove_elements = [x for x in all_elements if x not in elements]
+
+    structure.remove_species(remove_elements)
      
     nodes = nodes_from_structure(structure, rcut, get_halo=True)
     clusters = set()
@@ -128,7 +131,7 @@ def clusters_from_file(filename, rcut):
             nodes.difference_update(cluster.nodes)
             clusters.add(cluster)
    
-    set_cluster_periodic(clusters, structure_temp, rcut)
+    set_cluster_periodic(clusters, Structure.from_file(filename), rcut)
 
     # add halo nodes to clusters
     for cluster in clusters:
