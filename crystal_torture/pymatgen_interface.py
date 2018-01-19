@@ -216,9 +216,7 @@ def nodes_from_structure(structure, rcut, get_halo=False):
   
     """
     structure.add_site_property("UC_index", [str(i) for i in range(len(structure.sites))] )
-    print("in nodes from structure",structure)
     neighbours = get_all_neighbors_and_image(structure,rcut,include_index=True)
-    print("neighbour_list",neighbours)
     nodes = []
 
     no_nodes = len(structure.sites)
@@ -232,7 +230,6 @@ def nodes_from_structure(structure, rcut, get_halo=False):
     test_neigh = get_all_neighbors_and_image(structure,rcut,include_index=True)
     
  
-    print("reordered structure",structure)
     for index,site  in enumerate(structure.sites):
          
         if index in uc_index:
@@ -240,7 +237,6 @@ def nodes_from_structure(structure, rcut, get_halo=False):
         else:
            halo_node = True
 
-        print("node",index,halo_node,"neighbours",set(neighbours[index]) ==set([n[2] for n in test_neigh[index]]))
         node_neighbours_ind = set(neighbours[index])
 
         
@@ -305,13 +301,15 @@ def clusters_from_file(filename, rcut):# elements):
     nodes = nodes_from_structure(structure, rcut, get_halo=True)
     clusters = set()
 
- 
-    while nodes:
-         node=nodes.pop()
+    uc_nodes = set([node for node in nodes if node.labels["Halo"]==False])
+    print([node.index for node in uc_nodes])
+
+    while uc_nodes:
+         node=uc_nodes.pop()
          if node.labels["Halo"]==False :
             cluster = Cluster({node})
             cluster.grow_cluster(key="Halo",value=False)
-            nodes.difference_update(cluster.nodes)
+            uc_nodes.difference_update(cluster.nodes)
             clusters.add(cluster)
 
     sys.exit()
