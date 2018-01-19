@@ -1,13 +1,12 @@
 
 from crystal_torture.node import Node
 from crystal_torture.cluster import Cluster
-from crystal_torture import dist
-from pymatgen import Structure, Molecule, PeriodicSite
-import numpy as np
+from crystal_torture.dist import dist
+from pymatgen import Structure, Molecule
 import itertools
 import math
+import dist
 import copy
-import sys
 
 "Functions for setting up a node, cluster and graph using pymatgen"
 
@@ -27,13 +26,12 @@ def shift_index(index,x_d,y_d,z_d,shift):
        new_index (int): index of the site in the new supercell structure
      
    """
-   new_x=((int(index/(y_d*z_d)))%x_d+shift[0])%x_d
+   new_x=((int(index/y_d*z_d))%x_d+shift[0])%x_d
    new_y=((int(index/y_d))%y_d+shift[1])%y_d
    new_z=(index%z_d+shift[2])%z_d
-   new_index = int(x_d*y_d*z_d*int(index/(x_d*y_d*z_d))+(new_x%x_d*y_d*z_d+new_y%y_d*z_d+new_z%z_d))
+   new_index = int(x_d*y_d*z_d*int(index/x_d*y_d*z_d)+(new_x%x_d*y_d*z+new_y%y_d*z_d+new_z%z_d))
 
    return new_index
-
 
 def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
     """
@@ -64,7 +62,7 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
             for z in range(0,z_d,1):
                count+=1
 
-               neigh.append([shift_index(neighbour,x_d,y_d,z_d,[x,y,z]) for neighbour in uc_neighbours[i]])
+               neigh.append([shift_index(neighbour,[x,y,z]) for neighbour in uc_neighbours[i]])
 
     return neigh
 
@@ -150,7 +148,7 @@ def reorder_supercell(structure,neighbours,no_sites):
     
     """
 
-    uc_index = [((index * 27 ) +13) for index in range(no_sites)]
+    uc_index = [((site * 27 ) +13) for index in range(no_sites)]
     uc_index.reverse()
 
     structure_sorted=Structure(lattice=structure.lattice,species=[],coords=[])
@@ -161,18 +159,17 @@ def reorder_supercell(structure,neighbours,no_sites):
        del structure.sites[index]
        del neighbours[index]
 
-    print("in reorder",neighbours)
     structure_sorted.sites.reverse()
-    neighbours_sorted.reverse()
+    neighbour_sorted.reverse()
 
-    for index,site in enumerate(structure.sites):
+    for index,site in structure.sites:
         structure_sorted.sites.append(site)
-        neighbours_sorted.append(neighbours[index])
+        neighbour_sorted.append(neighbours[index])
 
-    return structure_sorted, neighbours_sorted
+    return structure_sorted, neighbouor_sorted
 
 
-def create_halo(structure, neighbours):
+def create_halo(structure, neigbours):
     """
     Takes a pymatgen structure object, sets up a halo by making a 3x3x3 supercell,
     and reorders the structure to put original unit cell sites (now in centre of supercell) at
@@ -189,15 +186,16 @@ def create_halo(structure, neighbours):
     z = 3
     no_sites = len(structure.sites)
     
-    for i in range(no_sites):
-       neighbours[i]=[shift_index((x*y*z*neighbour[2]),x,y,z,neighbour[3]) for neighbour in neighbours[i]]
+
+    for i in range(no_sites):#,site in enumerate(structure.sites):
+       neighbours[i] = [shift_index((x*y*z*neighbour[2]),neighbour[3]) for neighbour in neighbours[i]]
+  
     uc_index = [((site * x*y*z )) for site in range(len(structure.sites))]
     structure.make_supercell([x,y,z])
-    neighbours = map_index(neighbours,uc_index,x,y,z)
+    neighbours = map_index_proper(neighbours,uc_index,x,y,z)
 
-#    structure,neighbours = reorder_supercell(structure,neighbours,no_sites)
-    #print(structure,neighbours)
-    #sys.exit()
+    structure,neighbours = reorder_supercell(structure,neighbours,no_sites)
+
         
     return structure, neighbours
 
@@ -216,34 +214,22 @@ def nodes_from_structure(structure, rcut, get_halo=False):
   
     """
     structure.add_site_property("UC_index", [str(i) for i in range(len(structure.sites))] )
-    print("in nodes from structure",structure)
     neighbours = get_all_neighbors_and_image(structure,rcut,include_index=True)
-    print("neighbour_list",neighbours)
     nodes = []
 
     no_nodes = len(structure.sites)
     if get_halo == True:
        structure,neighbours = create_halo(structure, neighbours)
-       uc_index = set([((index * 27 ) +13) for index in range(no_nodes)])
-    else:
-       uc_index =  set([range(no_nodes)])
 
 
-    test_neigh = get_all_neighbors_and_image(structure,rcut,include_index=True)
-    
- 
-    print("reordered structure",structure)
     for index,site  in enumerate(structure.sites):
-         
-        if index in uc_index:
+        if index < no_nodes:
            halo_node = False
         else:
            halo_node = True
 
-        print("node",index,halo_node,"neighbours",set(neighbours[index]) ==set([n[2] for n in test_neigh[index]]))
-        node_neighbours_ind = set(neighbours[index])
+        node_neighbours_ind =set([n[2] for n in neighbours[index]])
 
-        
         nodes.append(Node(index = index, element = site.species_string, labels = {"UC_index":site.properties["UC_index"], "Halo":halo_node} , neighbours_ind = node_neighbours_ind))
 
 
@@ -302,19 +288,18 @@ def clusters_from_file(filename, rcut):# elements):
     remove_elements = [x for x in all_elements if x not in elements]
 
     structure.remove_species(remove_elements)
+
     nodes = nodes_from_structure(structure, rcut, get_halo=True)
     clusters = set()
 
- 
     while nodes:
          node=nodes.pop()
+
          if node.labels["Halo"]==False :
             cluster = Cluster({node})
             cluster.grow_cluster(key="Halo",value=False)
             nodes.difference_update(cluster.nodes)
             clusters.add(cluster)
-
-    sys.exit()
 
     set_cluster_periodic(clusters, Structure.from_file(filename), rcut)
 

@@ -47,15 +47,16 @@ class Cluster:
         """
 
         nodes_to_visit = [ self.nodes.pop() ]
+
+        
         visited = set()      
         
         while nodes_to_visit:
             node = nodes_to_visit.pop(0)
             if key:
-              
                   if node not in visited and node.labels[key]==value:
                      nodes_to_visit += [ node for node in node.neighbours ]
-                  visited.add(node)        
+                     visited.add(node)   
             else:
               if node not in visited:
                  nodes_to_visit += [ node for node in node.neighbours ]
@@ -108,10 +109,14 @@ class Cluster:
                next_dist = dist[node.index] + 1
 
                if node not in visited:
+                  print("visiting node",node.index)
                   if int(node.labels["UC_index"]) == index and node.index != index:
                       for node in path:
                           if node.tortuosity == None:
-                             node.tortuosity = next_dist-1 
+                            # node.tortuosity = next_dist-1
+                             for node in self.return_key_nodes(key="UC_index",value=index):
+                                 node.tortuosity = next_dist-1
+
                           elif node.tortuosity != next_dist -1:
                              sys.exit("Error in torture. Calculated tortuosity doesn't match for node")
                       print("Path",[node.index for node in path],next_dist-1)
@@ -132,7 +137,11 @@ class Cluster:
             print("Tortuosity",node.index,node.tortuosity) 
               
 
+#    def torture_multi(self):
 
+#        pool_size
+
+          
 
 
 
