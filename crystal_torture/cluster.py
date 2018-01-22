@@ -16,7 +16,8 @@ class Cluster:
         """
 
         self.nodes = nodes
-        self.periodic = [False, False, False]
+        self.periodic = None #[False, False, False]
+        
 
     def merge(self, other_cluster):
         """
@@ -51,25 +52,24 @@ class Cluster:
         
         visited = set()      
         
-        while nodes_to_visit:
-            print("nodes to visit",[node.index for node in nodes_to_visit])
-            node = nodes_to_visit.pop(0)
-            print("popped node",node.index)
-            if key:
-                  
-                  if node.labels[key]==value:#node not in visited and node.labels[key]==value:
-                     nodes_to_visit += [ neigh for neigh in node.neighbours if (neigh not in visited and neigh.labels[key]==value)]
-                     print("adding neighbours of node",node.index,"to stack:",[node.index for node in nodes_to_visit])
-                     print([(n_node.index,n_node.labels[key]) for n_node in node.neighbours if n_node.labels[key]==value]) 
+        if key:
+           
+           while nodes_to_visit:
+               print("nodes to visit",[node.index for node in nodes_to_visit])
+               node = nodes_to_visit.pop(0)
+               print("popped node",node.index)
+               nodes_to_visit += [ neigh for neigh in node.neighbours if (neigh not in visited and neigh.labels[key]==value)]
+               print("adding neighbours of node",node.index,"to stack:",[node.index for node in nodes_to_visit])
+               print([(n_node.index,n_node.labels[key]) for n_node in node.neighbours if n_node.labels[key]==value]) 
 
-                     visited.add(node)  
-                     print("******************")
-                
-            else:
-              if node not in visited:
-                 nodes_to_visit += [ node for node in node.neighbours ]
-              visited.add(node)
-        
+               visited.add(node)   
+               print("******************")
+        else:
+           while nodes_to_visit:
+               node = nodes_to_visit.pop(0)
+               nodes_to_visit += [ neigh for neigh in node.neighbours if neigh not in visited ]
+               visited.add(node)
+
         self.nodes = visited
         print("Nodes in cluster",len(self.nodes))
 
