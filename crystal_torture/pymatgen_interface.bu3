@@ -11,6 +11,10 @@ import copy
 import sys
 import psutil
 import time
+import multiprocessing as mp
+from functools import partial
+
+
 
 "Functions for setting up a node, cluster and graph using pymatgen"
 
@@ -39,6 +43,21 @@ def shift_index(index,x_d,y_d,z_d,shift):
    return new_index
 
 #@profile
+
+def map_multi(i,uc_neighbours,x_d,y_d,z_d):
+    neigh=[]
+#    for i,index in enumerate(uc_index):
+    for x in range(0,x_d,1):
+       for y in range(0,y_d,1):
+          for z in range(0,z_d,1):
+       #       count+=1
+
+#               neigh[shift_index(neighbour,x_d,y_d,z_d,[x,y,z]) for neighbour in uc_neighbours[i]]
+              neigh.append([dist.shift_index(neighbour,[x,y,z]) for neighbour in uc_neighbours[i]])
+
+    print("neigh of index",i,neigh)
+    return neigh
+
 def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
     """
     Takes a list of neighbour indices for sites in the original unit cell, 
@@ -60,17 +79,28 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
     """
 
     no_atoms = len(uc_index)
-    count = -1
-    neigh = []
-    append = neigh.append
-    for i,index in enumerate(uc_index):
-       for x in range(0,x_d,1):
-         for y in range(0,y_d,1):
-            for z in range(0,z_d,1):
-               count+=1
+#    count = -1
+#    neigh = []
+#    append = neigh.append
+    pool_size = int(mp.cpu_count())
+    loop =  partial(map_multi,uc_neighbours=uc_neighbours,x_d=x_d,y_d=y_d,z_d=z_d)
+    pool =  mp.Pool(processes=pool_size,maxtasksperchild=1)
+    uc = [i for i in range(len(uc_index))]
+    print("uc",uc)
+    neigh = pool.map(loop,uc)
+   # print("neigh",neigh)
+    pool.close()
+    pool.join()
+    neigh = [item for sublist in neigh for item in sublist]
+    print("neigh",neigh)
+#    for i,index in enumerate(uc_index):
+#       for x in range(0,x_d,1):
+#         for y in range(0,y_d,1):
+#            for z in range(0,z_d,1):
+#               count+=1
 
 #               append([shift_index(neighbour,x_d,y_d,z_d,[x,y,z]) for neighbour in uc_neighbours[i]])
-               append([dist.shift_index(neighbour,[x,y,z]) for neighbour in uc_neighbours[i]])
+##               append([dist.shift_index(neighbour,[x,y,z]) for neighbour in uc_neighbours[i]])
     return neigh
 
 #@profile
@@ -397,7 +427,7 @@ def clusters_from_file(filename, rcut):# elements):
     
     print("after cluster",psutil.virtual_memory())
 
-#    sys.exit()
+    sys.exit()
 
     return clusters
 

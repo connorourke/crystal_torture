@@ -397,7 +397,7 @@ def clusters_from_file(filename, rcut):# elements):
     
     print("after cluster",psutil.virtual_memory())
 
-#    sys.exit()
+    sys.exit()
 
     return clusters
 
