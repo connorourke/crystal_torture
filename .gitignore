@@ -4,3 +4,4 @@ crystal_torture/devel
 *.swp
 *pyc
 */activate/*
+crystal_torture/.f2py_f2cmap

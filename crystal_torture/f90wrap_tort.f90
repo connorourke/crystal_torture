@@ -1,5 +1,33 @@
 ! Module tort_mod defined in file tort.f90
 
+subroutine f90wrap_test_node__get__node_index(this, f90wrap_node_index)
+    use tort_mod, only: test_node
+    implicit none
+    type test_node_ptr_type
+        type(test_node), pointer :: p => NULL()
+    end type test_node_ptr_type
+    integer, intent(in)   :: this(2)
+    type(test_node_ptr_type) :: this_ptr
+    integer, intent(out) :: f90wrap_node_index
+    
+    this_ptr = transfer(this, this_ptr)
+    f90wrap_node_index = this_ptr%p%node_index
+end subroutine f90wrap_test_node__get__node_index
+
+subroutine f90wrap_test_node__set__node_index(this, f90wrap_node_index)
+    use tort_mod, only: test_node
+    implicit none
+    type test_node_ptr_type
+        type(test_node), pointer :: p => NULL()
+    end type test_node_ptr_type
+    integer, intent(in)   :: this(2)
+    type(test_node_ptr_type) :: this_ptr
+    integer, intent(in) :: f90wrap_node_index
+    
+    this_ptr = transfer(this, this_ptr)
+    this_ptr%p%node_index = f90wrap_node_index
+end subroutine f90wrap_test_node__set__node_index
+
 subroutine f90wrap_test_node__array__neigh_ind(this, nd, dtype, dshape, dloc)
     use tort_mod, only: test_node
     implicit none
@@ -49,6 +77,92 @@ subroutine f90wrap_test_node_finalise(this)
     this_ptr = transfer(this, this_ptr)
     deallocate(this_ptr%p)
 end subroutine f90wrap_test_node_finalise
+
+subroutine f90wrap_queued_node__get__node_index(this, f90wrap_node_index)
+    use tort_mod, only: queued_node
+    implicit none
+    type queued_node_ptr_type
+        type(queued_node), pointer :: p => NULL()
+    end type queued_node_ptr_type
+    integer, intent(in)   :: this(2)
+    type(queued_node_ptr_type) :: this_ptr
+    integer, intent(out) :: f90wrap_node_index
+    
+    this_ptr = transfer(this, this_ptr)
+    f90wrap_node_index = this_ptr%p%node_index
+end subroutine f90wrap_queued_node__get__node_index
+
+subroutine f90wrap_queued_node__set__node_index(this, f90wrap_node_index)
+    use tort_mod, only: queued_node
+    implicit none
+    type queued_node_ptr_type
+        type(queued_node), pointer :: p => NULL()
+    end type queued_node_ptr_type
+    integer, intent(in)   :: this(2)
+    type(queued_node_ptr_type) :: this_ptr
+    integer, intent(in) :: f90wrap_node_index
+    
+    this_ptr = transfer(this, this_ptr)
+    this_ptr%p%node_index = f90wrap_node_index
+end subroutine f90wrap_queued_node__set__node_index
+
+subroutine f90wrap_queued_node__get__next_node(this, f90wrap_next_node)
+    use tort_mod, only: queued_node
+    implicit none
+    type queued_node_ptr_type
+        type(queued_node), pointer :: p => NULL()
+    end type queued_node_ptr_type
+    integer, intent(in)   :: this(2)
+    type(queued_node_ptr_type) :: this_ptr
+    integer, intent(out) :: f90wrap_next_node(2)
+    type(queued_node_ptr_type) :: next_node_ptr
+    
+    this_ptr = transfer(this, this_ptr)
+    next_node_ptr%p => this_ptr%p%next_node
+    f90wrap_next_node = transfer(next_node_ptr,f90wrap_next_node)
+end subroutine f90wrap_queued_node__get__next_node
+
+subroutine f90wrap_queued_node__set__next_node(this, f90wrap_next_node)
+    use tort_mod, only: queued_node
+    implicit none
+    type queued_node_ptr_type
+        type(queued_node), pointer :: p => NULL()
+    end type queued_node_ptr_type
+    integer, intent(in)   :: this(2)
+    type(queued_node_ptr_type) :: this_ptr
+    integer, intent(in) :: f90wrap_next_node(2)
+    type(queued_node_ptr_type) :: next_node_ptr
+    
+    this_ptr = transfer(this, this_ptr)
+    next_node_ptr = transfer(f90wrap_next_node,next_node_ptr)
+    this_ptr%p%next_node = next_node_ptr%p
+end subroutine f90wrap_queued_node__set__next_node
+
+subroutine f90wrap_queued_node_initialise(this)
+    use tort_mod, only: queued_node
+    implicit none
+    
+    type queued_node_ptr_type
+        type(queued_node), pointer :: p => NULL()
+    end type queued_node_ptr_type
+    type(queued_node_ptr_type) :: this_ptr
+    integer, intent(out), dimension(2) :: this
+    allocate(this_ptr%p)
+    this = transfer(this_ptr, this)
+end subroutine f90wrap_queued_node_initialise
+
+subroutine f90wrap_queued_node_finalise(this)
+    use tort_mod, only: queued_node
+    implicit none
+    
+    type queued_node_ptr_type
+        type(queued_node), pointer :: p => NULL()
+    end type queued_node_ptr_type
+    type(queued_node_ptr_type) :: this_ptr
+    integer, intent(in), dimension(2) :: this
+    this_ptr = transfer(this, this_ptr)
+    deallocate(this_ptr%p)
+end subroutine f90wrap_queued_node_finalise
 
 subroutine f90wrap_set_nodes(n, indices, n0)
     use tort_mod, only: set_nodes
