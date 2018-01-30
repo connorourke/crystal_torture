@@ -145,18 +145,18 @@ CONTAINS
 
 
         !loop over all unit cell nodes - with OpenMP
-        !$OMP PARALLEL DO private(uc_node,dist,stack_head,visited_head,stack_tail)&
+        !$OMP PARALLEL DO private(uc_node,dist,stack_head,visited_head,stack_tail,visited)&
         !$OMP& PRIVATE(visited_tail,root_node,uc_index,neigh,next_dist,current_node,check) &
         !$OMP& SHARED(nodes,uc_nodes)
         DO uc_node=1,n
 
            dist(:)=0
-          
+           visited(:)=0          
+
            call initialise_queue(stack_head,stack_tail)
            call initialise_queue(visited_head,visited_tail)
          
            stack_head%node_index = uc_nodes(uc_node)
-           visited_head%node_index = uc_nodes(uc_node)
 
            root_node = uc_nodes(uc_node)
            uc_index = nodes(root_node)%uc_index
@@ -166,19 +166,16 @@ CONTAINS
                call enqueue_node(stack_tail,nodes(stack_head%node_index)%neigh_ind(neigh))
 
            END DO
-           call enqueue_node(visited_tail,root_node)
+           visited(root_node)=1
            call dequeue_node(stack_head)
 
 
            DO WHILE (ASSOCIATED(stack_head))
               
               next_dist = dist(stack_head%node_index) + 1 
-
               current_node = stack_head%node_index
-              call check_list(visited_head,current_node,check)
               
-!              IF ((.NOT. check ) .and. (current_node .ne. uc_node)) THEN
-               IF (.NOT. check) THEN
+              IF (visited(current_node)==0) THEN
                 
                  DO neigh=1,SIZE(nodes(stack_head%node_index)%neigh_ind)
                     if (dist(nodes(stack_head%node_index)%neigh_ind(neigh)) == 0) then
@@ -186,11 +183,10 @@ CONTAINS
                     END IF
                     call enqueue_node(stack_tail,nodes(stack_head%node_index)%neigh_ind(neigh))
                  END DO 
-                 call enqueue_node(visited_tail,current_node)
+                 !call enqueue_node(visited_tail,current_node)
+                  visited(current_node) = 1
                 
 
-!                 IF ((nodes(stack_head%node_index)%uc_index .EQ. uc_index) .AND. &
-!                     (stack_head%node_index .NE. root_node)) THEN
                   IF (nodes(stack_head%node_index)%uc_index .EQ. uc_index) THEN
                     print*,"Tortuosity for node",uc_node,next_dist-1
                     EXIT
@@ -204,8 +200,6 @@ CONTAINS
            
          
            call shut_down_queue(stack_head)
-           call shut_down_queue(visited_head)
-
 
        END DO
       !$OMP END PARALLEL DO
