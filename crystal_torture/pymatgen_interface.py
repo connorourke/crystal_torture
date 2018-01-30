@@ -266,6 +266,8 @@ def nodes_from_structure(structure, rcut, get_halo=False):
        for neighbour_ind in node.neighbours_ind:
            node.neighbours.add(nodes[neighbour_ind])
 
+    for node in nodes:
+       print("Node",node.index,"Neigh",[neigh.index for neigh in node.neighbours])
     print("Nodes appended")
 
     return set(nodes)
@@ -364,6 +366,9 @@ def clusters_from_file(filename, rcut):# elements):
     """
 
     structure = Structure.from_file(filename)
+    sites = [site.to_unit_cell for site in structure.sites]
+    structure = Structure.from_sites(sites)
+
 
     elements={"Li","X","X0+"}
     all_elements = set([species for species in structure.symbol_set])

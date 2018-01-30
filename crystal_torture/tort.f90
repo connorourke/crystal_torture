@@ -29,10 +29,11 @@ CONTAINS
         INTEGER, INTENT(IN)::n
         INTEGER :: node
 
-        ALLOCATE(nodes(n))
-        DO node=1,n
-           nodes(node)%node_index=node+1
+        ALLOCATE(nodes(0:n-1))
+        DO node=0,n-1
+           nodes(node)%node_index=node
         END DO
+
 
      END SUBROUTINE set_nodes
 
@@ -43,11 +44,11 @@ CONTAINS
         INTEGER, DIMENSION(n), INTENT(IN):: neigh
 
 
-        ALLOCATE(nodes(ind+1)%neigh_ind(n))
-
+        ALLOCATE(nodes(ind)%neigh_ind(n))
+        
         DO i=1,n
-          nodes(ind+1)%neigh_ind(i) = neigh(i)+1
-          nodes(ind+1)%uc_index = uc_ind
+          nodes(ind)%neigh_ind(i) = neigh(i)
+          nodes(ind)%uc_index = uc_ind
         END DO
 
      END SUBROUTINE

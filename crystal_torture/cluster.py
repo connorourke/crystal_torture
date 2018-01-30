@@ -116,7 +116,7 @@ class Cluster:
 
         this is wrong.
  
-        the nodes on the path willnot necessarily have the same tortuosity,
+        the nodes on the path will not necessarily have the same tortuosity,
         but it provides a bound on them 
 
         if the path between i and i contains j, and the path between j and j contains
@@ -285,9 +285,9 @@ class Cluster:
         print("UC",[node.index for node in uc])
         while uc:
 
-          
+            
            node_stack = [uc.pop()]
-           
+
            visited = set()
            dist = [0]*len(self.nodes)
            uc_index = node_stack[0].labels["UC_index"]
@@ -299,21 +299,24 @@ class Cluster:
  
 
               node=node_stack.pop(0)
-           #   print("At node",node.index)
+              print("At node",node.index,"UC_index",node.labels["UC_index"],uc_index,"dist",dist[node.index])
               next_dist = dist[node.index] + 1
 
               if node not in visited:
+                
                  for neigh in node.neighbours:
                      if dist[neigh.index] == 0:
                         dist[neigh.index] = next_dist 
+                        print("Adding neighbours",neigh.index,next_dist)
                     # if neigh not in visited:
-                     node_stack.append(neigh)
+                        node_stack.append(neigh)
               if (node.labels["UC_index"] == uc_index) and (node.index != index):
             #     print("Found image",node.index,"(",node.labels["UC_index"],")",next_dist)
                  root_node.tortuosity = next_dist
                  break
               visited.add(node)
-
+           print("Tortuosity  =",root_node.tortuosity-1)
+           print("*********************")     
         for node in self.return_key_nodes(key="Halo",value=False):
            print("tortuosity",node.index,node.labels["UC_index"],node.tortuosity-1)
  
@@ -337,12 +340,11 @@ class Cluster:
 
     def torture_fort(self):
 
-      
         uc_nodes = [node.index for node in self.return_key_nodes(key="Halo",value=False)]
         tort.tort_mod.set_nodes(len(self.nodes))
+ 
         for node in self.nodes:
            tort.tort_mod.set_neighbours(node.index,int(node.labels["UC_index"]),len(node.neighbours_ind),[ind for ind in node.neighbours_ind])
-
         
         tort.tort_mod.torture(len(uc_nodes),uc_nodes)   
 
