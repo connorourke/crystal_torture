@@ -6,4 +6,4 @@ clusters = clusters_from_file("crystal_torture/tests/POSCAR_2_cluster.vasp",4.0)
 
 for cluster in clusters:
    if cluster.periodic > 0:
-      cluster.torture_fort()
+      cluster.torture_fort()#test()

@@ -319,27 +319,32 @@ class Cluster:
  
 
 
-    def torture_fort(self):
-        print("in torture fort")
+#    def torture_fort_play(self):
+#        print("in torture fort")
 
-
-        tort.tort_mod.set_nodes(len(self.nodes),[n.index for n in self.nodes])
-        for node in self.nodes:
-           tort.tort_mod.set_neighbours(node.index,len(node.neighbours_ind),[ind for ind in node.neighbours_ind])
-
-        print("*********************")
-        for node in self.nodes:
-           print("Node",node.index,"neighbours",[neigh.index for neigh in node.neighbours])
+#        tort.tort_mod.check_omp()
+#        tort.tort_mod.set_nodes(len(self.nodes),)#,[n.index for n in self.nodes])
+#        for node in self.nodes:
+#           tort.tort_mod.set_neighbours(node.index,int(node.labels["UC_index"]),len(node.neighbours_ind),[ind for ind in node.neighbours_ind])
+#
+#        print("*********************")
+#        for node in self.nodes:
+#           print("PNode",node.index,"neighbours",[neigh.index for neigh in node.neighbours])
 
 
         
-        tort.tort_mod.torture(len(self.nodes))
+#        tort.tort_mod.torture(len(self.nodes))
 
+    def torture_fort(self):
 
+      
+        uc_nodes = [node.index for node in self.return_key_nodes(key="Halo",value=False)]
+        tort.tort_mod.set_nodes(len(self.nodes))
+        for node in self.nodes:
+           tort.tort_mod.set_neighbours(node.index,int(node.labels["UC_index"]),len(node.neighbours_ind),[ind for ind in node.neighbours_ind])
 
-
-
-
+        
+        tort.tort_mod.torture(len(uc_nodes),uc_nodes)   
 
 
 
