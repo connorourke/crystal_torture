@@ -266,8 +266,8 @@ def nodes_from_structure(structure, rcut, get_halo=False):
        for neighbour_ind in node.neighbours_ind:
            node.neighbours.add(nodes[neighbour_ind])
 
-    for node in nodes:
-       print("Node",node.index,"Neigh",[neigh.index for neigh in node.neighbours])
+#    for node in nodes:
+#       print("Node",node.index,"Neigh",[neigh.index for neigh in node.neighbours])
     print("Nodes appended")
 
     return set(nodes)

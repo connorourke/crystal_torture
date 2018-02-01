@@ -71,10 +71,9 @@ CONTAINS
         TYPE(queued_node),POINTER,INTENT(INOUT)::head
         TYPE(queued_node),POINTER:: h
 
-        ALLOCATE(h)
-
+         
         IF (associated(head%next_node)) THEN
-           h=head
+           h=>head
            head=>head%next_node
         END IF
 
@@ -122,7 +121,7 @@ CONTAINS
 
         TYPE(queued_node), POINTER :: current_node
 
-!        current_node => head%next_node
+        current_node => head%next_node
  
         DO WHILE(ASSOCIATED(current_node))
            current_node => head%next_node

@@ -338,6 +338,7 @@ class Cluster:
         
 #        tort.tort_mod.torture(len(self.nodes))
 
+#    @profile
     def torture_fort(self):
 
         uc_nodes = [node.index for node in self.return_key_nodes(key="Halo",value=False)]
