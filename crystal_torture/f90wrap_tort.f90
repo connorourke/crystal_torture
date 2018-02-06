@@ -140,6 +140,9 @@ subroutine f90wrap_queued_node__get__next_node(this, f90wrap_next_node)
     type queued_node_ptr_type
         type(queued_node), pointer :: p => NULL()
     end type queued_node_ptr_type
+    type queued_node_ptr_type
+        type(queued_node), pointer :: p => NULL()
+    end type queued_node_ptr_type
     integer, intent(in)   :: this(2)
     type(queued_node_ptr_type) :: this_ptr
     integer, intent(out) :: f90wrap_next_node(2)
@@ -153,6 +156,9 @@ end subroutine f90wrap_queued_node__get__next_node
 subroutine f90wrap_queued_node__set__next_node(this, f90wrap_next_node)
     use tort_mod, only: queued_node
     implicit none
+    type queued_node_ptr_type
+        type(queued_node), pointer :: p => NULL()
+    end type queued_node_ptr_type
     type queued_node_ptr_type
         type(queued_node), pointer :: p => NULL()
     end type queued_node_ptr_type
@@ -192,6 +198,17 @@ subroutine f90wrap_queued_node_finalise(this)
     deallocate(this_ptr%p)
 end subroutine f90wrap_queued_node_finalise
 
+subroutine f90wrap_get_tortuosity(n, tort, n0)
+    use tort_mod, only: get_tortuosity
+    implicit none
+    
+    integer, intent(in) :: n
+    integer, intent(inout), dimension(n0) :: tort
+    integer :: n0
+    !f2py intent(hide), depend(tort) :: n0 = shape(tort,0)
+    call get_tortuosity(n=n, tort=tort)
+end subroutine f90wrap_get_tortuosity
+
 subroutine f90wrap_set_nodes(n)
     use tort_mod, only: set_nodes
     implicit none
@@ -223,6 +240,27 @@ subroutine f90wrap_torture(n, uc_nodes, n0)
     !f2py intent(hide), depend(uc_nodes) :: n0 = shape(uc_nodes,0)
     call torture(n=n, uc_nodes=uc_nodes)
 end subroutine f90wrap_torture
+
+subroutine f90wrap_tort_mod__array__test_tort(dummy_this, nd, dtype, dshape, &
+    dloc)
+    use omp_lib
+    use tort_mod, only: tort_mod_test_tort => test_tort
+    implicit none
+    integer, intent(in) :: dummy_this(2)
+    integer, intent(out) :: nd
+    integer, intent(out) :: dtype
+    integer, dimension(10), intent(out) :: dshape
+    integer*8, intent(out) :: dloc
+    
+    nd = 1
+    dtype = 5
+    if (allocated(tort_mod_test_tort)) then
+        dshape(1:1) = shape(tort_mod_test_tort)
+        dloc = loc(tort_mod_test_tort)
+    else
+        dloc = 0
+    end if
+end subroutine f90wrap_tort_mod__array__test_tort
 
 ! End of module tort_mod defined in file tort.f90
 

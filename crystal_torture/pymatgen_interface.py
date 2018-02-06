@@ -128,7 +128,6 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
         indices = np.arange(len(structure))
         for image in itertools.product(*all_ranges):
             coords = latt.get_cartesian_coords(image) + coords_in_cell
-            print("IMAGE",image,len(coords),len(site_coords))
             all_dists = dist.dist(coords, site_coords, len(coords))
             all_within_r = np.bitwise_and(all_dists <= r, all_dists > 1e-8)
 
@@ -140,7 +139,6 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
                     item = (nnsite, d[i], j, image) if include_index else (
                         nnsite, d[i])
                     neighbors[i].append(item)
-        print("Got neighbours, leaving")
         return neighbors
 
 #@profile
@@ -241,7 +239,6 @@ def nodes_from_structure(structure, rcut, get_halo=False):
     else:
        uc_index =  set([range(no_nodes)])
 
-    print("Appending nodes")
 
     append = nodes.append
  
@@ -268,7 +265,6 @@ def nodes_from_structure(structure, rcut, get_halo=False):
 
 #    for node in nodes:
 #       print("Node",node.index,"Neigh",[neigh.index for neigh in node.neighbours])
-    print("Nodes appended")
 
     return set(nodes)
 
@@ -375,20 +371,13 @@ def clusters_from_file(filename, rcut):# elements):
     remove_elements = [x for x in all_elements if x not in elements]
 
     structure.remove_species(remove_elements)
-    print("before node",psutil.virtual_memory())
 
     nodes = nodes_from_structure(structure, rcut, get_halo=True)
-    print("after node",psutil.virtual_memory())
 
     clusters = set()
 
     uc_nodes = set([node for node in nodes if node.labels["Halo"]==False])
-    print("UC nodes",[node.index for node in uc_nodes])
-   
 
-    print("before cluster",psutil.virtual_memory())
-
-    #sys.exit()
     while uc_nodes:
          node=uc_nodes.pop()
          if node.labels["Halo"]==False :
@@ -397,12 +386,7 @@ def clusters_from_file(filename, rcut):# elements):
             uc_nodes.difference_update(cluster.nodes)
             clusters.add(cluster)
             set_cluster_periodic(cluster)
-            #print("Periodic",cluster.periodic)
-
     
-    print("after cluster",psutil.virtual_memory())
-
-#    sys.exit()
 
     return clusters
 

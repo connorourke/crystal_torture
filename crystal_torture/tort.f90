@@ -18,10 +18,21 @@ IMPLICIT NONE
 
   TYPE(test_node),ALLOCATABLE,DIMENSION(:)::nodes
 
+  INTEGER,ALLOCATABLE,DIMENSION(:):: test_tort
 
 
 
 CONTAINS
+
+     SUBROUTINE get_tortuosity(n,tort)
+
+        INTEGER,INTENT(IN)::n
+        INTEGER,INTENT(OUT),DIMENSION(n)::tort
+
+        tort = test_tort
+
+     END SUBROUTINE
+
 
      SUBROUTINE set_nodes(n)
 
@@ -33,7 +44,7 @@ CONTAINS
         DO node=0,n-1
            nodes(node)%node_index=node
         END DO
-
+        ALLOCATE(test_tort(n/27))
 
      END SUBROUTINE set_nodes
 
@@ -134,7 +145,6 @@ CONTAINS
 
         INTEGER,INTENT(IN):: n
         INTEGER,DIMENSION(n),INTENT(IN)::uc_nodes
-        
 
         TYPE(queued_node), POINTER:: stack_head, stack_tail
         TYPE(queued_node), POINTER:: visited_head, visited_tail,temp
@@ -142,12 +152,12 @@ CONTAINS
         LOGICAL::check
 
         INTEGER,DIMENSION(n*27)::dist,visited
-
+  
 
         !loop over all unit cell nodes - with OpenMP
         !$OMP PARALLEL DO private(uc_node,dist,stack_head,visited_head,stack_tail,visited)&
         !$OMP& PRIVATE(visited_tail,root_node,uc_index,neigh,next_dist,current_node,check) &
-        !$OMP& SHARED(nodes,uc_nodes)
+        !$OMP& SHARED(nodes,uc_nodes,test_tort)
         DO uc_node=1,n
 
            dist(:)=0
@@ -183,12 +193,11 @@ CONTAINS
                     END IF
                     call enqueue_node(stack_tail,nodes(stack_head%node_index)%neigh_ind(neigh))
                  END DO 
-                 !call enqueue_node(visited_tail,current_node)
                   visited(current_node) = 1
                 
 
                   IF (nodes(stack_head%node_index)%uc_index .EQ. uc_index) THEN
-                    print*,"Tortuosity for node",uc_node,next_dist-1
+                    test_tort(uc_node) = next_dist-1
                     EXIT
                  END IF
         
@@ -203,12 +212,6 @@ CONTAINS
 
        END DO
       !$OMP END PARALLEL DO
-
-
-          
-     
-
-
 
 
      END SUBROUTINE torture

@@ -5,7 +5,7 @@ import pathos.multiprocessing as mp
 from queue import Queue
 from crystal_torture import tort
 from threading import Thread
-
+import numpy as np
 
 class Cluster:
     """
@@ -22,7 +22,7 @@ class Cluster:
 
         self.nodes = nodes
         self.periodic = None #[False, False, False]
-        
+        self.tortuosity = None 
 
     def merge(self, other_cluster):
         """
@@ -62,13 +62,8 @@ class Cluster:
         if key:
            
            while nodes_to_visit:
-              # print("nodes to visit",[node.index for node in nodes_to_visit])
                node = nodes_to_visit.pop()
-              # print("popped node",node.index)
-#               nodes_to_visit += set([ neigh for neigh in node.neighbours if (neigh not in visited and neigh.labels[key]==value)])
                nodes_to_visit = nodes_to_visit.union(set([ neigh for neigh in node.neighbours if (neigh not in visited and neigh.labels[key]==value)]))
-              # print("adding neighbours of node",node.index,"to stack:",[node.index for node in nodes_to_visit])
-              # print([(n_node.index,n_node.labels[key]) for n_node in node.neighbours if n_node.labels[key]==value]) 
 
 #               visited.add(node)   
                add(node)
@@ -76,13 +71,11 @@ class Cluster:
         else:
            while nodes_to_visit:
                node = nodes_to_visit.pop()
-              # nodes_to_visit += [ neigh for neigh in node.neighbours if neigh not in visited ]
                nodes_to_visit = nodes_to_visit.union(set([ neigh for neigh in node.neighbours if neigh not in visited]))
                #visited.add(node)
                add(node)
 
         self.nodes = visited
-        print("Nodes in cluster",len(self.nodes))
 
 
     def return_key_nodes(self,key,value):
@@ -174,7 +167,7 @@ class Cluster:
                                node_t.tortuosity = next_dist-1
                              #sys.exit("Error in torture. Calculated tortuosity doesn't match for node")
                       
- #                     print("Path",[node_p.index for node_p in path],next_dist-1)
+                      print("Path",[node_p.index for node_p in path],next_dist-1)
 
                       break 
             
@@ -281,8 +274,6 @@ class Cluster:
 ###  this works
 ###
         uc = self.return_key_nodes(key="Halo",value=False)
-#        print("popped",uc.pop())
-        print("UC",[node.index for node in uc])
         while uc:
 
             
@@ -293,13 +284,11 @@ class Cluster:
            uc_index = node_stack[0].labels["UC_index"]
            index = node_stack[0].index
            root_node = node_stack[0]
-        #   print("Searching for node",index,"(",uc_index,")")
 
            while node_stack:
  
 
               node=node_stack.pop(0)
-              print("At node",node.index,"UC_index",node.labels["UC_index"],uc_index,"dist",dist[node.index])
               next_dist = dist[node.index] + 1
 
               if node not in visited:
@@ -307,11 +296,8 @@ class Cluster:
                  for neigh in node.neighbours:
                      if dist[neigh.index] == 0:
                         dist[neigh.index] = next_dist 
-                        print("Adding neighbours",neigh.index,next_dist)
-                    # if neigh not in visited:
                         node_stack.append(neigh)
               if (node.labels["UC_index"] == uc_index) and (node.index != index):
-            #     print("Found image",node.index,"(",node.labels["UC_index"],")",next_dist)
                  root_node.tortuosity = next_dist
                  break
               visited.add(node)
@@ -319,24 +305,7 @@ class Cluster:
            print("*********************")     
         for node in self.return_key_nodes(key="Halo",value=False):
            print("tortuosity",node.index,node.labels["UC_index"],node.tortuosity-1)
- 
 
-
-#    def torture_fort_play(self):
-#        print("in torture fort")
-
-#        tort.tort_mod.check_omp()
-#        tort.tort_mod.set_nodes(len(self.nodes),)#,[n.index for n in self.nodes])
-#        for node in self.nodes:
-#           tort.tort_mod.set_neighbours(node.index,int(node.labels["UC_index"]),len(node.neighbours_ind),[ind for ind in node.neighbours_ind])
-#
-#        print("*********************")
-#        for node in self.nodes:
-#           print("PNode",node.index,"neighbours",[neigh.index for neigh in node.neighbours])
-
-
-        
-#        tort.tort_mod.torture(len(self.nodes))
 
 #    @profile
     def torture_fort(self):
@@ -346,12 +315,15 @@ class Cluster:
  
         for node in self.nodes:
            tort.tort_mod.set_neighbours(node.index,int(node.labels["UC_index"]),len(node.neighbours_ind),[ind for ind in node.neighbours_ind])
+     
+
+        tort.tort_mod.torture(len(uc_nodes),uc_nodes)
+
+        for i,node in enumerate(self.return_key_nodes(key="Halo",value=False)):
+            node.tortuosity = tort.tort_mod.test_tort[i]
+
+        self.tortuosity = sum([node.tortuosity for node in self.return_key_nodes(key="Halo",value=False)])/len(uc_nodes)
         
-        tort.tort_mod.torture(len(uc_nodes),uc_nodes)   
-
-
-
-
-
-
+        #for node in self.return_key_nodes(key="Halo",value=False):
+        #    print(node.tortuosity)
 
