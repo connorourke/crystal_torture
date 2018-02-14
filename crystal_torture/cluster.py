@@ -21,7 +21,7 @@ class Cluster:
         """
 
         self.nodes = nodes
-        self.periodic = None #[False, False, False]
+        self.periodic = None
         self.tortuosity = None 
 
     def merge(self, other_cluster):
@@ -43,7 +43,6 @@ class Cluster:
 
         return bool( self.nodes & other_cluster.nodes ) 
 
-#    @profile
     def grow_cluster(self,key=None,value=None):
         """
         Grow cluster by adding neighbours
@@ -65,14 +64,11 @@ class Cluster:
                node = nodes_to_visit.pop()
                nodes_to_visit = nodes_to_visit.union(set([ neigh for neigh in node.neighbours if (neigh not in visited and neigh.labels[key]==value)]))
 
-#               visited.add(node)   
                add(node)
-             #  print("******************")
         else:
            while nodes_to_visit:
                node = nodes_to_visit.pop()
                nodes_to_visit = nodes_to_visit.union(set([ neigh for neigh in node.neighbours if neigh not in visited]))
-               #visited.add(node)
                add(node)
 
         self.nodes = visited
@@ -278,52 +274,59 @@ class Cluster:
 
             
            node_stack = [uc.pop()]
-
+           
            visited = set()
-           dist = [0]*len(self.nodes)
            uc_index = node_stack[0].labels["UC_index"]
            index = node_stack[0].index
            root_node = node_stack[0]
 
+           for node in self.nodes:
+               node.dist = 0
+
            while node_stack:
  
-
+             
               node=node_stack.pop(0)
-              next_dist = dist[node.index] + 1
-
+              next_dist = node.dist + 1
               if node not in visited:
                 
                  for neigh in node.neighbours:
-                     if dist[neigh.index] == 0:
-                        dist[neigh.index] = next_dist 
+                     if neigh.dist == 0:
+                        neigh.dist = next_dist 
                         node_stack.append(neigh)
               if (node.labels["UC_index"] == uc_index) and (node.index != index):
-                 root_node.tortuosity = next_dist
+                 root_node.tortuosity = next_dist-1
                  break
               visited.add(node)
-           print("Tortuosity  =",root_node.tortuosity-1)
-           print("*********************")     
+        
+        self.tortuosity = sum([node.tortuosity for node in self.return_key_nodes(key="Halo",value=False)])/len(self.return_key_nodes(key="Halo",value=False))
+
         for node in self.return_key_nodes(key="Halo",value=False):
-           print("tortuosity",node.index,node.labels["UC_index"],node.tortuosity-1)
+           print("tortuosity",node.index,node.labels["UC_index"],node.tortuosity)
 
 
 #    @profile
     def torture_fort(self):
 
+
         uc_nodes = [node.index for node in self.return_key_nodes(key="Halo",value=False)]
-        tort.tort_mod.set_nodes(len(self.nodes))
- 
-        for node in self.nodes:
-           tort.tort_mod.set_neighbours(node.index,int(node.labels["UC_index"]),len(node.neighbours_ind),[ind for ind in node.neighbours_ind])
-     
-
         tort.tort_mod.torture(len(uc_nodes),uc_nodes)
+#        print("LENGTH",tort.tort_mod.test_tort[0])
+#        sys.exit() 
+#        print([tort for tort in tort.tort_mod.test_tort])
 
-        for i,node in enumerate(self.return_key_nodes(key="Halo",value=False)):
-            node.tortuosity = tort.tort_mod.test_tort[i]
+#        for i,node in enumerate(self.return_key_nodes(key="Halo",value=False)):
+#            print("setting tortuosity",i,tort.tort_mod.test_tort[i])
 
-        self.tortuosity = sum([node.tortuosity for node in self.return_key_nodes(key="Halo",value=False)])/len(uc_nodes)
-        
-        #for node in self.return_key_nodes(key="Halo",value=False):
-        #    print(node.tortuosity)
+#            node.tortuosity = tort.tort_mod.nodes(node.index)%tortuosity
+#        sys.exit() 
+#        self.tortuosity = sum([node.tortuosity for node in self.return_key_nodes(key="Halo",value=False)])/len(uc_nodes)
+#        sys.exit() 
+#        print(tort.tort_mod.test_tort)
+#        tort.tort_mod.tear_down()
+#        sys.exit()
+#        print([tor for tor in tort.tort_mod.nodes])
+        for node in self.return_key_nodes(key="Halo",value=False):
+            print("tort",tort.tort_mod.uc_tort[int(node.labels["UC_index"])])
 
+#        sys.exit()

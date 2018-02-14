@@ -1,5 +1,5 @@
 #from crystal_torture.cluster import  Cluster
-from crystal_torture.pymatgen_interface import clusters_from_file
+#from crystal_torture.pymatgen_interface import clusters_from_file
 
 class Graph:
     """
@@ -16,7 +16,7 @@ class Graph:
         """
         
         self.clusters = clusters
-        
+
 
          
         

@@ -18,34 +18,44 @@ IMPLICIT NONE
 
   TYPE(test_node),ALLOCATABLE,DIMENSION(:)::nodes
 
-  INTEGER,ALLOCATABLE,DIMENSION(:):: test_tort
-
-
+  INTEGER,ALLOCATABLE,DIMENSION(:):: uc_tort
 
 CONTAINS
 
-     SUBROUTINE get_tortuosity(n,tort)
+!     SUBROUTINE get_tortuosity(n,tort)
 
-        INTEGER,INTENT(IN)::n
-        INTEGER,INTENT(OUT),DIMENSION(n)::tort
+!        INTEGER,INTENT(IN)::n
+!        INTEGER,INTENT(OUT),DIMENSION(n)::tort
 
-        tort = test_tort
+!        tort = test_tort
 
-     END SUBROUTINE
-
-
-     SUBROUTINE set_nodes(n)
+!     END SUBROUTINE
 
 
-        INTEGER, INTENT(IN)::n
+     SUBROUTINE allocate_nodes(n,n2)
+       INTEGER, INTENT(IN)::n,n2
+
+
+        ALLOCATE(nodes(0:n-1))
+!        nodes(:)%tortuosity = 0
+         
+        ALLOCATE(uc_tort(0:n2-1))
+        uc_tort(:) = 0
+     END SUBROUTINE allocate_nodes
+
+     SUBROUTINE set_nodes(n,n2)
+
+
+        INTEGER, INTENT(IN)::n,n2
         INTEGER :: node
 
         ALLOCATE(nodes(0:n-1))
         DO node=0,n-1
            nodes(node)%node_index=node
         END DO
-        ALLOCATE(test_tort(n/27))
-
+        ALLOCATE(uc_tort(0:n2-1))
+         
+       
      END SUBROUTINE set_nodes
 
      SUBROUTINE set_neighbours(ind,uc_ind,n,neigh)
@@ -56,7 +66,6 @@ CONTAINS
 
 
         ALLOCATE(nodes(ind)%neigh_ind(n))
-        
         DO i=1,n
           nodes(ind)%neigh_ind(i) = neigh(i)
           nodes(ind)%uc_index = uc_ind
@@ -151,18 +160,17 @@ CONTAINS
         INTEGER:: node, current_node, neigh, uc_node, uc_index, root_node, next_dist
         LOGICAL::check
 
-        INTEGER,DIMENSION(n*27)::dist,visited
+        INTEGER,DIMENSION(size(NODES))::dist,visited
   
-
         !loop over all unit cell nodes - with OpenMP
         !$OMP PARALLEL DO private(uc_node,dist,stack_head,visited_head,stack_tail,visited)&
         !$OMP& PRIVATE(visited_tail,root_node,uc_index,neigh,next_dist,current_node,check) &
-        !$OMP& SHARED(nodes,uc_nodes,test_tort)
+        !$OMP& SHARED(nodes,uc_nodes,uc_tort)
         DO uc_node=1,n
 
-           dist(:)=0
+           dist(:) = 0
            visited(:)=0          
-
+           
            call initialise_queue(stack_head,stack_tail)
            call initialise_queue(visited_head,visited_tail)
          
@@ -178,11 +186,11 @@ CONTAINS
            END DO
            visited(root_node)=1
            call dequeue_node(stack_head)
-
+            
 
            DO WHILE (ASSOCIATED(stack_head))
               
-              next_dist = dist(stack_head%node_index) + 1 
+              next_dist = dist(stack_head%node_index) + 1
               current_node = stack_head%node_index
               
               IF (visited(current_node)==0) THEN
@@ -194,10 +202,9 @@ CONTAINS
                     call enqueue_node(stack_tail,nodes(stack_head%node_index)%neigh_ind(neigh))
                  END DO 
                   visited(current_node) = 1
-                
-
+                   
                   IF (nodes(stack_head%node_index)%uc_index .EQ. uc_index) THEN
-                    test_tort(uc_node) = next_dist-1
+                    uc_tort(uc_index) = next_dist - 1
                     EXIT
                  END IF
         
@@ -212,7 +219,6 @@ CONTAINS
 
        END DO
       !$OMP END PARALLEL DO
-
 
      END SUBROUTINE torture
 

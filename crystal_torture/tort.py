@@ -7,7 +7,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
     Module tort_mod
     
     
-    Defined at tort.f90 lines 1-241
+    Defined at tort.f90 lines 1-246
     
     """
     class Test_Node(f90wrap.runtime.FortranDerivedType):
@@ -216,35 +216,36 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         _dt_array_initialisers = []
         
     @staticmethod
-    def get_tortuosity(n, tort):
+    def allocate_nodes(n, n2):
         """
-        get_tortuosity(n, tort)
+        allocate_nodes(n, n2)
         
         
-        Defined at tort.f90 lines 27-35
+        Defined at tort.f90 lines 35-44
         
         Parameters
         ----------
         n : int
-        tort : int array
+        n2 : int
         
         """
-        _tort.f90wrap_get_tortuosity(n=n, tort=tort)
+        _tort.f90wrap_allocate_nodes(n=n, n2=n2)
     
     @staticmethod
-    def set_nodes(n):
+    def set_nodes(n, n2):
         """
-        set_nodes(n)
+        set_nodes(n, n2)
         
         
-        Defined at tort.f90 lines 37-49
+        Defined at tort.f90 lines 46-59
         
         Parameters
         ----------
         n : int
+        n2 : int
         
         """
-        _tort.f90wrap_set_nodes(n=n)
+        _tort.f90wrap_set_nodes(n=n, n2=n2)
     
     @staticmethod
     def set_neighbours(ind, uc_ind, n, neigh):
@@ -252,7 +253,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         set_neighbours(ind, uc_ind, n, neigh)
         
         
-        Defined at tort.f90 lines 51-66
+        Defined at tort.f90 lines 61-75
         
         Parameters
         ----------
@@ -270,7 +271,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         torture(n, uc_nodes)
         
         
-        Defined at tort.f90 lines 144-220
+        Defined at tort.f90 lines 153-225
         
         Parameters
         ----------
@@ -281,33 +282,33 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         _tort.f90wrap_torture(n=n, uc_nodes=uc_nodes)
     
     @property
-    def test_tort(self):
+    def uc_tort(self):
         """
-        Element test_tort ftype=integer pytype=int
+        Element uc_tort ftype=integer pytype=int
         
         
         Defined at tort.f90 line 21
         
         """
         array_ndim, array_type, array_shape, array_handle = \
-            _tort.f90wrap_tort_mod__array__test_tort(f90wrap.runtime.empty_handle)
+            _tort.f90wrap_tort_mod__array__uc_tort(f90wrap.runtime.empty_handle)
         if array_handle in self._arrays:
-            test_tort = self._arrays[array_handle]
+            uc_tort = self._arrays[array_handle]
         else:
-            test_tort = f90wrap.runtime.get_array(f90wrap.runtime.sizeof_fortran_t,
+            uc_tort = f90wrap.runtime.get_array(f90wrap.runtime.sizeof_fortran_t,
                                     f90wrap.runtime.empty_handle,
-                                    _tort.f90wrap_tort_mod__array__test_tort)
-            self._arrays[array_handle] = test_tort
-        return test_tort
+                                    _tort.f90wrap_tort_mod__array__uc_tort)
+            self._arrays[array_handle] = uc_tort
+        return uc_tort
     
-    @test_tort.setter
-    def test_tort(self, test_tort):
-        self.test_tort[...] = test_tort
+    @uc_tort.setter
+    def uc_tort(self, uc_tort):
+        self.uc_tort[...] = uc_tort
     
     def __str__(self):
         ret = ['<tort_mod>{\n']
-        ret.append('    test_tort : ')
-        ret.append(repr(self.test_tort))
+        ret.append('    uc_tort : ')
+        ret.append(repr(self.uc_tort))
         ret.append('}')
         return ''.join(ret)
     
