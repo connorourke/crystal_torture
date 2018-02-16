@@ -210,6 +210,13 @@ subroutine f90wrap_set_nodes(n, n2)
     call set_nodes(n=n, n2=n2)
 end subroutine f90wrap_set_nodes
 
+subroutine f90wrap_tear_down
+    use tort_mod, only: tear_down
+    implicit none
+    
+    call tear_down()
+end subroutine f90wrap_tear_down
+
 subroutine f90wrap_set_neighbours(ind, uc_ind, n, neigh, n0)
     use tort_mod, only: set_neighbours
     implicit none
@@ -235,8 +242,8 @@ subroutine f90wrap_torture(n, uc_nodes, n0)
 end subroutine f90wrap_torture
 
 subroutine f90wrap_tort_mod__array__uc_tort(dummy_this, nd, dtype, dshape, dloc)
-    use omp_lib
     use tort_mod, only: tort_mod_uc_tort => uc_tort
+    use omp_lib
     implicit none
     integer, intent(in) :: dummy_this(2)
     integer, intent(out) :: nd

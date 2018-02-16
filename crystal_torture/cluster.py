@@ -97,7 +97,8 @@ class Cluster:
         index_node = [node for node in self.nodes if node.index == index]
 
         return index_node
-    
+
+
     def torture(self):
         """
         Calculates the average tortuosity of the cluster
@@ -304,6 +305,9 @@ class Cluster:
         for node in self.return_key_nodes(key="Halo",value=False):
            print("tortuosity",node.index,node.labels["UC_index"],node.tortuosity)
 
+        self.tortuosity = sum([node.tortuosity for node in self.return_key_nodes(key="Halo",value=False)])/len(self.return_key_nodes(key="Halo",value=False)
+)
+
 
 #    @profile
     def torture_fort(self):
@@ -327,6 +331,9 @@ class Cluster:
 #        sys.exit()
 #        print([tor for tor in tort.tort_mod.nodes])
         for node in self.return_key_nodes(key="Halo",value=False):
+            node.tortuosity = tort.tort_mod.uc_tort[int(node.labels["UC_index"])]
             print("tort",tort.tort_mod.uc_tort[int(node.labels["UC_index"])])
+
+        self.tortuosity = sum([node.tortuosity for node in self.return_key_nodes(key="Halo",value=False)])/len(uc_nodes)
 
 #        sys.exit()

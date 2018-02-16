@@ -34,10 +34,15 @@ integer, intent(out) :: new_index
 
 integer::new_x,new_y,new_z
 
-new_x = MOD(int(index_n/9)+shift(1),3)
-new_y = MOD(int(index_n/3) + shift(2),3)
-new_z = MOD(index_n +shift(3),3)
+!new_x = MOD(int(index_n/9)+ shift(0),3)
+!new_y = MOD(int(index_n/3) + shift(1),3)
+!new_z = MOD(index_n +shift(2),3)
 
-new_index = int(27*int(index_n/(27))+(MOD(new_x,3)*9+MOD(new_y,3)*3+MOD(new_z,3)))
+
+new_x = MODULO((MODULO(int(index_n/9),3)+shift(1)),3)
+new_y = MODULO((MODULO(int(index_n/3),3)+shift(2)),3)
+new_z = MODULO((MODULO(index_n,3)+shift(3)),3)
+
+new_index = int(27*int(index_n/(27))+(MODULO(new_x,3)*9+MODULO(new_y,3)*3+MODULO(new_z,3)))
 end subroutine shift_index
 

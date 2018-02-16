@@ -22,23 +22,11 @@ IMPLICIT NONE
 
 CONTAINS
 
-!     SUBROUTINE get_tortuosity(n,tort)
-
-!        INTEGER,INTENT(IN)::n
-!        INTEGER,INTENT(OUT),DIMENSION(n)::tort
-
-!        tort = test_tort
-
-!     END SUBROUTINE
-
-
      SUBROUTINE allocate_nodes(n,n2)
        INTEGER, INTENT(IN)::n,n2
 
 
         ALLOCATE(nodes(0:n-1))
-!        nodes(:)%tortuosity = 0
-         
         ALLOCATE(uc_tort(0:n2-1))
         uc_tort(:) = 0
      END SUBROUTINE allocate_nodes
@@ -49,14 +37,29 @@ CONTAINS
         INTEGER, INTENT(IN)::n,n2
         INTEGER :: node
 
-        ALLOCATE(nodes(0:n-1))
-        DO node=0,n-1
-           nodes(node)%node_index=node
-        END DO
-        ALLOCATE(uc_tort(0:n2-1))
+!        ALLOCATE(nodes(0:n-1))
+!        DO node=0,n-1
+!           nodes(node)%node_index=node
+!        END DO
+!        ALLOCATE(uc_tort(0:n2-1))
          
        
      END SUBROUTINE set_nodes
+
+     SUBROUTINE tear_down
+
+        INTEGER::i,no_nodes
+  
+        no_nodes = SIZE(nodes)-1
+
+        DO i=0,no_nodes
+           IF (ALLOCATED(nodes(i)%neigh_ind)) THEN
+              DEALLOCATE(nodes(i)%neigh_ind)
+           END IF
+        END DO
+        DEALLOCATE(nodes,uc_tort)
+
+     END SUBROUTINE tear_down
 
      SUBROUTINE set_neighbours(ind,uc_ind,n,neigh)
 
@@ -97,7 +100,9 @@ CONTAINS
            head=>head%next_node
         END IF
 
-        DEALLOCATE(h)
+        IF (ASSOCIATED(h)) THEN
+           DEALLOCATE(h)
+        END IF
 
      END SUBROUTINE dequeue_node
 

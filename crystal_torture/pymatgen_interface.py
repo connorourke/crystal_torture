@@ -202,11 +202,14 @@ def create_halo(structure, neighbours):
     no_sites = len(structure.sites)
     for i in range(no_sites):
        neighbours[i]=[dist.shift_index((27*neighbour[2]),neighbour[3]) for neighbour in neighbours[i]]
- 
+#       neighbours[i]=[shift_index((27*neighbour[2]),1,2,3,neighbour[3]) for neighbour in neighbours[i]]
+      
     uc_index = [((site * 27)) for site in range(len(structure.sites))]
     structure.make_supercell([x,y,z])
     neighbours = map_index(neighbours,uc_index,x,y,z)
-
+    
+     
+    neigh = get_all_neighbors_and_image(structure,4.0,include_index=True)
     return structure, neighbours
 
 #@profile
@@ -248,7 +251,6 @@ def nodes_from_structure(structure, rcut, get_halo=False):
            halo_node = False
         else:
            halo_node = True
-
         node_neighbours_ind = set(neighbours[index])
         append(Node(index = index, element = site.species_string, labels = {"UC_index":site.properties["UC_index"], "Halo":halo_node} , neighbours_ind = node_neighbours_ind))
 
@@ -307,12 +309,10 @@ def clusters_from_file(filename, rcut, elements):
     structure = Structure.from_sites(sites)
 
 
-    #elements={"Li","X","X0+"}
     all_elements = set([species for species in structure.symbol_set])
     remove_elements = [x for x in all_elements if x not in elements]
 
     structure.remove_species(remove_elements)
-    print(structure)
     nodes = nodes_from_structure(structure, rcut, get_halo=True)
     set_fort_nodes(nodes)
 
@@ -351,15 +351,63 @@ def graph_from_file(filename,rcut,elements):
     return graph
 
 
+def structure_from_cluster(cluster,filename):
+    """
+    Takes a cluster and the original structure of which it is a subset, and 
+    sets up a pymatgen structure object containing only the cluster. Allows
+    clusters to be output to viewable files.
+
+    Args:
+       filename (str): name of file to set up graph from
+       cluster  (Cluster): cluster object containing sites to output
+ 
+    Returns:
+       structure (Structure): pymatgen structure object
+    """ 
+
+    graph_structure = Structure.from_file(filename)
+    cluster_structure = Structure(lattice=graph_structure.lattice,species=[],coords=[])
+
+    symbols = [species for species in graph_structure.symbol_set]
+
+    for symbol in symbols:
+        for node in set([node for node in cluster.nodes]):
+            site = graph_structure.sites[int(node.labels["UC_index"])]
+            
+            if site.species_string==symbol:
+        
+               cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
+
+    return cluster_structure
+
+def structure_cluster_structure(cluster,graph_structure):
+    """
+    Takes a cluster and the original structure of which it is a subset, and 
+    sets up a pymatgen structure object containing only the cluster. Allows
+    clusters to be output to viewable files.
+
+    Args:
+       filename (str): name of file to set up graph from
+       cluster  (Cluster): cluster object containing sites to output
+ 
+    Returns:
+       structure (Structure): pymatgen structure object
+    """
+
+#    graph_structure = Structure.from_file(filename)
+    cluster_structure = Structure(lattice=graph_structure.lattice,species=[],coords=[])
+
+    symbols = [species for species in graph_structure.symbol_set]
+
+#    for node in cluster.nodes:
+    for symbol in symbols:
+        for node in set([node for node in cluster.nodes if node.labels["Halo"]==False]):
+            site = graph_structure.sites[int(node.labels["UC_index"])]
+
+            if site.species_string==symbol:
+
+               cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
 
 
-
-
-
-
-
-
-
-
-
+    return cluster_structure
 

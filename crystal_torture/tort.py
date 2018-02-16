@@ -7,7 +7,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
     Module tort_mod
     
     
-    Defined at tort.f90 lines 1-246
+    Defined at tort.f90 lines 1-251
     
     """
     class Test_Node(f90wrap.runtime.FortranDerivedType):
@@ -221,7 +221,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         allocate_nodes(n, n2)
         
         
-        Defined at tort.f90 lines 35-44
+        Defined at tort.f90 lines 25-32
         
         Parameters
         ----------
@@ -237,7 +237,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         set_nodes(n, n2)
         
         
-        Defined at tort.f90 lines 46-59
+        Defined at tort.f90 lines 34-47
         
         Parameters
         ----------
@@ -248,12 +248,24 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         _tort.f90wrap_set_nodes(n=n, n2=n2)
     
     @staticmethod
+    def tear_down():
+        """
+        tear_down()
+        
+        
+        Defined at tort.f90 lines 49-62
+        
+        
+        """
+        _tort.f90wrap_tear_down()
+    
+    @staticmethod
     def set_neighbours(ind, uc_ind, n, neigh):
         """
         set_neighbours(ind, uc_ind, n, neigh)
         
         
-        Defined at tort.f90 lines 61-75
+        Defined at tort.f90 lines 64-78
         
         Parameters
         ----------
@@ -271,7 +283,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         torture(n, uc_nodes)
         
         
-        Defined at tort.f90 lines 153-225
+        Defined at tort.f90 lines 158-230
         
         Parameters
         ----------

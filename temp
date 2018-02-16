@@ -1,0 +1,559 @@
+Full Formula (Li97)
+Reduced Formula: Li
+abc   :  24.240000  24.240000  24.240000
+angles:  90.000000  90.000000  90.000000
+Sites (97)
+  #  SP           a         b         c
+---  ----  --------  --------  --------
+  0  Li    0.125     0.125     0.458333
+  1  Li    0.125     0.458333  0.125
+  2  Li    0.125     0.458333  0.791667
+  3  Li    0.125     0.791667  0.791667
+  4  Li    0.458333  0.791667  0.458333
+  5  Li    0.458333  0.791667  0.791667
+  6  Li    0.791667  0.125     0.458333
+  7  Li    0.791667  0.458333  0.791667
+  8  Li    0.791667  0.791667  0.125
+  9  Li    0.791667  0.791667  0.458333
+ 10  Li    0.291667  0.291667  0.458333
+ 11  Li    0.291667  0.958333  0.125
+ 12  Li    0.625     0.291667  0.125
+ 13  Li    0.625     0.291667  0.458333
+ 14  Li    0.625     0.291667  0.791667
+ 15  Li    0.625     0.625     0.125
+ 16  Li    0.625     0.625     0.458333
+ 17  Li    0.625     0.625     0.791667
+ 18  Li    0.625     0.958333  0.458333
+ 19  Li    0.625     0.958333  0.791667
+ 20  Li    0.958333  0.291667  0.125
+ 21  Li    0.958333  0.291667  0.791667
+ 22  Li    0.958333  0.625     0.458333
+ 23  Li    0.958333  0.625     0.791667
+ 24  Li    0.958333  0.958333  0.125
+ 25  Li    0.958333  0.958333  0.458333
+ 26  Li    0.208333  0.208333  0.208333
+ 27  Li    0.208333  0.208333  0.875
+ 28  Li    0.208333  0.541667  0.208333
+ 29  Li    0.208333  0.875     0.208333
+ 30  Li    0.208333  0.875     0.541667
+ 31  Li    0.541667  0.208333  0.208333
+ 32  Li    0.541667  0.208333  0.875
+ 33  Li    0.541667  0.541667  0.208333
+ 34  Li    0.541667  0.541667  0.875
+ 35  Li    0.541667  0.875     0.208333
+ 36  Li    0.875     0.875     0.541667
+ 37  Li    0.375     0.375     0.208333
+ 38  Li    0.375     0.708333  0.208333
+ 39  Li    0.375     0.041667  0.875
+ 40  Li    0.708333  0.708333  0.208333
+ 41  Li    0.708333  0.041667  0.208333
+ 42  Li    0.708333  0.041667  0.541667
+ 43  Li    0.041667  0.375     0.541667
+ 44  Li    0.041667  0.375     0.875
+ 45  Li    0.041667  0.708333  0.541667
+ 46  Li    0.041667  0.708333  0.875
+ 47  Li    0.291667  0.125     0.625
+ 48  Li    0.291667  0.458333  0.625
+ 49  Li    0.625     0.125     0.625
+ 50  Li    0.625     0.458333  0.291667
+ 51  Li    0.625     0.791667  0.625
+ 52  Li    0.958333  0.125     0.291667
+ 53  Li    0.958333  0.125     0.625
+ 54  Li    0.958333  0.458333  0.291667
+ 55  Li    0.958333  0.458333  0.958333
+ 56  Li    0.958333  0.791667  0.291667
+ 57  Li    0.958333  0.791667  0.625
+ 58  Li    0.125     0.291667  0.625
+ 59  Li    0.125     0.625     0.291667
+ 60  Li    0.125     0.625     0.625
+ 61  Li    0.125     0.625     0.958333
+ 62  Li    0.125     0.958333  0.291667
+ 63  Li    0.458333  0.291667  0.291667
+ 64  Li    0.458333  0.291667  0.958333
+ 65  Li    0.458333  0.625     0.291667
+ 66  Li    0.458333  0.958333  0.625
+ 67  Li    0.791667  0.291667  0.291667
+ 68  Li    0.791667  0.291667  0.625
+ 69  Li    0.791667  0.625     0.291667
+ 70  Li    0.791667  0.625     0.625
+ 71  Li    0.791667  0.625     0.958333
+ 72  Li    0.791667  0.958333  0.625
+ 73  Li    0.375     0.208333  0.708333
+ 74  Li    0.375     0.875     0.375
+ 75  Li    0.375     0.875     0.041667
+ 76  Li    0.708333  0.208333  0.041667
+ 77  Li    0.708333  0.541667  0.375
+ 78  Li    0.708333  0.875     0.375
+ 79  Li    0.708333  0.875     0.708333
+ 80  Li    0.041667  0.208333  0.375
+ 81  Li    0.041667  0.208333  0.708333
+ 82  Li    0.041667  0.541667  0.375
+ 83  Li    0.041667  0.541667  0.041667
+ 84  Li    0.041667  0.875     0.041667
+ 85  Li    0.208333  0.375     0.708333
+ 86  Li    0.208333  0.375     0.041667
+ 87  Li    0.208333  0.708333  0.708333
+ 88  Li    0.541667  0.375     0.041667
+ 89  Li    0.541667  0.708333  0.708333
+ 90  Li    0.541667  0.708333  0.041667
+ 91  Li    0.541667  0.041667  0.375
+ 92  Li    0.541667  0.041667  0.041667
+ 93  Li    0.875     0.375     0.708333
+ 94  Li    0.875     0.708333  0.375
+ 95  Li    0.875     0.708333  0.708333
+ 96  Li    0.875     0.708333  0.041667
+CLuster 0  periodic 1 no nodes in cluster 189
+tort 24
+tort 12
+tort 14
+tort 16
+tort 14
+tort 22
+tort 20
+tort 18
+tort 26
+tort 26
+tort 14
+tort 14
+tort 12
+tort 16
+tort 12
+tort 22
+tort 22
+tort 24
+tort 18
+tort 22
+tort 24
+tort 20
+tort 12
+tort 18
+tort 16
+tort 14
+tort 18
+tort 24
+tort 22
+tort 14
+tort 20
+tort 18
+tort 16
+tort 20
+tort 16
+tort 22
+tort 22
+tort 20
+tort 20
+tort 20
+Tortuosity: 18.6
+clus 0 t node {'51', '5', '59', '15', '38', '83', '69', '50', '9', '45', '89', '22', '36', '17', '48', '81', '19', '93', '77', '25', '49', '85', '40', '87', '1', '23', '65', '46', '53', '68', '58', '16', '3', '7', '33', '28', '91', '86', '34', '8', '61', '72', '43', '6', '95', '55', '44', '54', '78', '21', '71', '18', '57', '42', '96', '56', '94', '2', '90', '60', '70', '82', '79'}
+node in cluster 0 node 51
+node in cluster 0 node 5
+node in cluster 0 node 59
+node in cluster 0 node 15
+node in cluster 0 node 38
+node in cluster 0 node 83
+node in cluster 0 node 69
+node in cluster 0 node 50
+node in cluster 0 node 9
+node in cluster 0 node 45
+node in cluster 0 node 89
+node in cluster 0 node 22
+node in cluster 0 node 36
+node in cluster 0 node 17
+node in cluster 0 node 48
+node in cluster 0 node 81
+node in cluster 0 node 19
+node in cluster 0 node 93
+node in cluster 0 node 77
+node in cluster 0 node 25
+node in cluster 0 node 49
+node in cluster 0 node 85
+node in cluster 0 node 40
+node in cluster 0 node 87
+node in cluster 0 node 1
+node in cluster 0 node 23
+node in cluster 0 node 65
+node in cluster 0 node 46
+node in cluster 0 node 53
+node in cluster 0 node 68
+node in cluster 0 node 58
+node in cluster 0 node 16
+node in cluster 0 node 3
+node in cluster 0 node 7
+node in cluster 0 node 33
+node in cluster 0 node 28
+node in cluster 0 node 91
+node in cluster 0 node 86
+node in cluster 0 node 34
+node in cluster 0 node 8
+node in cluster 0 node 61
+node in cluster 0 node 72
+node in cluster 0 node 43
+node in cluster 0 node 6
+node in cluster 0 node 95
+node in cluster 0 node 55
+node in cluster 0 node 44
+node in cluster 0 node 54
+node in cluster 0 node 78
+node in cluster 0 node 21
+node in cluster 0 node 71
+node in cluster 0 node 18
+node in cluster 0 node 57
+node in cluster 0 node 42
+node in cluster 0 node 96
+node in cluster 0 node 56
+node in cluster 0 node 94
+node in cluster 0 node 2
+node in cluster 0 node 90
+node in cluster 0 node 60
+node in cluster 0 node 70
+node in cluster 0 node 82
+node in cluster 0 node 79
+CLuster 1  periodic 0 no nodes in cluster 2
+clus 1 t node {'74', '4'}
+node in cluster 1 node 74
+node in cluster 1 node 4
+CLuster 2  periodic 1 no nodes in cluster 189
+tort 18
+tort 20
+tort 20
+tort 20
+Tortuosity: 19.5
+clus 2 t node {'51', '5', '59', '15', '38', '83', '69', '50', '9', '45', '89', '22', '36', '17', '48', '81', '19', '93', '77', '25', '49', '85', '40', '87', '1', '23', '65', '46', '53', '68', '58', '16', '3', '7', '33', '91', '86', '34', '72', '8', '61', '28', '43', '6', '95', '55', '44', '54', '78', '21', '71', '18', '57', '42', '96', '56', '94', '2', '90', '60', '70', '82', '79'}
+node in cluster 2 node 51
+node in cluster 2 node 5
+node in cluster 2 node 59
+node in cluster 2 node 15
+node in cluster 2 node 38
+node in cluster 2 node 83
+node in cluster 2 node 69
+node in cluster 2 node 50
+node in cluster 2 node 9
+node in cluster 2 node 45
+node in cluster 2 node 89
+node in cluster 2 node 22
+node in cluster 2 node 36
+node in cluster 2 node 17
+node in cluster 2 node 48
+node in cluster 2 node 81
+node in cluster 2 node 19
+node in cluster 2 node 93
+node in cluster 2 node 77
+node in cluster 2 node 25
+node in cluster 2 node 49
+node in cluster 2 node 85
+node in cluster 2 node 40
+node in cluster 2 node 87
+node in cluster 2 node 1
+node in cluster 2 node 23
+node in cluster 2 node 65
+node in cluster 2 node 46
+node in cluster 2 node 53
+node in cluster 2 node 68
+node in cluster 2 node 58
+node in cluster 2 node 16
+node in cluster 2 node 3
+node in cluster 2 node 7
+node in cluster 2 node 33
+node in cluster 2 node 91
+node in cluster 2 node 86
+node in cluster 2 node 34
+node in cluster 2 node 72
+node in cluster 2 node 8
+node in cluster 2 node 61
+node in cluster 2 node 28
+node in cluster 2 node 43
+node in cluster 2 node 6
+node in cluster 2 node 95
+node in cluster 2 node 55
+node in cluster 2 node 44
+node in cluster 2 node 54
+node in cluster 2 node 78
+node in cluster 2 node 21
+node in cluster 2 node 71
+node in cluster 2 node 18
+node in cluster 2 node 57
+node in cluster 2 node 42
+node in cluster 2 node 96
+node in cluster 2 node 56
+node in cluster 2 node 94
+node in cluster 2 node 2
+node in cluster 2 node 90
+node in cluster 2 node 60
+node in cluster 2 node 70
+node in cluster 2 node 82
+node in cluster 2 node 79
+CLuster 3  periodic 0 no nodes in cluster 1
+clus 3 t node {'10'}
+node in cluster 3 node 10
+CLuster 4  periodic 0 no nodes in cluster 9
+clus 4 t node {'14', '88', '63', '12', '76', '37', '32', '31', '64'}
+node in cluster 4 node 14
+node in cluster 4 node 88
+node in cluster 4 node 63
+node in cluster 4 node 12
+node in cluster 4 node 76
+node in cluster 4 node 37
+node in cluster 4 node 32
+node in cluster 4 node 31
+node in cluster 4 node 64
+CLuster 5  periodic 0 no nodes in cluster 1
+clus 5 t node {'13'}
+node in cluster 5 node 13
+CLuster 6  periodic 0 no nodes in cluster 3
+clus 6 t node {'52', '80', '0'}
+node in cluster 6 node 52
+node in cluster 6 node 80
+node in cluster 6 node 0
+CLuster 7  periodic 1 no nodes in cluster 189
+tort 12
+tort 20
+tort 12
+tort 22
+tort 12
+tort 12
+tort 12
+tort 18
+tort 24
+tort 12
+tort 14
+tort 20
+tort 12
+tort 12
+tort 12
+tort 12
+tort 16
+tort 22
+tort 12
+Tortuosity: 15.1578947368
+clus 7 t node {'51', '5', '59', '15', '38', '83', '69', '50', '9', '45', '89', '22', '36', '17', '48', '81', '19', '93', '77', '25', '49', '85', '40', '87', '1', '23', '46', '65', '53', '68', '58', '16', '3', '7', '33', '91', '86', '34', '72', '8', '61', '28', '43', '6', '95', '55', '44', '54', '78', '21', '71', '18', '57', '42', '56', '96', '94', '2', '90', '60', '70', '82', '79'}
+node in cluster 7 node 51
+node in cluster 7 node 5
+node in cluster 7 node 59
+node in cluster 7 node 15
+node in cluster 7 node 38
+node in cluster 7 node 83
+node in cluster 7 node 69
+node in cluster 7 node 50
+node in cluster 7 node 9
+node in cluster 7 node 45
+node in cluster 7 node 89
+node in cluster 7 node 22
+node in cluster 7 node 36
+node in cluster 7 node 17
+node in cluster 7 node 48
+node in cluster 7 node 81
+node in cluster 7 node 19
+node in cluster 7 node 93
+node in cluster 7 node 77
+node in cluster 7 node 25
+node in cluster 7 node 49
+node in cluster 7 node 85
+node in cluster 7 node 40
+node in cluster 7 node 87
+node in cluster 7 node 1
+node in cluster 7 node 23
+node in cluster 7 node 46
+node in cluster 7 node 65
+node in cluster 7 node 53
+node in cluster 7 node 68
+node in cluster 7 node 58
+node in cluster 7 node 16
+node in cluster 7 node 3
+node in cluster 7 node 7
+node in cluster 7 node 33
+node in cluster 7 node 91
+node in cluster 7 node 86
+node in cluster 7 node 34
+node in cluster 7 node 72
+node in cluster 7 node 8
+node in cluster 7 node 61
+node in cluster 7 node 28
+node in cluster 7 node 43
+node in cluster 7 node 6
+node in cluster 7 node 95
+node in cluster 7 node 55
+node in cluster 7 node 44
+node in cluster 7 node 54
+node in cluster 7 node 78
+node in cluster 7 node 21
+node in cluster 7 node 71
+node in cluster 7 node 18
+node in cluster 7 node 57
+node in cluster 7 node 42
+node in cluster 7 node 56
+node in cluster 7 node 96
+node in cluster 7 node 94
+node in cluster 7 node 2
+node in cluster 7 node 90
+node in cluster 7 node 60
+node in cluster 7 node 70
+node in cluster 7 node 82
+node in cluster 7 node 79
+CLuster 8  periodic 0 no nodes in cluster 4
+clus 8 t node {'29', '11', '75', '62'}
+node in cluster 8 node 29
+node in cluster 8 node 11
+node in cluster 8 node 75
+node in cluster 8 node 62
+CLuster 9  periodic 0 no nodes in cluster 9
+clus 9 t node {'88', '14', '63', '12', '76', '37', '32', '31', '64'}
+node in cluster 9 node 88
+node in cluster 9 node 14
+node in cluster 9 node 63
+node in cluster 9 node 12
+node in cluster 9 node 76
+node in cluster 9 node 37
+node in cluster 9 node 32
+node in cluster 9 node 31
+node in cluster 9 node 64
+CLuster 10  periodic 0 no nodes in cluster 1
+clus 10 t node {'41'}
+node in cluster 10 node 41
+CLuster 11  periodic 0 no nodes in cluster 3
+clus 11 t node {'52', '80', '0'}
+node in cluster 11 node 52
+node in cluster 11 node 80
+node in cluster 11 node 0
+CLuster 12  periodic 0 no nodes in cluster 1
+clus 12 t node {'92'}
+node in cluster 12 node 92
+CLuster 13  periodic 0 no nodes in cluster 2
+clus 13 t node {'84', '24'}
+node in cluster 13 node 84
+node in cluster 13 node 24
+CLuster 14  periodic 0 no nodes in cluster 1
+clus 14 t node {'39'}
+node in cluster 14 node 39
+CLuster 15  periodic 0 no nodes in cluster 2
+clus 15 t node {'73', '47'}
+node in cluster 15 node 73
+node in cluster 15 node 47
+CLuster 16  periodic 0 no nodes in cluster 1
+clus 16 t node {'26'}
+node in cluster 16 node 26
+CLuster 17  periodic 0 no nodes in cluster 1
+clus 17 t node {'66'}
+node in cluster 17 node 66
+CLuster 18  periodic 0 no nodes in cluster 2
+clus 18 t node {'84', '24'}
+node in cluster 18 node 84
+node in cluster 18 node 24
+CLuster 19  periodic 0 no nodes in cluster 1
+clus 19 t node {'67'}
+node in cluster 19 node 67
+CLuster 20  periodic 0 no nodes in cluster 1
+clus 20 t node {'27'}
+node in cluster 20 node 27
+CLuster 21  periodic 0 no nodes in cluster 1
+clus 21 t node {'35'}
+node in cluster 21 node 35
+CLuster 22  periodic 0 no nodes in cluster 1
+clus 22 t node {'30'}
+node in cluster 22 node 30
+CLuster 23  periodic 0 no nodes in cluster 1
+clus 23 t node {'20'}
+node in cluster 23 node 20
+Full Formula (Li97)
+Reduced Formula: Li
+abc   :  24.240000  24.240000  24.240000
+angles:  90.000000  90.000000  90.000000
+Sites (97)
+  #  SP           a         b         c
+---  ----  --------  --------  --------
+  0  Li    0.125     0.125     0.458333
+  1  Li    0.125     0.458333  0.125
+  2  Li    0.125     0.458333  0.791667
+  3  Li    0.125     0.791667  0.791667
+  4  Li    0.458333  0.791667  0.458333
+  5  Li    0.458333  0.791667  0.791667
+  6  Li    0.791667  0.125     0.458333
+  7  Li    0.791667  0.458333  0.791667
+  8  Li    0.791667  0.791667  0.125
+  9  Li    0.791667  0.791667  0.458333
+ 10  Li    0.291667  0.291667  0.458333
+ 11  Li    0.291667  0.958333  0.125
+ 12  Li    0.625     0.291667  0.125
+ 13  Li    0.625     0.291667  0.458333
+ 14  Li    0.625     0.291667  0.791667
+ 15  Li    0.625     0.625     0.125
+ 16  Li    0.625     0.625     0.458333
+ 17  Li    0.625     0.625     0.791667
+ 18  Li    0.625     0.958333  0.458333
+ 19  Li    0.625     0.958333  0.791667
+ 20  Li    0.958333  0.291667  0.125
+ 21  Li    0.958333  0.291667  0.791667
+ 22  Li    0.958333  0.625     0.458333
+ 23  Li    0.958333  0.625     0.791667
+ 24  Li    0.958333  0.958333  0.125
+ 25  Li    0.958333  0.958333  0.458333
+ 26  Li    0.208333  0.208333  0.208333
+ 27  Li    0.208333  0.208333  0.875
+ 28  Li    0.208333  0.541667  0.208333
+ 29  Li    0.208333  0.875     0.208333
+ 30  Li    0.208333  0.875     0.541667
+ 31  Li    0.541667  0.208333  0.208333
+ 32  Li    0.541667  0.208333  0.875
+ 33  Li    0.541667  0.541667  0.208333
+ 34  Li    0.541667  0.541667  0.875
+ 35  Li    0.541667  0.875     0.208333
+ 36  Li    0.875     0.875     0.541667
+ 37  Li    0.375     0.375     0.208333
+ 38  Li    0.375     0.708333  0.208333
+ 39  Li    0.375     0.041667  0.875
+ 40  Li    0.708333  0.708333  0.208333
+ 41  Li    0.708333  0.041667  0.208333
+ 42  Li    0.708333  0.041667  0.541667
+ 43  Li    0.041667  0.375     0.541667
+ 44  Li    0.041667  0.375     0.875
+ 45  Li    0.041667  0.708333  0.541667
+ 46  Li    0.041667  0.708333  0.875
+ 47  Li    0.291667  0.125     0.625
+ 48  Li    0.291667  0.458333  0.625
+ 49  Li    0.625     0.125     0.625
+ 50  Li    0.625     0.458333  0.291667
+ 51  Li    0.625     0.791667  0.625
+ 52  Li    0.958333  0.125     0.291667
+ 53  Li    0.958333  0.125     0.625
+ 54  Li    0.958333  0.458333  0.291667
+ 55  Li    0.958333  0.458333  0.958333
+ 56  Li    0.958333  0.791667  0.291667
+ 57  Li    0.958333  0.791667  0.625
+ 58  Li    0.125     0.291667  0.625
+ 59  Li    0.125     0.625     0.291667
+ 60  Li    0.125     0.625     0.625
+ 61  Li    0.125     0.625     0.958333
+ 62  Li    0.125     0.958333  0.291667
+ 63  Li    0.458333  0.291667  0.291667
+ 64  Li    0.458333  0.291667  0.958333
+ 65  Li    0.458333  0.625     0.291667
+ 66  Li    0.458333  0.958333  0.625
+ 67  Li    0.791667  0.291667  0.291667
+ 68  Li    0.791667  0.291667  0.625
+ 69  Li    0.791667  0.625     0.291667
+ 70  Li    0.791667  0.625     0.625
+ 71  Li    0.791667  0.625     0.958333
+ 72  Li    0.791667  0.958333  0.625
+ 73  Li    0.375     0.208333  0.708333
+ 74  Li    0.375     0.875     0.375
+ 75  Li    0.375     0.875     0.041667
+ 76  Li    0.708333  0.208333  0.041667
+ 77  Li    0.708333  0.541667  0.375
+ 78  Li    0.708333  0.875     0.375
+ 79  Li    0.708333  0.875     0.708333
+ 80  Li    0.041667  0.208333  0.375
+ 81  Li    0.041667  0.208333  0.708333
+ 82  Li    0.041667  0.541667  0.375
+ 83  Li    0.041667  0.541667  0.041667
+ 84  Li    0.041667  0.875     0.041667
+ 85  Li    0.208333  0.375     0.708333
+ 86  Li    0.208333  0.375     0.041667
+ 87  Li    0.208333  0.708333  0.708333
+ 88  Li    0.541667  0.375     0.041667
+ 89  Li    0.541667  0.708333  0.708333
+ 90  Li    0.541667  0.708333  0.041667
+ 91  Li    0.541667  0.041667  0.375
+ 92  Li    0.541667  0.041667  0.041667
+ 93  Li    0.875     0.375     0.708333
+ 94  Li    0.875     0.708333  0.375
+ 95  Li    0.875     0.708333  0.708333
+ 96  Li    0.875     0.708333  0.041667
