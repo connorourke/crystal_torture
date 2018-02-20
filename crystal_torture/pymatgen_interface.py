@@ -210,7 +210,7 @@ def create_halo(structure, neighbours):
     neighbours = map_index(neighbours,uc_index,x,y,z)
     
      
-    neigh = get_all_neighbors_and_image(structure,4.0,include_index=True)
+
     return structure, neighbours
 
 #@profile
