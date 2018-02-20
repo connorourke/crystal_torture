@@ -129,6 +129,7 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
         indices = np.arange(len(structure))
         for image in itertools.product(*all_ranges):
             coords = latt.get_cartesian_coords(image) + coords_in_cell
+            print("image",image)
             all_dists = dist.dist(coords, site_coords, len(coords))
             all_within_r = np.bitwise_and(all_dists <= r, all_dists > 1e-8)
 

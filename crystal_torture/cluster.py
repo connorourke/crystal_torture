@@ -332,7 +332,7 @@ class Cluster:
 #        print([tor for tor in tort.tort_mod.nodes])
         for node in self.return_key_nodes(key="Halo",value=False):
             node.tortuosity = tort.tort_mod.uc_tort[int(node.labels["UC_index"])]
-            print("tort",tort.tort_mod.uc_tort[int(node.labels["UC_index"])])
+           # print("tort",tort.tort_mod.uc_tort[int(node.labels["UC_index"])])
 
         self.tortuosity = sum([node.tortuosity for node in self.return_key_nodes(key="Halo",value=False)])/len(uc_nodes)
 
