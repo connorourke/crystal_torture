@@ -8,6 +8,6 @@ clusters = clusters_from_file("crystal_torture/tests/POSCAR_2_cluster.vasp",4.0)
 for cluster in clusters:
    if cluster.periodic > 0:
       time1=time.time()
-      cluster.torture()
+      cluster.torture_fort()
       time2=time.time()
       print("Time",time2-time1)
