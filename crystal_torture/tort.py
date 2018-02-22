@@ -7,7 +7,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
     Module tort_mod
     
     
-    Defined at tort.f90 lines 1-251
+    Defined at tort.f90 lines 1-270
     
     """
     class Test_Node(f90wrap.runtime.FortranDerivedType):
@@ -15,7 +15,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         Type(name=test_node)
         
         
-        Defined at tort.f90 lines 7-11
+        Defined at tort.f90 lines 7-16
         
         """
         def __init__(self, handle=None):
@@ -23,7 +23,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             self = Test_Node()
             
             
-            Defined at tort.f90 lines 7-11
+            Defined at tort.f90 lines 7-16
             
             
             Returns
@@ -42,7 +42,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             Destructor for class Test_Node
             
             
-            Defined at tort.f90 lines 7-11
+            Defined at tort.f90 lines 7-16
             
             Parameters
             ----------
@@ -61,7 +61,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             Element node_index ftype=integer pytype=int
             
             
-            Defined at tort.f90 line 8
+            Defined at tort.f90 line 13
             
             """
             return _tort.f90wrap_test_node__get__node_index(self._handle)
@@ -76,7 +76,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             Element uc_index ftype=integer pytype=int
             
             
-            Defined at tort.f90 line 8
+            Defined at tort.f90 line 13
             
             """
             return _tort.f90wrap_test_node__get__uc_index(self._handle)
@@ -91,7 +91,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             Element neigh_ind ftype=integer pytype=int
             
             
-            Defined at tort.f90 line 9
+            Defined at tort.f90 line 14
             
             """
             array_ndim, array_type, array_shape, array_handle = \
@@ -127,7 +127,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         Type(name=queued_node)
         
         
-        Defined at tort.f90 lines 13-17
+        Defined at tort.f90 lines 18-27
         
         """
         def __init__(self, handle=None):
@@ -135,7 +135,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             self = Queued_Node()
             
             
-            Defined at tort.f90 lines 13-17
+            Defined at tort.f90 lines 18-27
             
             
             Returns
@@ -154,7 +154,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             Destructor for class Queued_Node
             
             
-            Defined at tort.f90 lines 13-17
+            Defined at tort.f90 lines 18-27
             
             Parameters
             ----------
@@ -173,7 +173,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             Element node_index ftype=integer   pytype=int
             
             
-            Defined at tort.f90 line 14
+            Defined at tort.f90 line 24
             
             """
             return _tort.f90wrap_queued_node__get__node_index(self._handle)
@@ -188,7 +188,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             Element next_node ftype=type(queued_node) pytype=Queued_Node
             
             
-            Defined at tort.f90 line 15
+            Defined at tort.f90 line 25
             
             """
             next_node_handle = _tort.f90wrap_queued_node__get__next_node(self._handle)
@@ -221,7 +221,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         allocate_nodes(n, n2)
         
         
-        Defined at tort.f90 lines 25-32
+        Defined at tort.f90 lines 35-51
         
         Parameters
         ----------
@@ -232,28 +232,12 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         _tort.f90wrap_allocate_nodes(n=n, n2=n2)
     
     @staticmethod
-    def set_nodes(n, n2):
-        """
-        set_nodes(n, n2)
-        
-        
-        Defined at tort.f90 lines 34-47
-        
-        Parameters
-        ----------
-        n : int
-        n2 : int
-        
-        """
-        _tort.f90wrap_set_nodes(n=n, n2=n2)
-    
-    @staticmethod
     def tear_down():
         """
         tear_down()
         
         
-        Defined at tort.f90 lines 49-62
+        Defined at tort.f90 lines 53-69
         
         
         """
@@ -265,7 +249,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         set_neighbours(ind, uc_ind, n, neigh)
         
         
-        Defined at tort.f90 lines 64-78
+        Defined at tort.f90 lines 71-90
         
         Parameters
         ----------
@@ -283,7 +267,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         torture(n, uc_nodes)
         
         
-        Defined at tort.f90 lines 158-230
+        Defined at tort.f90 lines 166-249
         
         Parameters
         ----------
@@ -299,7 +283,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         Element uc_tort ftype=integer pytype=int
         
         
-        Defined at tort.f90 line 21
+        Defined at tort.f90 line 31
         
         """
         array_ndim, array_type, array_shape, array_handle = \

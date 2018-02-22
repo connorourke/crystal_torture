@@ -46,10 +46,10 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
     and maps them on to all of the supercell sites.
 
     Args:
-        uc_neighbours(list(list(int))): list of lists containing neighbour inndices for the sites
+        uc_neighbours(list(list(int))): list of lists containing neighbour inndices for the nodes
         that are in the primitive cell
       
-        uc_index(list(int)): list of indices corresponding to the primitive cell sites
+        uc_index(list(int)): list of indices corresponding to the primitive cell nodes
         x_d (int): x dimension of supercell
         y_d (int): y dimension of supercell
         z_d (int): z dimension of supercell
@@ -57,7 +57,7 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
 
     Returns:
     
-
+        neigh ([[int]...[int]]): list of neighbour indices for all nodes
     """
 
     no_atoms = len(uc_index)
@@ -129,7 +129,6 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
         indices = np.arange(len(structure))
         for image in itertools.product(*all_ranges):
             coords = latt.get_cartesian_coords(image) + coords_in_cell
-            print("image",image)
             all_dists = dist.dist(coords, site_coords, len(coords))
             all_within_r = np.bitwise_and(all_dists <= r, all_dists > 1e-8)
 
@@ -143,52 +142,11 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
                     neighbors[i].append(item)
         return neighbors
 
-#@profile
-def reorder_supercell(structure,neighbours,no_sites):
-    """
-    Takes a 3x3x3 supercell structure, and a list of site neighbours and 
-    reorders so the central unit cell is at the start of the structure
-    and the neighbour indices are at the start of the neighbour list.
 
-    Args:
-        structure (Structure): pymatgen Structure object
-        neighbours (list(int)): list of neighbour indices for each site
-        no_sites (int): number of sites in the unit cell
-
-    
-    """
-
-
-    uc_index = [((index * 27 ) +13) for index in range(no_sites)]
-    uc_index.reverse()
-
-    structure_sorted=Structure(lattice=structure.lattice,species=[],coords=[])
-    neighbours_sorted = []
-    append = structure_sorted.sites.append
-    n_append = neighbours_sorted.append
-    for index in uc_index:
-       append(structure.sites[index])
-       n_append(neighbours[index])
-       del structure.sites[index]
-       del neighbours[index]
-
-    structure_sorted.sites.reverse()
-    neighbours_sorted.reverse()
-
-    for index,site in enumerate(structure.sites):
-        append(site)
-        n_append(neighbours[index])
-
-    return structure_sorted, neighbours_sorted
-
-
-
-#@profile
 def create_halo(structure, neighbours):
     """
     Takes a pymatgen structure object, sets up a halo by making a 3x3x3 supercell,
-    and reorders the structure to put original unit cell sites (now in centre of supercell) at
-    start of the structure object.
+    
 
     Args:
         structure (Structure): pymatgen Structure object
@@ -216,7 +174,7 @@ def create_halo(structure, neighbours):
 #@profile
 def nodes_from_structure(structure, rcut, get_halo=False):
     """
-    Takes a structure file and converts to Nodes for interogation.
+    Takes a pymatgen structure object and converts to Nodes for interogation.
 
     Args:
         structure (Structure): pymatgen Structure object
@@ -264,9 +222,17 @@ def nodes_from_structure(structure, rcut, get_halo=False):
     return set(nodes)
 
 #@profile
-def set_cluster_periodic(cluster):#s, structure, rcut):
+def set_cluster_periodic(cluster):
     """
+    Sets the periodicty of the cluster by counting through the number of 
+    labelled UC nodes it contains
 
+    Args:
+       None
+    Returns:
+       None
+    Sets:
+       cluster.periodic (int): periodicity of the cluster (1=1D,2=2D,3=3D)
 
     """
 
@@ -288,7 +254,16 @@ def set_cluster_periodic(cluster):#s, structure, rcut):
 
 def set_fort_nodes(nodes):
     """
+    Sets up a copy of the nodes and the neighbour indices in the tort.f90 Fortran module
+    to allow access if using the Fortran tortuosity routines.
 
+    Args:
+       None
+    Returns:
+       None
+    Sets:
+       tort.tort_mod.nodes(:) : allocates space to hold node indices for full graph
+       tort.tort_mod.uc_tort(:) : allocates space to hold unit cell node tortuosity for full graph
   
     """
 
@@ -300,6 +275,13 @@ def set_fort_nodes(nodes):
 #@profile
 def clusters_from_file(filename, rcut, elements):
     """
+    Take a pymatgen compatible file, and converts it to a graph object
+    Args:
+        filename (str): name of file to set up graph from
+        rcut (float):   cut-off radii for node-node connections in forming clusters
+        elements ([str,str,.....]): list of elements to include in setting up graph
+    Returns:
+        clusters ({clusters}): set of clusters 
 
 
 
@@ -325,7 +307,7 @@ def clusters_from_file(filename, rcut, elements):
          node=uc_nodes.pop()
          if node.labels["Halo"]==False :
             cluster = Cluster({node})
-            cluster.grow_cluster()#(key="Halo",value=False)
+            cluster.grow_cluster()
             uc_nodes.difference_update(cluster.nodes)
             clusters.add(cluster)
             set_cluster_periodic(cluster)
@@ -346,7 +328,6 @@ def graph_from_file(filename,rcut,elements):
 
     """
 
-#    elements={"Li","X","X0+"}
     graph = Graph(clusters_from_file(filename=filename,rcut=rcut,elements=elements))
 
     return graph
@@ -395,12 +376,10 @@ def structure_cluster_structure(cluster,graph_structure):
        structure (Structure): pymatgen structure object
     """
 
-#    graph_structure = Structure.from_file(filename)
     cluster_structure = Structure(lattice=graph_structure.lattice,species=[],coords=[])
 
     symbols = [species for species in graph_structure.symbol_set]
 
-#    for node in cluster.nodes:
     for symbol in symbols:
         for node in set([node for node in cluster.nodes if node.labels["Halo"]==False]):
             site = graph_structure.sites[int(node.labels["UC_index"])]

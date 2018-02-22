@@ -57,12 +57,20 @@ def index_sites(structure,species=None,labels=None):
 
 
 def sort_structure(structure,order):
-    ''' Given a spinel structure with species sort the species so that their indices
-        sit side by side in the structure, in given order - allows for POSCAR file to 
-        be written in a readable way after doping
+    ''' 
+    Given a pymatgen structure object sort the species so that their indices
+    sit side by side in the structure, in given order - allows for POSCAR file to 
+    be written in a readable way after doping
+
+    Args:
+       structure (Structure): pymatgen structure object
+       order ([str,str..]): list of species str in order to sort
+
+    Returns:
+       structure (Structure): ordered pymatgen Structure object
     '''
 
-    symbols = [species for species in structure.symbol_set]
+    #symbols = [species for species in structure.symbol_set]
 
     if "X" in set(symbols):
        symbols.remove("X")
@@ -85,7 +93,19 @@ def sort_structure(structure,order):
 
 
 def dope_structure(structure,conc,species_to_rem,species_to_insert,label_to_remove=None):
+    '''
+    Dope a pymatgen structure object to a particular concentration.
+    Removes conc * no(species_to_remove) from structure and inserts species to insert in 
+    there place. Does so at random (excepting when label_to_remove is passed)
 
+    Args:
+       structure (Structure): pymatgen structure object
+       conc (real): fractional % of sites to remove
+       species_to_remove (str): the species to remove from structure
+       species_to_insert ([str,str]): a list of species to equally distribute over sites that are removed
+       label_to_remove (str): label of sites to select for removal.
+
+    '''
 
     no_sites = count_sites(structure,species=species_to_rem,labels=label_to_remove)
     site_indices = index_sites(structure,species=species_to_rem,labels=label_to_remove)

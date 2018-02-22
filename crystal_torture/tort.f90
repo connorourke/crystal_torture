@@ -5,12 +5,22 @@ use omp_lib
 IMPLICIT NONE
 
   TYPE test_node
+  ! Type for storing node data:
+  ! Contains:
+  !    node_index(int): index of node
+  !    uc_index(int): unit cell index label of node
+  !    neigh_ind([int]): array to store neighbour indices
      INTEGER:: node_index, uc_index
      INTEGER,allocatable, DIMENSION(:)::neigh_ind
   END TYPE test_node
 
     
   TYPE queued_node
+  ! Type for queued nodes:
+  ! Contains:
+  !    node_index(int): index of node
+  !    next_node(queded_node(pointer)): pointer to next node in queue
+
       INTEGER  :: node_index
       TYPE(queued_node),POINTER:: next_node
   END TYPE queued_node
@@ -23,6 +33,14 @@ IMPLICIT NONE
 CONTAINS
 
      SUBROUTINE allocate_nodes(n,n2)
+     ! Allocate the space for the nodes and to store the
+     ! unit cell node tortuosity
+     ! Args:
+     !     n(int): number of nodes in graph
+     !     n2(int): number of nodes in original unit cell
+   
+           
+
        INTEGER, INTENT(IN)::n,n2
 
 
@@ -31,23 +49,12 @@ CONTAINS
         uc_tort(:) = 0
      END SUBROUTINE allocate_nodes
 
-     SUBROUTINE set_nodes(n,n2)
-
-
-        INTEGER, INTENT(IN)::n,n2
-        INTEGER :: node
-
-!        ALLOCATE(nodes(0:n-1))
-!        DO node=0,n-1
-!           nodes(node)%node_index=node
-!        END DO
-!        ALLOCATE(uc_tort(0:n2-1))
-         
-       
-     END SUBROUTINE set_nodes
 
      SUBROUTINE tear_down
-
+     ! Free up space used to store nodes, tortuosity and neighbours
+     ! Args:
+     !    None
+     !
         INTEGER::i,no_nodes
   
         no_nodes = SIZE(nodes)-1
@@ -62,7 +69,12 @@ CONTAINS
      END SUBROUTINE tear_down
 
      SUBROUTINE set_neighbours(ind,uc_ind,n,neigh)
-
+     ! Set the neighbour list and the unit cell index for the graph nodes
+     ! Args:
+     !   ind(int): node index to set
+     !   uc_ind(int): unit cell index label for node
+     !   n(int): the number of neighbours for the node
+     !   neigh([int,int..]): array containing neighbour indices for node
         INTEGER :: i
         INTEGER, INTENT(IN):: ind,uc_ind,n
         INTEGER, DIMENSION(n), INTENT(IN):: neigh
@@ -78,6 +90,10 @@ CONTAINS
 
 
      SUBROUTINE enqueue_node(tail,node_index)
+     ! Add node to a queue of nodes
+     ! Args:
+     !   tail(queued_node): tail node of queue
+     !   node_index(int): index of node to add to queue
 
         TYPE(queued_node),POINTER,INTENT(INOUT)::tail
         TYPE(integer),INTENT(IN)::node_index
@@ -90,6 +106,10 @@ CONTAINS
      END SUBROUTINE enqueue_node
 
      SUBROUTINE dequeue_node(head)
+     ! Remove head node from queue of nodes
+     ! Args:
+     !   head(queued_node): head node of queue to remove
+
 
         TYPE(queued_node),POINTER,INTENT(INOUT)::head
         TYPE(queued_node),POINTER:: h
@@ -107,26 +127,11 @@ CONTAINS
      END SUBROUTINE dequeue_node
 
 
-     SUBROUTINE check_list(head,index_to_check,check)
-        TYPE(queued_node), POINTER, INTENT(IN):: head
-        INTEGER,INTENT(IN) :: index_to_check
-        TYPE(queued_node), POINTER :: current_node
-        LOGICAL, INTENT(OUT) :: check
-
-        current_node => head
-        check = .False.
-
-        DO WHILE(ASSOCIATED(current_node))
-          IF (current_node%node_index == index_to_check) THEN
-             check = .True.
-             EXIT
-          END IF
-          current_node => current_node%next_node
-
-        END DO
-     END SUBROUTINE check_list
-
      SUBROUTINE initialise_queue(head,tail)
+     ! Set up a queue of nodes by allocating head and tail
+     ! Args:
+     !    head(queued_node): head node in queue
+     !    tail(queued_node): tail node in queue
  
         TYPE(queued_node), POINTER, INTENT(INOUT)::head,tail
  
@@ -141,6 +146,9 @@ CONTAINS
      END SUBROUTINE
 
      SUBROUTINE shut_down_queue(head)
+     ! Close down a queue of nodes by cyclng through linked list and deallocating
+     ! Args:
+     !    head(queued_node): head of queue to close down
 
         TYPE(queued_node),POINTER,INTENT(INOUT)::head
 
@@ -156,6 +164,17 @@ CONTAINS
      END SUBROUTINE shut_down_queue
 
      SUBROUTINE torture(n,uc_nodes)
+     ! Perform tortuosity analysis on cluster using a BFS & OpenMP
+     ! The nodes in the cluster are tortured in parallel until all
+     ! nodes in the cluster have been tortured, and only the
+     ! nodes that reside in the original unit cell are tortured
+     ! Args:
+     !      n(int): number of nodes in original unit cell
+     !      uc_nodes ([int]): array containing the indices of the unit cell nodes in the cluster
+     ! Sets:
+     !   uc_tort([int]: array containing the tortuosity for each unit cell node in cluster
+     
+    
 
         INTEGER,INTENT(IN):: n
         INTEGER,DIMENSION(n),INTENT(IN)::uc_nodes

@@ -201,15 +201,6 @@ subroutine f90wrap_allocate_nodes(n, n2)
     call allocate_nodes(n=n, n2=n2)
 end subroutine f90wrap_allocate_nodes
 
-subroutine f90wrap_set_nodes(n, n2)
-    use tort_mod, only: set_nodes
-    implicit none
-    
-    integer, intent(in) :: n
-    integer, intent(in) :: n2
-    call set_nodes(n=n, n2=n2)
-end subroutine f90wrap_set_nodes
-
 subroutine f90wrap_tear_down
     use tort_mod, only: tear_down
     implicit none
