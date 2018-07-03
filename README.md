@@ -1,6 +1,6 @@
 
 ### Status
-[![Build Status](https://travis-ci.com/connorourke/crystal_torture.png?branch=master)](https://travis-ci.org/connorourke/crystal_torture?branch=master)
+[![Build Status](https://travis-ci.com/connorourke/crystal_torture.svg?token=nTMqYYEUasQRTBsU6oCc&branch=master)](https://travis-ci.com/connorourke/crystal_torture.svg?token=nTMqYYEUasQRTBsU6oCc&branch=master)
 
 Wrapping and compiling fortran with derived types:
 
