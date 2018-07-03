@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 from crystal_torture.pymatgen_interface import nodes_from_structure, clusters_from_file
-from crystal_torture import Cluster, Node
+from crystal_torture import Cluster, Node, tort
 
 class ClusterTestCase( unittest.TestCase ):
     """ Test for Graph Class"""
@@ -44,6 +44,8 @@ class ClusterTestCase( unittest.TestCase ):
         clusterf = cluster.pop()
         clusterf.grow_cluster()
         clusterf.torture_fort()
+        tort.tort_mod.tear_down()
+
         self.assertEqual(set([node.tortuosity for node in clusterf.return_key_nodes(key="Halo",value=False)]),set([4,3,3,3,3,3,3,3]))
 
 if __name__ =='__main__':

@@ -233,8 +233,8 @@ subroutine f90wrap_torture(n, uc_nodes, n0)
 end subroutine f90wrap_torture
 
 subroutine f90wrap_tort_mod__array__uc_tort(dummy_this, nd, dtype, dshape, dloc)
-    use tort_mod, only: tort_mod_uc_tort => uc_tort
     use omp_lib
+    use tort_mod, only: tort_mod_uc_tort => uc_tort
     implicit none
     integer, intent(in) :: dummy_this(2)
     integer, intent(out) :: nd

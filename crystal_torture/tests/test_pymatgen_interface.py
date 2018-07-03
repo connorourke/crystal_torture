@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import Mock
-from crystal_torture import Node, Cluster
+from crystal_torture import Node, Cluster, tort
 from crystal_torture.pymatgen_interface import nodes_from_structure, clusters_from_file
 from pymatgen import Structure
 
@@ -45,11 +45,17 @@ class PymatgenTestCase( unittest.TestCase ):
         cluster1.grow_cluster()
         self.assertEqual(set([node.index for node in self.cluster.nodes]),set([node.index for node in cluster1.nodes]))
         self.assertEqual(set([node.element for node in self.cluster.nodes]),set([node.element for node in cluster1.nodes]))
+#        tort.tort_mod.tear_down()
 
     def test_clusters_from_file(self): 
         
         clusters1 = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+        tort.tort_mod.tear_down()
+#
         clusters2 = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=3.5,elements={"Li"})
+        tort.tort_mod.tear_down()
+
+
 
         self.assertEqual(len(clusters1),1)
         self.assertEqual(len(clusters2),2)
@@ -57,7 +63,11 @@ class PymatgenTestCase( unittest.TestCase ):
     def test_cluster_periodic(self):
    
         clusters1 = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+        tort.tort_mod.tear_down()
+
         clusters2 = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=3.5,elements={"Li"})
+        tort.tort_mod.tear_down()
+
 
         self.assertEqual(clusters1.pop().periodic,3)
         if clusters2.pop().periodic == 3:

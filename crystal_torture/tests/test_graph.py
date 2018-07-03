@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import Mock
-from crystal_torture import Cluster, Graph, Node
+from crystal_torture import Cluster, Graph, Node, tort
 from crystal_torture.pymatgen_interface import graph_from_file, clusters_from_file
 
 class GraphTestCase( unittest.TestCase ):
@@ -31,14 +31,17 @@ class GraphTestCase( unittest.TestCase ):
         self.assertEqual( g_nodes, c_nodes)
 
     def test_graph_from_file(self):
-        graph = graph_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0, elements={"Li"})
-        clusters = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+#        tort.tort_mod.tear_down()
 
+        graph = graph_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0, elements={"Li"})
+        tort.tort_mod.tear_down()
+
+        clusters = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+        tort.tort_mod.tear_down()
         c_nodes = set([node.index for node in clusters.pop().nodes])
         g_nodes = set([node.index for node in graph.clusters.pop().nodes])
 
         self.assertEqual( g_nodes,c_nodes)
-
             
 
 if __name__ =='__main__':

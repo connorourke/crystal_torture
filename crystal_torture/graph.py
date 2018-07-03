@@ -94,6 +94,7 @@ class Graph:
 
         tort.tort_mod.tear_down()
         self.set_site_tortuosity()
+        print("Tearing down")
         self.set_minimal_clusters()
         
     def output_clusters(self,fmt,graph_structure,periodic=None):

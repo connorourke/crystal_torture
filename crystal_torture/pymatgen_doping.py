@@ -70,7 +70,7 @@ def sort_structure(structure,order):
        structure (Structure): ordered pymatgen Structure object
     '''
 
-    #symbols = [species for species in structure.symbol_set]
+    symbols = [species for species in structure.symbol_set]
 
     if "X" in set(symbols):
        symbols.remove("X")
@@ -121,7 +121,17 @@ def dope_structure(structure,conc,species_to_rem,species_to_insert,label_to_remo
     return structure
 
 
+def dope_structure_by_no(structure,no_dopants,species_to_rem,species_to_insert,label_to_remove=None):
+    no_sites = count_sites(structure,species=species_to_rem,labels=label_to_remove)
+    site_indices = index_sites(structure,species=species_to_rem,labels=label_to_remove)
+ 
+    random.shuffle(site_indices)
 
+    for species in species_to_insert:
+        for dopant in range(no_dopants):
+             structure[site_indices.pop()]=species
+
+    return structure
 
 
 
