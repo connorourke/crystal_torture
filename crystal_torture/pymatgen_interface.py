@@ -10,7 +10,7 @@ import itertools
 import math
 import copy
 import sys
-import psutil
+#import psutil
 import time
 
 "Functions for setting up a node, cluster and graph using pymatgen"
