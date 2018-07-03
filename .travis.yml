@@ -1,0 +1,22 @@
+branches:
+    only:
+      - master
+      - devel
+
+language: python
+notifications:
+   email: false
+python:
+   - "3.5"
+   - "3.5-dev"
+   - "3.6"
+   - "3.6-dev" 
+os:
+   - linux     
+
+install:
+   - pip install -r requirements.txt
+   - pip install -U numpy
+
+script:
+   - python -m unittest discover

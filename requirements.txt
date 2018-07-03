@@ -1,0 +1,5 @@
+Cython==0.27.2
+f90wrap==0.1.4
+numpy==1.13.0
+pymatgen==2017.6.8
+scipy==0.19.0
