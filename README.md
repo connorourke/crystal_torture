@@ -1,4 +1,7 @@
 
+### Status
+[![Build Status](https://travis-ci.com/connorourke/crystal_torture.png)](https://travis-ci.org/connorourke/crystal_torture)
+
 Wrapping and compiling fortran with derived types:
 
 
