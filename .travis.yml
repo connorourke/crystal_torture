@@ -7,7 +7,7 @@ sudo: required
 
 before_install:
   - sudo apt-get install gfortran
-        
+          
 language: python
 notifications:
    email: false
@@ -22,7 +22,13 @@ os:
 install:
    - pip install -r requirements.txt
    - pip install -U numpy
-
+before_script:
+   - cd crystal_torture    
+   - f2py -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m dist dist.f90
+   - f2py-f90wrap -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m _tort f90wrap_tort.f90 tort.o
+   - cd ../  
+      
 script:
+   - f2py-f90wrap -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m _tort f90wrap_tort.f90 tort.o     
    - python -m unittest discover
 
