@@ -5,3 +5,16 @@ crystal_torture/devel
 *pyc
 */activate/*
 crystal_torture/.f2py_f2cmap
+check_run.py
+check_doping.py
+*vasp
+*/*so
+
+check_run.py
+check_doping.py
+*vasp
+*/*so
+.cover*
+htmlcov
+things_to_note
+crystal_torture/ENV

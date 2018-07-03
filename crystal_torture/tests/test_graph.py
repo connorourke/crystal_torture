@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import Mock
-from crystal_torture import Cluster, Graph, Node
+from crystal_torture import Cluster, Graph, Node, tort
+from crystal_torture.pymatgen_interface import graph_from_file, clusters_from_file
 
 class GraphTestCase( unittest.TestCase ):
     """ Test for Graph Class"""
@@ -18,15 +19,29 @@ class GraphTestCase( unittest.TestCase ):
             node.neighbours = set(node.neighbours)
 
         self.cluster = Cluster({self.nodes.pop()})
-       # self.cluster.grow_cluster()
         self.graph = Graph({self.cluster})
 
     def test_graph_is_initialised( self ):
-        cluster = Cluster({self.nodes.pop()})
-        #cluster.grow_cluster()
-       # graph = Graph({cluster})
-       # self.assertEqual( graph.clusters.pop().nodes, self.graph.clusters.pop().nodes)
+        self.cluster.grow_cluster()
+        graph = Graph({self.cluster})
 
+        c_nodes = set([node.index for node in self.cluster.nodes])
+        g_nodes = set([node.index for node in graph.clusters.pop().nodes])
+
+        self.assertEqual( g_nodes, c_nodes)
+
+    def test_graph_from_file(self):
+#        tort.tort_mod.tear_down()
+
+        graph = graph_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0, elements={"Li"})
+        tort.tort_mod.tear_down()
+
+        clusters = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+        tort.tort_mod.tear_down()
+        c_nodes = set([node.index for node in clusters.pop().nodes])
+        g_nodes = set([node.index for node in graph.clusters.pop().nodes])
+
+        self.assertEqual( g_nodes,c_nodes)
             
 
 if __name__ =='__main__':

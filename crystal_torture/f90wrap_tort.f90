@@ -140,9 +140,6 @@ subroutine f90wrap_queued_node__get__next_node(this, f90wrap_next_node)
     type queued_node_ptr_type
         type(queued_node), pointer :: p => NULL()
     end type queued_node_ptr_type
-    type queued_node_ptr_type
-        type(queued_node), pointer :: p => NULL()
-    end type queued_node_ptr_type
     integer, intent(in)   :: this(2)
     type(queued_node_ptr_type) :: this_ptr
     integer, intent(out) :: f90wrap_next_node(2)
@@ -156,9 +153,6 @@ end subroutine f90wrap_queued_node__get__next_node
 subroutine f90wrap_queued_node__set__next_node(this, f90wrap_next_node)
     use tort_mod, only: queued_node
     implicit none
-    type queued_node_ptr_type
-        type(queued_node), pointer :: p => NULL()
-    end type queued_node_ptr_type
     type queued_node_ptr_type
         type(queued_node), pointer :: p => NULL()
     end type queued_node_ptr_type
@@ -198,24 +192,21 @@ subroutine f90wrap_queued_node_finalise(this)
     deallocate(this_ptr%p)
 end subroutine f90wrap_queued_node_finalise
 
-subroutine f90wrap_get_tortuosity(n, tort, n0)
-    use tort_mod, only: get_tortuosity
+subroutine f90wrap_allocate_nodes(n, n2)
+    use tort_mod, only: allocate_nodes
     implicit none
     
     integer, intent(in) :: n
-    integer, intent(inout), dimension(n0) :: tort
-    integer :: n0
-    !f2py intent(hide), depend(tort) :: n0 = shape(tort,0)
-    call get_tortuosity(n=n, tort=tort)
-end subroutine f90wrap_get_tortuosity
+    integer, intent(in) :: n2
+    call allocate_nodes(n=n, n2=n2)
+end subroutine f90wrap_allocate_nodes
 
-subroutine f90wrap_set_nodes(n)
-    use tort_mod, only: set_nodes
+subroutine f90wrap_tear_down
+    use tort_mod, only: tear_down
     implicit none
     
-    integer, intent(in) :: n
-    call set_nodes(n=n)
-end subroutine f90wrap_set_nodes
+    call tear_down()
+end subroutine f90wrap_tear_down
 
 subroutine f90wrap_set_neighbours(ind, uc_ind, n, neigh, n0)
     use tort_mod, only: set_neighbours
@@ -241,10 +232,9 @@ subroutine f90wrap_torture(n, uc_nodes, n0)
     call torture(n=n, uc_nodes=uc_nodes)
 end subroutine f90wrap_torture
 
-subroutine f90wrap_tort_mod__array__test_tort(dummy_this, nd, dtype, dshape, &
-    dloc)
+subroutine f90wrap_tort_mod__array__uc_tort(dummy_this, nd, dtype, dshape, dloc)
     use omp_lib
-    use tort_mod, only: tort_mod_test_tort => test_tort
+    use tort_mod, only: tort_mod_uc_tort => uc_tort
     implicit none
     integer, intent(in) :: dummy_this(2)
     integer, intent(out) :: nd
@@ -254,13 +244,13 @@ subroutine f90wrap_tort_mod__array__test_tort(dummy_this, nd, dtype, dshape, &
     
     nd = 1
     dtype = 5
-    if (allocated(tort_mod_test_tort)) then
-        dshape(1:1) = shape(tort_mod_test_tort)
-        dloc = loc(tort_mod_test_tort)
+    if (allocated(tort_mod_uc_tort)) then
+        dshape(1:1) = shape(tort_mod_uc_tort)
+        dloc = loc(tort_mod_uc_tort)
     else
         dloc = 0
     end if
-end subroutine f90wrap_tort_mod__array__test_tort
+end subroutine f90wrap_tort_mod__array__uc_tort
 
 ! End of module tort_mod defined in file tort.f90
 
