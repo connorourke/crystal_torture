@@ -25,11 +25,10 @@ install:
 before_script:
    - cd crystal_torture    
    - f2py -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m dist dist.f90
-   -  gfortran -c -O3 -fPIC tort.f90
+   - gfortran -c -O3 -fPIC tort.f90
    - f2py-f90wrap -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m _tort f90wrap_tort.f90 tort.o
    - cd ../  
       
 script:
-   - f2py-f90wrap -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m _tort f90wrap_tort.f90 tort.o     
    - python -m unittest discover
 
