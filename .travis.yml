@@ -3,6 +3,11 @@ branches:
       - master
       - devel
 
+sudo: required
+
+before_install:
+  - sudo apt-get install gfortran
+        
 language: python
 notifications:
    email: false
