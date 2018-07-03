@@ -56,7 +56,7 @@ class Graph:
              indices = frozenset([int(node.labels["UC_index"]) for node in cluster.nodes])
              site_sets.append(indices)
 
-        site_sets=set(site_sets)
+        site_sets = set(site_sets)
         
         self.minimal_clusters = []
 

@@ -15,31 +15,6 @@ import time
 
 "Functions for setting up a node, cluster and graph using pymatgen"
 
-
-#@profile
-def shift_index(index,x_d,y_d,z_d,shift):
-   """
-   Takes a pymatgen site index, and image and shifts the original index to the apropriate
-   site index for the given supercell structure
-
-   Args:
-       index (int): original site index
-       x_d (int): x dimension of supercell
-       y_d (int): y dimension of supercell
-       z_d (int): z dimension of supercell
-       shift (list[int,int,int]): image to shift to
-
-   Returns:
-       new_index (int): index of the site in the new supercell structure
-     
-   """
-   new_x=((int(index/(9)))%3+shift[0])%3
-   new_y=((int(index/3))%3+shift[1])%3
-   new_z=(index%3+shift[2])%3
-   new_index = int(27*int(index/(27))+(new_x%3*9+new_y%3*3+new_z%3))
-   return new_index
-
-#@profile
 def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
     """
     Takes a list of neighbour indices for sites in the original unit cell, 
@@ -69,12 +44,9 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
          for y in range(0,y_d,1):
             for z in range(0,z_d,1):
                count+=1
-
-#               append([shift_index(neighbour,x_d,y_d,z_d,[x,y,z]) for neighbour in uc_neighbours[i]])
                append([dist.shift_index(neighbour,[x,y,z]) for neighbour in uc_neighbours[i]])
     return neigh
 
-#@profile
 def get_all_neighbors_and_image(structure, r, include_index=False):
 
         """
@@ -160,8 +132,7 @@ def create_halo(structure, neighbours):
 
     no_sites = len(structure.sites)
     for i in range(no_sites):
-       neighbours[i]=[dist.shift_index((27*neighbour[2]),neighbour[3]) for neighbour in neighbours[i]]
-#       neighbours[i]=[shift_index((27*neighbour[2]),1,2,3,neighbour[3]) for neighbour in neighbours[i]]
+       neighbours[i]=[dist.shift_index((27 * neighbour[2]),neighbour[3]) for neighbour in neighbours[i]]
       
     uc_index = [((site * 27)) for site in range(len(structure.sites))]
     structure.make_supercell([x,y,z])
@@ -171,7 +142,6 @@ def create_halo(structure, neighbours):
 
     return structure, neighbours
 
-#@profile
 def nodes_from_structure(structure, rcut, get_halo=False):
     """
     Takes a pymatgen structure object and converts to Nodes for interogation.
@@ -221,7 +191,6 @@ def nodes_from_structure(structure, rcut, get_halo=False):
 
     return set(nodes)
 
-#@profile
 def set_cluster_periodic(cluster):
     """
     Sets the periodicty of the cluster by counting through the number of 
