@@ -91,6 +91,23 @@ class Cluster:
  
         return key_nodes
             
+    def return_uc_indices(self):
+        """
+        Returns the unit-cell indices of nodes in a cluster (i.e. reduces the full list of uc_indices
+        included in the unit-cell and the halo to contain the indices only once)
+
+        Args: None
+
+        Returns:
+            uc_nodes (set(Int)): set of unit-cell indices for nodes in cluster
+
+        """
+
+
+        uc_indices = set([node.labels["UC_index"] for node in self.nodes])
+
+        return uc_indices
+
 
     def return_index_node(self,index):
        

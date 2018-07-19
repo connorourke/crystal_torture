@@ -43,6 +43,7 @@ CONTAINS
 
        INTEGER, INTENT(IN)::n,n2
 
+        call tear_down()
 
         ALLOCATE(nodes(0:n-1))
         ALLOCATE(uc_tort(0:n2-1))
@@ -56,15 +57,16 @@ CONTAINS
      !    None
      !
         INTEGER::i,no_nodes
-  
-        no_nodes = SIZE(nodes)-1
-
-        DO i=0,no_nodes
-           IF (ALLOCATED(nodes(i)%neigh_ind)) THEN
-              DEALLOCATE(nodes(i)%neigh_ind)
-           END IF
-        END DO
-        DEALLOCATE(nodes,uc_tort)
+    
+        IF (allocated(nodes)) THEN
+           no_nodes = SIZE(nodes)-1
+           DO i=0,no_nodes
+              IF (ALLOCATED(nodes(i)%neigh_ind)) THEN
+                 DEALLOCATE(nodes(i)%neigh_ind)
+              END IF
+           END DO
+           DEALLOCATE(nodes,uc_tort)
+        END IF
 
      END SUBROUTINE tear_down
 
@@ -191,7 +193,6 @@ CONTAINS
         !$OMP& PRIVATE(visited_tail,root_node,uc_index,neigh,next_dist,current_node,check) &
         !$OMP& SHARED(nodes,uc_nodes,uc_tort)
         DO uc_node=1,n
-
            dist(:) = 0
            visited(:)=0          
            

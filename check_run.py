@@ -8,7 +8,7 @@ import time
 #clusters = clusters_from_file("crystal_torture/tests/STRUCTURE_FILES/POSCAR_UC.vasp",4.0)
 #graph = graph_from_file("crystal_torture/tests/STRUCTURE_FILES/POSCAR_SPINEL_SPLIT.vasp",4.0,["Li"])
 #graph = graph_from_file("crystal_torture/tests/STRUCTURE_FILES/POSCAR_CUT.vasp",4.0,["Li"])
-graph = graph_from_file("POSCAR_temp.vasp",4.0,["Li"])
+graph = graph_from_file("POSCAR_tem.vasp",4.0,["Li"])
 print("Got graph - torturing")
 
 for i,cluster in enumerate(graph.clusters):

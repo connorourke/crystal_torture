@@ -9,7 +9,7 @@ check_run.py
 check_doping.py
 *vasp
 */*so
-
+crystal_torture/todo
 check_run.py
 check_doping.py
 *vasp

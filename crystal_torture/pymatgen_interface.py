@@ -10,11 +10,35 @@ import itertools
 import math
 import copy
 import sys
-#import psutil
 import time
 
 "Functions for setting up a node, cluster and graph using pymatgen"
 
+
+#@profile
+def shift_index(index,x_d,y_d,z_d,shift):
+   """
+   Takes a pymatgen site index, and image and shifts the original index to the apropriate
+   site index for the given supercell structure
+
+   Args:
+       index (int): original site index
+       x_d (int): x dimension of supercell
+       y_d (int): y dimension of supercell
+       z_d (int): z dimension of supercell
+       shift (list[int,int,int]): image to shift to
+
+   Returns:
+       new_index (int): index of the site in the new supercell structure
+     
+   """
+   new_x=((int(index/(9)))%3+shift[0])%3
+   new_y=((int(index/3))%3+shift[1])%3
+   new_z=(index%3+shift[2])%3
+   new_index = int(27*int(index/(27))+(new_x%3*9+new_y%3*3+new_z%3))
+   return new_index
+
+#@profile
 def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
     """
     Takes a list of neighbour indices for sites in the original unit cell, 
@@ -44,9 +68,12 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
          for y in range(0,y_d,1):
             for z in range(0,z_d,1):
                count+=1
+
+#               append([shift_index(neighbour,x_d,y_d,z_d,[x,y,z]) for neighbour in uc_neighbours[i]])
                append([dist.shift_index(neighbour,[x,y,z]) for neighbour in uc_neighbours[i]])
     return neigh
 
+#@profile
 def get_all_neighbors_and_image(structure, r, include_index=False):
 
         """
@@ -132,7 +159,8 @@ def create_halo(structure, neighbours):
 
     no_sites = len(structure.sites)
     for i in range(no_sites):
-       neighbours[i]=[dist.shift_index((27 * neighbour[2]),neighbour[3]) for neighbour in neighbours[i]]
+       neighbours[i]=[dist.shift_index((27*neighbour[2]),neighbour[3]) for neighbour in neighbours[i]]
+#       neighbours[i]=[shift_index((27*neighbour[2]),1,2,3,neighbour[3]) for neighbour in neighbours[i]]
       
     uc_index = [((site * 27)) for site in range(len(structure.sites))]
     structure.make_supercell([x,y,z])
@@ -142,6 +170,7 @@ def create_halo(structure, neighbours):
 
     return structure, neighbours
 
+#@profile
 def nodes_from_structure(structure, rcut, get_halo=False):
     """
     Takes a pymatgen structure object and converts to Nodes for interogation.
@@ -191,6 +220,7 @@ def nodes_from_structure(structure, rcut, get_halo=False):
 
     return set(nodes)
 
+#@profile
 def set_cluster_periodic(cluster):
     """
     Sets the periodicty of the cluster by counting through the number of 
@@ -241,7 +271,6 @@ def set_fort_nodes(nodes):
         tort.tort_mod.set_neighbours(node.index,int(node.labels["UC_index"]),len(node.neighbours_ind),[ind for ind in node.neighbours_ind])
 
 
-#@profile
 def clusters_from_file(filename, rcut, elements):
     """
     Take a pymatgen compatible file, and converts it to a graph object
@@ -260,6 +289,45 @@ def clusters_from_file(filename, rcut, elements):
     sites = [site.to_unit_cell for site in structure.sites]
     structure = Structure.from_sites(sites)
 
+    all_elements = set([species for species in structure.symbol_set])
+    remove_elements = [x for x in all_elements if x not in elements]
+
+    structure.remove_species(remove_elements)
+    nodes = nodes_from_structure(structure, rcut, get_halo=True)
+    set_fort_nodes(nodes)
+
+    clusters = set()
+
+    uc_nodes = set([node for node in nodes if node.labels["Halo"]==False])
+
+
+    while uc_nodes:
+         node=uc_nodes.pop()
+         if node.labels["Halo"]==False :
+            cluster = Cluster({node})
+            cluster.grow_cluster()
+            uc_nodes.difference_update(cluster.nodes)
+            clusters.add(cluster)
+            set_cluster_periodic(cluster)
+
+    return clusters
+
+def clusters_from_structure(structure, rcut, elements):
+    """
+    Take a pymatgen compatible file, and converts it to a graph object
+    Args:
+        structure (Structure): pymatgen structure object to set up graph from
+        rcut (float):   cut-off radii for node-node connections in forming clusters
+        elements ([str,str,.....]): list of elements to include in setting up graph
+    Returns:
+        clusters ({clusters}): set of clusters 
+
+
+
+    """
+
+    sites = [site.to_unit_cell for site in structure.sites]
+    structure = Structure.from_sites(sites)
 
     all_elements = set([species for species in structure.symbol_set])
     remove_elements = [x for x in all_elements if x not in elements]
@@ -272,6 +340,7 @@ def clusters_from_file(filename, rcut, elements):
 
     uc_nodes = set([node for node in nodes if node.labels["Halo"]==False])
 
+
     while uc_nodes:
          node=uc_nodes.pop()
          if node.labels["Halo"]==False :
@@ -280,10 +349,24 @@ def clusters_from_file(filename, rcut, elements):
             uc_nodes.difference_update(cluster.nodes)
             clusters.add(cluster)
             set_cluster_periodic(cluster)
-    
 
     return clusters
 
+def graph_from_structure(structure,rcut,elements):
+    """
+    Take a pymatgen compatible file, and converts it to a graph object
+    Args:
+        structure (Structure): pymatgen structure object to set up graph from
+        rcut (float):   cut-off radii for node-node connections in forming clusters
+        elements ([str,str,.....]): list of elements to include in setting up graph
+    Returns:
+        graph (Graph): graph object for structure
+
+    """
+
+    graph = Graph(clusters_from_structure(structure=structure,rcut=rcut,elements=elements))
+
+    return graph
 
 def graph_from_file(filename,rcut,elements):
     """

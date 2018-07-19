@@ -76,17 +76,17 @@ def sort_structure(structure,order):
        symbols.remove("X")
        symbols.append("X0+")
 
-   # if (set(symbols) == set(order)):
-    structure_sorted=Structure(lattice=structure.lattice,species=[],coords=[])
-    for symbol in order:
-        for i,site in enumerate(structure.sites):
-            if (site.species_string==symbol):
-               structure_sorted.append(symbol,site.coords,coords_are_cartesian=True)
-   # else:
-   #    print('Error: sort structure elements in list passed in order does not match that found in POSCAR')
-   #    print('Passed: ',order)
-   #    print('POSCAR: ',symbols)
-   #    exit()
+    if (set(symbols) == set(order)):
+        structure_sorted=Structure(lattice=structure.lattice,species=[],coords=[])
+        for symbol in order:
+           for i,site in enumerate(structure.sites):
+               if (site.species_string==symbol):
+                  structure_sorted.append(symbol,site.coords,coords_are_cartesian=True)
+    else:
+       print('Error: sort structure elements in list passed in order does not match that found in POSCAR')
+       print('Passed: ',order)
+       print('POSCAR: ',symbols)
+       exit()
 
     return structure_sorted
 
