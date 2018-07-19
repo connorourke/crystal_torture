@@ -30,7 +30,7 @@ class PymatgenTestCase( unittest.TestCase ):
 
     def test_nodes_from_file(self):
 
-        structure = Structure.from_file("crystal_torture/tests/STRUCTURE_FILES/POSCAR_UC.vasp")
+        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_UC.vasp")
         nodes = nodes_from_structure(structure, 4.0, get_halo=False)
         mock_neigh_ind = set([frozenset(node.neighbours_ind) for node in self.mock_nodes])
         neigh_ind = set([frozenset(node.neighbours_ind) for node in nodes])
@@ -49,10 +49,10 @@ class PymatgenTestCase( unittest.TestCase ):
 
     def test_clusters_from_file(self): 
         
-        clusters1 = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+        clusters1 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
         tort.tort_mod.tear_down()
 #
-        clusters2 = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=3.5,elements={"Li"})
+        clusters2 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=3.5,elements={"Li"})
         tort.tort_mod.tear_down()
 
 
@@ -62,10 +62,10 @@ class PymatgenTestCase( unittest.TestCase ):
         
     def test_cluster_periodic(self):
    
-        clusters1 = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+        clusters1 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
         tort.tort_mod.tear_down()
 
-        clusters2 = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=3.5,elements={"Li"})
+        clusters2 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=3.5,elements={"Li"})
         tort.tort_mod.tear_down()
 
 

@@ -33,10 +33,10 @@ class GraphTestCase( unittest.TestCase ):
     def test_graph_from_file(self):
 #        tort.tort_mod.tear_down()
 
-        graph = graph_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0, elements={"Li"})
+        graph = graph_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0, elements={"Li"})
         tort.tort_mod.tear_down()
 
-        clusters = clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+        clusters = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
         tort.tort_mod.tear_down()
         c_nodes = set([node.index for node in clusters.pop().nodes])
         g_nodes = set([node.index for node in graph.clusters.pop().nodes])

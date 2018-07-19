@@ -92,7 +92,7 @@ class Graph:
                cluster.torture_fort()
                print("tortured")
 
-        tort.tort_mod.tear_down()
+#        tort.tort_mod.tear_down()
         self.set_site_tortuosity()
         self.set_minimal_clusters()
 
@@ -110,7 +110,7 @@ class Graph:
             if cluster.periodic > 0:
                cluster.torture_py()
 
-        tort.tort_mod.tear_down()
+#        tort.tort_mod.tear_down()
         self.set_site_tortuosity()
         self.set_minimal_clusters()
 
@@ -227,4 +227,4 @@ class Graph:
                periodic_nodes += len(cluster.nodes)
 
         return periodic_nodes/total_nodes
-            
+

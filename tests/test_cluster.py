@@ -1,10 +1,12 @@
 import unittest
 from unittest.mock import Mock
-from crystal_torture.pymatgen_interface import nodes_from_structure, clusters_from_file
-from crystal_torture import Cluster, Node, tort
+from crystal_torture.pymatgen_interface import nodes_from_structure, clusters_from_file, graph_from_file
+from crystal_torture import Cluster, Node, tort, Graph
+from ddt import ddt, data, unpack
 
+@ddt
 class ClusterTestCase( unittest.TestCase ):
-    """ Test for Graph Class"""
+    """ Test for Cluster Class"""
 
     def setUp( self ):
 
@@ -39,14 +41,38 @@ class ClusterTestCase( unittest.TestCase ):
         self.cluster1.grow_cluster()
         self.assertEqual(self.cluster1.nodes,self.cluster.nodes)
 
-    def test_torture_cluster(self):
-        cluster =  clusters_from_file(filename="crystal_torture/tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+    @data("POSCAR_2_clusters.vasp")
+    def test_torture_cluster(self, value):
+        cluster =  clusters_from_file(filename="tests/STRUCTURE_FILES/" + value,rcut=4.0,elements={"Li"})
         clusterf = cluster.pop()
         clusterf.grow_cluster()
         clusterf.torture_fort()
         tort.tort_mod.tear_down()
 
         self.assertEqual(set([node.tortuosity for node in clusterf.return_key_nodes(key="Halo",value=False)]),set([4,3,3,3,3,3,3,3]))
+
+    @data("POSCAR_2_clusters.vasp")
+    def test_minimal_cluster(self, value):
+        
+        graph = graph_from_file(filename="tests/STRUCTURE_FILES/" + value,rcut=4.0,elements={"Li"})
+
+        cluster =  clusters_from_file(filename="tests/STRUCTURE_FILES/" + value,rcut=4.0,elements={"Li"})
+        clusterf = cluster.pop()
+        clusterf.grow_cluster()
+        clusterf.torture_fort()
+        graph.torture()
+
+        self.assertEqual(set([c.tortuosity for c in graph.minimal_clusters]),set([c.tortuosity for c in list(graph.clusters)]))
+
+    @data("POSCAR_2_clusters.vasp")
+    def test_py_equals_fort(self,value):
+        graph_p = graph_from_file(filename="tests/STRUCTURE_FILES/" + value,rcut=4.0,elements={"Li"})
+        graph_p.torture_py()
+
+        graph_f = graph_from_file(filename="tests/STRUCTURE_FILES/" + value,rcut=4.0,elements={"Li"})
+        graph_f.torture()
+
+        self.assertEqual([c.tortuosity for c in list(graph_p.clusters)],[c.tortuosity for c in list(graph_f.clusters)])
 
 if __name__ =='__main__':
     unittest.main()

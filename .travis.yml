@@ -30,5 +30,6 @@ before_script:
    - cd ../  
       
 script:
-   - python -m unittest discover
-
+        #   - python -m unittest discover
+   - coverage run --rcfile=.coveragerc -m unittest discover 
+   
