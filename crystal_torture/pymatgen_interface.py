@@ -43,12 +43,9 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
          for y in range(0,y_d,1):
             for z in range(0,z_d,1):
                count+=1
-
-#               append([shift_index(neighbour,x_d,y_d,z_d,[x,y,z]) for neighbour in uc_neighbours[i]])
                append([dist.shift_index(neighbour,[x,y,z]) for neighbour in uc_neighbours[i]])
     return neigh
 
-#@profile
 def get_all_neighbors_and_image(structure, r, include_index=False):
 
         """
@@ -85,8 +82,6 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
 
 
         """
-        # Use same algorithm as get_sites_in_sphere to determine supercell but
-        # loop over all atoms in crystal
         recp_len = np.array(structure.lattice.reciprocal_lattice.abc)
         maxr = np.ceil((r + 0.15) * recp_len / (2 * math.pi))
         nmin = np.floor(np.min(structure.frac_coords, axis=0)) - maxr
@@ -135,7 +130,6 @@ def create_halo(structure, neighbours):
     no_sites = len(structure.sites)
     for i in range(no_sites):
        neighbours[i]=[dist.shift_index((27*neighbour[2]),neighbour[3]) for neighbour in neighbours[i]]
-#       neighbours[i]=[shift_index((27*neighbour[2]),1,2,3,neighbour[3]) for neighbour in neighbours[i]]
       
     uc_index = [((site * 27)) for site in range(len(structure.sites))]
     structure.make_supercell([x,y,z])
@@ -259,41 +253,45 @@ def clusters_from_file(filename, rcut, elements):
 
 
     """
-
+    
     structure = Structure.from_file(filename)
-    sites = [site.to_unit_cell for site in structure.sites]
-    structure = Structure.from_sites(sites)
+    symbols = set([species for species in structure.symbol_set])
+    if set(elements).issubset(symbols):
 
-    all_elements = set([species for species in structure.symbol_set])
-    remove_elements = [x for x in all_elements if x not in elements]
+       sites = [site.to_unit_cell for site in structure.sites]
+       structure = Structure.from_sites(sites)
 
-    structure.remove_species(remove_elements)
-    nodes = nodes_from_structure(structure, rcut, get_halo=True)
-    set_fort_nodes(nodes)
+       all_elements = set([species for species in structure.symbol_set])
+       remove_elements = [x for x in all_elements if x not in elements]
 
-    clusters = set()
+       structure.remove_species(remove_elements)
+       nodes = nodes_from_structure(structure, rcut, get_halo=True)
+       set_fort_nodes(nodes)
 
-    uc_nodes = set([node for node in nodes if node.labels["Halo"]==False])
+       clusters = set()
+
+       uc_nodes = set([node for node in nodes if node.labels["Halo"]==False])
 
 
-    while uc_nodes:
-         node=uc_nodes.pop()
-         if node.labels["Halo"]==False :
-            cluster = Cluster({node})
-            cluster.grow_cluster()
-            uc_nodes.difference_update(cluster.nodes)
-            clusters.add(cluster)
-            set_cluster_periodic(cluster)
+       while uc_nodes:
+            node=uc_nodes.pop()
+            if node.labels["Halo"]==False :
+               cluster = Cluster({node})
+               cluster.grow_cluster()
+               uc_nodes.difference_update(cluster.nodes)
+               clusters.add(cluster)
+               set_cluster_periodic(cluster)
 
-    return clusters
-
+       return clusters
+    else:
+       sys.exit("The element set fed to 'clusters_from_file' is not a subset of the elements in the file")
 def clusters_from_structure(structure, rcut, elements):
     """
-    Take a pymatgen compatible file, and converts it to a graph object
+    Take a pymatgen structure, and converts it to a graph object
     Args:
         structure (Structure): pymatgen structure object to set up graph from
         rcut (float):   cut-off radii for node-node connections in forming clusters
-        elements ([str,str,.....]): list of elements to include in setting up graph
+        elements ({str,str,.....}): set of element strings to include in setting up graph
     Returns:
         clusters ({clusters}): set of clusters 
 
@@ -301,31 +299,39 @@ def clusters_from_structure(structure, rcut, elements):
 
     """
 
-    sites = [site.to_unit_cell for site in structure.sites]
-    structure = Structure.from_sites(sites)
+    
+    
+    symbols = set([species for species in structure.symbol_set])
+#    print("symbols",symbols,"Elements",elements,elements.issubset(symbols))
+    if elements.issubset(structure.symbol_set):
 
-    all_elements = set([species for species in structure.symbol_set])
-    remove_elements = [x for x in all_elements if x not in elements]
+       sites = [site.to_unit_cell for site in structure.sites]
+       structure = Structure.from_sites(sites)
 
-    structure.remove_species(remove_elements)
-    nodes = nodes_from_structure(structure, rcut, get_halo=True)
-    set_fort_nodes(nodes)
+       all_elements = set([species for species in structure.symbol_set])
+       remove_elements = [x for x in all_elements if x not in elements]
 
-    clusters = set()
+       structure.remove_species(remove_elements)
+       nodes = nodes_from_structure(structure, rcut, get_halo=True)
+       set_fort_nodes(nodes)
 
-    uc_nodes = set([node for node in nodes if node.labels["Halo"]==False])
+       clusters = set()
+
+       uc_nodes = set([node for node in nodes if node.labels["Halo"]==False])
 
 
-    while uc_nodes:
-         node=uc_nodes.pop()
-         if node.labels["Halo"]==False :
-            cluster = Cluster({node})
-            cluster.grow_cluster()
-            uc_nodes.difference_update(cluster.nodes)
-            clusters.add(cluster)
-            set_cluster_periodic(cluster)
+       while uc_nodes:
+            node=uc_nodes.pop()
+            if node.labels["Halo"]==False :
+               cluster = Cluster({node})
+               cluster.grow_cluster()
+               uc_nodes.difference_update(cluster.nodes)
+               clusters.add(cluster)
+               set_cluster_periodic(cluster)
 
-    return clusters
+       return clusters
+    else:
+       sys.exit("The element set fed to 'clusters_from_file' is not a subset of the elements in the file")
 
 def graph_from_structure(structure,rcut,elements):
     """
@@ -338,8 +344,8 @@ def graph_from_structure(structure,rcut,elements):
         graph (Graph): graph object for structure
 
     """
-
-    graph = Graph(clusters_from_structure(structure=structure,rcut=rcut,elements=elements))
+    clusters = clusters_from_structure(structure=structure,rcut=rcut,elements=elements)
+    graph = Graph(clusters)
 
     return graph
 

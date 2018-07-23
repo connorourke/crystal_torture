@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 from crystal_torture import Node, Cluster, tort
-from crystal_torture.pymatgen_interface import nodes_from_structure, clusters_from_file
+from crystal_torture.pymatgen_interface import nodes_from_structure, clusters_from_file, clusters_from_structure, graph_from_structure
 from pymatgen import Structure
 
 class PymatgenTestCase( unittest.TestCase ):
@@ -45,13 +45,11 @@ class PymatgenTestCase( unittest.TestCase ):
         cluster1.grow_cluster()
         self.assertEqual(set([node.index for node in self.cluster.nodes]),set([node.index for node in cluster1.nodes]))
         self.assertEqual(set([node.element for node in self.cluster.nodes]),set([node.element for node in cluster1.nodes]))
-#        tort.tort_mod.tear_down()
 
     def test_clusters_from_file(self): 
         
         clusters1 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
         tort.tort_mod.tear_down()
-#
         clusters2 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=3.5,elements={"Li"})
         tort.tort_mod.tear_down()
 
@@ -59,7 +57,29 @@ class PymatgenTestCase( unittest.TestCase ):
 
         self.assertEqual(len(clusters1),1)
         self.assertEqual(len(clusters2),2)
+
+    def test_cluster_from_structure(self):
+  
+        clusters1 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp")
+        clusters2 = clusters_from_structure(structure,rcut=4.0,elements={"Li"})
+
+        neigh_set_1 = set([frozenset(node.neighbours_ind) for node in clusters1.pop().nodes])
+        neigh_set_2 = set([frozenset(node.neighbours_ind) for node in clusters2.pop().nodes])
         
+        self.assertEqual(neigh_set_1,neigh_set_2)
+
+    def test_graph_from_structure(self):
+        clusters1 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
+        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp")
+        graph = graph_from_structure(structure, rcut=4.0,elements={"Li"})
+
+        neigh_set_1 = set([frozenset(node.neighbours_ind) for node in clusters1.pop().nodes])
+        neigh_set_2 = set([frozenset(node.neighbours_ind) for node in graph.clusters.pop().nodes])
+
+        self.assertEqual(neigh_set_1,neigh_set_2)
+     
+
     def test_cluster_periodic(self):
    
         clusters1 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0,elements={"Li"})
@@ -75,7 +95,15 @@ class PymatgenTestCase( unittest.TestCase ):
         else:
            self.assertEqual(clusters2.pop().periodic,3)
 
+    def test_periodic(self):
 
+        clusters1 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_periodic_1.vasp",rcut=4.0,elements={"Li"})
+        clusters2 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_periodic_2.vasp",rcut=4.0,elements={"Li"})
+        clusters3 = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_periodic_3.vasp",rcut=4.0,elements={"Li"})
+
+        self.assertEqual(clusters1.pop().periodic,1)
+        self.assertEqual(clusters2.pop().periodic,2)
+        self.assertEqual(clusters3.pop().periodic,3)
 
 if __name__ =='__main__':
     unittest.main()

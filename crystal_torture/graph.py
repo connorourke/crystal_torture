@@ -221,10 +221,11 @@ class Graph:
         periodic_nodes = 0 
 
         for cluster in self.clusters:
+             
+            total_nodes += len(cluster.return_key_nodes(key='Halo',value=False))
             
-            total_nodes += len(cluster.nodes)
             if cluster.periodic > 0:
-               periodic_nodes += len(cluster.nodes)
+               periodic_nodes += len(cluster.return_key_nodes(key='Halo',value=False))
 
         return periodic_nodes/total_nodes
 
