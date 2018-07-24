@@ -9,7 +9,7 @@ class Graph:
     Graph class: group of disconnected clusters making up full graph
     """
 
-    def __init__(self, clusters):
+    def __init__(self, clusters, structure=None):
         """
         Initialise a graph. The graph is a 3x3x3 representation of the unit cell
         so there will the clusters within it which are not necessarily unique. 
@@ -18,13 +18,17 @@ class Graph:
 
         Args:
             clusters  (set(Clusters)): set of clusters in the graph
-            tortuosity (dict (node_index:tortuosity)): when
+            tortuosity (dict (node_index:tortuosity)): dict to hold the tortuosity for each node
+            self.minimal_clusters (list[minimal_Cluster]): list of minimal clusters for cluster output
+            self.structure (Structure): the pymatgen Structure object the graph has been formed from
 
         """
         
         self.clusters = clusters
+
         self.tortuosity = None
         self.minimal_clusters = None 
+        self.structure = structure
 
     def set_site_tortuosity(self):
         """
@@ -90,9 +94,7 @@ class Graph:
         for cluster in self.clusters:
             if cluster.periodic > 0:
                cluster.torture_fort()
-               print("tortured")
 
-#        tort.tort_mod.tear_down()
         self.set_site_tortuosity()
         self.set_minimal_clusters()
 
@@ -110,18 +112,16 @@ class Graph:
             if cluster.periodic > 0:
                cluster.torture_py()
 
-#        tort.tort_mod.tear_down()
         self.set_site_tortuosity()
         self.set_minimal_clusters()
 
 
-    def output_clusters_structure(self,fmt,graph_structure,periodic=None):
+    def output_clusters(self,fmt,periodic=None):
         """
         Outputs the unique unit cell clusters from the graph
 
         Args:
         fmt (str): output format for pymatgen structures set up from clusters
-        structure (Structure): original Structure object the graph was formed from
         periodic (Boolean): Whether to output only periodic clusters
 
         Outputs:
@@ -147,12 +147,12 @@ class Graph:
         site_sets = set(site_sets)
 
         for index,site_list in enumerate(site_sets):
-            cluster_structure = Structure(lattice=graph_structure.lattice,species=[],coords=[])
-            symbols = [species for species in graph_structure.symbol_set]
+            cluster_structure = Structure(lattice=self.structure.lattice,species=[],coords=[])
+            symbols = [species for species in self.structure.symbol_set]
             
             for symbol in symbols:
                 for site in site_list:
-                    site=graph_structure.sites[site]
+                    site=self.structure.sites[site]
                 
                     if site.species_string == symbol:
                        cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
@@ -160,51 +160,51 @@ class Graph:
     
             cluster_structure.to(fmt=fmt,filename="CLUS_"+str(index)+"."+tail)
 
-    def output_clusters(self,fmt,structure_file,periodic=None):
-        """
-        Outputs the unique unit cell clusters from the graph
+#    def output_clusters(self,fmt,structure_file,periodic=None):
+#        """
+#        Outputs the unique unit cell clusters from the graph
 
-        Args:
-        fmt (str): output format for pymatgen structures set up from clusters
-        structure_file (str): pymatgen file the original graph was formed from
-        periodic (Boolean): Whether to output only periodic clusters
+#        Args:
+#        fmt (str): output format for pymatgen structures set up from clusters
+#        structure_file (str): pymatgen file the original graph was formed from
+#        periodic (Boolean): Whether to output only periodic clusters
 
-        Outputs:
-        CLUS_*."fmt": A cluster structure file for each cluster in the graph
-        """
-
-
-        if fmt == 'poscar':
-           tail = 'vasp'
-        else:
-           tail = fmt
-
-        graph_structure = Structure.from_file(structure_file)
-
-        site_sets = []
-
-        for cluster in self.clusters:
-           if periodic:
-              if cluster.periodic > 0:
-                 site_sets.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
-           else:
-              site_sets.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
-
-        site_sets = set(site_sets)
-
-        for index,site_list in enumerate(site_sets):
-            cluster_structure = Structure(lattice=graph_structure.lattice,species=[],coords=[])
-            symbols = [species for species in graph_structure.symbol_set]
-
-            for symbol in symbols:
-                for site in site_list:
-                    site=graph_structure.sites[site]
-
-                    if site.species_string == symbol:
-                       cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
+#        Outputs:
+#        CLUS_*."fmt": A cluster structure file for each cluster in the graph
+#        """
 
 
-            cluster_structure.to(fmt=fmt,filename="CLUS_"+str(index)+"."+tail)
+#        if fmt == 'poscar':
+#           tail = 'vasp'
+#        else:
+#           tail = fmt
+
+#        graph_structure = Structure.from_file(structure_file)
+
+#        site_sets = []
+
+#        for cluster in self.clusters:
+#           if periodic:
+#              if cluster.periodic > 0:
+#                 site_sets.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
+#           else:
+#              site_sets.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
+#
+#        site_sets = set(site_sets)
+
+#        for index,site_list in enumerate(site_sets):
+#            cluster_structure = Structure(lattice=graph_structure.lattice,species=[],coords=[])
+#            symbols = [species for species in graph_structure.symbol_set]
+#
+#            for symbol in symbols:
+#                for site in site_list:
+#                    site=graph_structure.sites[site]
+#
+#                    if site.species_string == symbol:
+#                       cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
+#
+#
+#            cluster_structure.to(fmt=fmt,filename="CLUS_"+str(index)+"."+tail)
 
 
     def return_frac_percolating(self):
