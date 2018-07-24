@@ -284,7 +284,9 @@ def clusters_from_file(filename, rcut, elements):
 
        return clusters
     else:
-       sys.exit("The element set fed to 'clusters_from_file' is not a subset of the elements in the file")
+       print("The element set fed to 'clusters_from_file' is not a subset of the elements in the file")
+       raise ValueError
+
 def clusters_from_structure(structure, rcut, elements):
     """
     Take a pymatgen structure, and converts it to a graph object
@@ -331,7 +333,8 @@ def clusters_from_structure(structure, rcut, elements):
 
        return clusters
     else:
-       sys.exit("The element set fed to 'clusters_from_file' is not a subset of the elements in the file")
+       print("The element set fed to 'clusters_from_file' is not a subset of the elements in the file")
+       raise ValueError
 
 def graph_from_structure(structure,rcut,elements):
     """
@@ -368,34 +371,33 @@ def graph_from_file(filename,rcut,elements):
     return graph
 
 
-def structure_from_cluster(cluster,graph):
-    """
-    Takes a cluster and the original structure of which it is a subset, and 
-    sets up a pymatgen structure object containing only the cluster. Allows
-    clusters to be output to viewable files.
+#def structure_from_cluster(cluster,graph):
+#    """
+#    Takes a cluster and the original structure of which it is a subset, and 
+#    sets up a pymatgen structure object containing only the cluster. Allows
+#    clusters to be output to viewable files.
 
-    Args:
-       cluster  (Cluster): cluster object containing sites to output
-       graph    (Graph): full graph of which cluster is a subset
+#    Args:
+#       cluster  (Cluster): cluster object containing sites to output
+#       graph    (Graph): full graph of which cluster is a subset
  
-    Returns:
-       structure (Structure): pymatgen structure object
-    """ 
+#    Returns:
+#       structure (Structure): pymatgen structure object
+#    """ 
 
-#    graph_structure = graph.structure.from_file(filename)
-    cluster_structure = Structure(lattice=graph.structure.lattice,species=[],coords=[])
+#    cluster_structure = Structure(lattice=graph.structure.lattice,species=[],coords=[])
 
-    symbols = [species for species in graph.structure.symbol_set]
+#    symbols = [species for species in graph.structure.symbol_set]
 
-    for symbol in symbols:
-        for node in set([node for node in cluster.nodes]):
-            site = graph.structure.sites[int(node.labels["UC_index"])]
+#    for symbol in symbols:
+#        for node in set([node for node in cluster.nodes]):
+#            site = graph.structure.sites[int(node.labels["UC_index"])]
             
-            if site.species_string==symbol:
+#            if site.species_string==symbol:
         
-               cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
+#               cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
 
-    return cluster_structure
+#    return cluster_structure
 
 #def structure_cluster_structure(cluster,graph_structure):
 #    """

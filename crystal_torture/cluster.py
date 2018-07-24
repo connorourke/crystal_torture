@@ -113,7 +113,7 @@ class Cluster:
        
         index_node = [node for node in self.nodes if node.index == index]
 
-        return index_node
+        return index_node[0]
 
 
     def torture_py(self):
