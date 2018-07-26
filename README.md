@@ -57,7 +57,7 @@ Documentation can be found  [here](httpsL//http://crystal_torture.readthedocs.io
 
 
 
-Wrapping and compiling fortran with derived types:
+<!Wrapping and compiling fortran with derived types:
 
 
 compiling dist.f90:
@@ -87,5 +87,5 @@ from crystal_torture import tort
 
 and access like:
 
-tort.tort_mod.torture(n=4)
+tort.tort_mod.torture(n=4)-->
 

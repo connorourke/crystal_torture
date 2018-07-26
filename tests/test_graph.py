@@ -69,7 +69,7 @@ class GraphTestCase( unittest.TestCase ):
 
         self.assertEqual( g_nodes,c_nodes)
 
-    @data(0.195)
+    @data(0.195,0.482,0.727)
     def test_return_frac_perc(self, value):
 
         filename="tests/STRUCTURE_FILES/PERC/POSCAR_"+str(value)+".vasp"

@@ -18,3 +18,4 @@ check_doping.py
 htmlcov
 things_to_note
 crystal_torture/ENV
+tests/STRUCTURE_FILES/UNUSED
