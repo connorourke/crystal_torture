@@ -36,7 +36,7 @@ python setup.py install
 `crystal_torture` is automatically tested on each commit [here](httpsL//travis-ci.org/connorourke/crystal_torture), but the tests can be manually run:
 
 ```
-python -m unnittest discover
+python -m unittest discover
 ```
 
 ## Examples
