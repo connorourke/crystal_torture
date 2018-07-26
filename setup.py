@@ -17,13 +17,11 @@ class BuildDistCommand(distutils.cmd.Command):
     def initialize_options(self):
        """Set default values for options."""
        # Each user option must be listed here with their default value.
-       self.pylint_rcfile = ''
+       self.dist_rcfile = ''
 
     def finalize_options(self):
         """Post-process options."""
-        if self.pylint_rcfile:
-           assert os.path.exists(self.pylint_rcfile), (
-                'Pylint config file %s does not exist.' % self.pylint_rcfile)
+        print("finalised")
 
     def run(self):
         """Run command to compile & wrap"""
@@ -48,13 +46,12 @@ class BuildTortCommand(distutils.cmd.Command):
     def initialize_options(self):
         """Set default values for options."""
         # Each user option must be listed here with their default value.
-        self.pylint_rcfile = ''
+        self.tort_rcfile = ''
 
     def finalize_options(self):
         """Post-process options."""
-        if self.pylint_rcfile:
-           assert os.path.exists(self.pylint_rcfile), (
-                 'Pylint config file %s does not exist.' % self.pylint_rcfile)
+        print('finalised')    
+    
 
     def run(self):
         """Run command to compile & wrap"""
@@ -74,10 +71,18 @@ class BuildTortCommand(distutils.cmd.Command):
         os.chdir(top_dir)
 
 
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
+
 long_description = open('README.md').read()
+version_file = open(os.getcwd()+'/crystal_torture/'+ 'VERSION')
+__version__ = version_file.read().strip()
 
 config = {'name':'CrystalTorture',
-     'version':"1.0.0",#__version__,
+     'version':__version__,
      'description':'A Crystal Tortuosity Module',
      'long_description':long_description,
      'author':'Conn O\'Rourke',
