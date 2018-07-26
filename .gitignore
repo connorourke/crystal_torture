@@ -1,5 +1,6 @@
 crystal_torture/devel
 */*/*.swp
+*/*o
 */*/__pycache__
 *.swp
 *pyc
@@ -16,3 +17,4 @@ tests/STRUCTURE_FILES/UNUSED
 crystal_torture.egg-info*
 build*
 dist*
+MANIFEST.in
