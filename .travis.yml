@@ -7,7 +7,8 @@ sudo: required
 
 before_install:
   - sudo apt-get install gfortran
-          
+  - pip inistall coveralls
+
 language: python
 notifications:
    email: false
@@ -32,4 +33,6 @@ before_script:
 script:
         #   - python -m unittest discover
    - coverage run --rcfile=.coveragerc -m unittest discover 
-   
+
+after_success:   
+   - coveralls     
