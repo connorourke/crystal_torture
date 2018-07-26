@@ -76,15 +76,18 @@ try:
 except ImportError:
     from distutils.core import setup
 
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-long_description = open('README.md').read()
+
+#long_description = open('README.md').read()
 version_file = open(os.getcwd()+'/crystal_torture/'+ 'VERSION')
 __version__ = version_file.read().strip()
 
 config = {'name':'CrystalTorture',
      'version':__version__,
      'description':'A Crystal Tortuosity Module',
-     'long_description':long_description,
+     'long_description': read('README.md'),
      'author':'Conn O\'Rourke',
      'author_email':'conn.orourke@gmail.com',
      'url':'https://github.com/connorourke/crystaltorture',
