@@ -4,8 +4,8 @@ omit =
        *ENV* 
        *tests*/*
        *__*
-       /*i
+       /*
        */python?.?/*
        */lib-python/?.?/*.py
        */lib_pypy/_*.py
-
+       */tort.py
