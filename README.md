@@ -43,12 +43,7 @@ python -m unnittest discover
 Examples on how to use `crystal_torture` can be found in a Jupyter notebook in the `examples` directory [crystal_torture_examples.ipynb](httpsL//nbviewer.jupyter.org/github/connorourke/crystal_torture/blob/master/examples/crystal_torture_examples.ipynb)
 
 ## Documentation
-Documentation can be found  [here](httpsL//http://crystal_torture.readthedocs.io/)
-
-
-### notes to self
-
-
+Documentation can be found  [here](https://crystal-torture.readthedocs.io/en/latest/)
 
 
 

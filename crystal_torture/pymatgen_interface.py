@@ -3,7 +3,6 @@ from crystal_torture.cluster import Cluster
 from crystal_torture.graph import Graph
 from crystal_torture import dist
 from crystal_torture import tort
-#import dist
 from pymatgen import Structure, Molecule, PeriodicSite
 import numpy as np
 import itertools
@@ -48,68 +47,66 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
 
 def get_all_neighbors_and_image(structure, r, include_index=False):
 
-        """
-        Modified from pymatgen
-        (http://pymatgen.org/_modules/pymatgen/core/structure.html#IStructure.get_all_neighbors) 
+    """
+    Modified from pymatgen: (http://pymatgen.org/_modules/pymatgen/core/structure.html#IStructure.get_all_neighbors) 
+    to return image (used for mapping to supercell), and to use the f2py wrapped
+    OpenMP dist subroutine to get the distances (smaller memory footprint and faster
+    than numpy).
 
-        to return image (used for mapping to supercell), and to use the f2py wrapped
-        OpenMP dist subroutine to get the distances (smaller memory footprint and faster
-        than numpy).
+    Get neighbors for each atom in the unit cell, out to a distance r
+    Returns a list of list of neighbors for each site in structure.
+    Use this method if you are planning on looping over all sites in the
+    crystal. If you only want neighbors for a particular site, use the
+    method get_neighbors as it may not have to build such a large supercell
+    However if you are looping over all sites in the crystal, this method
+    is more efficient since it only performs one pass over a large enough
+    supercell to contain all possible atoms out to a distance r.
+    The return type is a [(site, dist) ...] since most of the time,
+    subsequent processing requires the distance.
 
-        Get neighbors for each atom in the unit cell, out to a distance r
-        Returns a list of list of neighbors for each site in structure.
-        Use this method if you are planning on looping over all sites in the
-        crystal. If you only want neighbors for a particular site, use the
-        method get_neighbors as it may not have to build such a large supercell
-        However if you are looping over all sites in the crystal, this method
-        is more efficient since it only performs one pass over a large enough
-        supercell to contain all possible atoms out to a distance r.
-        The return type is a [(site, dist) ...] since most of the time,
-        subsequent processing requires the distance.
+    Args:
+        r (float): Radius of sphere.
+        include_index (bool): Whether to include the non-supercell site
+        in the returned data
 
-        Args:
-            r (float): Radius of sphere.
-            include_index (bool): Whether to include the non-supercell site
-                in the returned data
-
-        Returns:
-            A list of a list of nearest neighbors for each site, i.e.,
-            [[(site, dist, index, image) ...], ..]
-            Index only supplied if include_index = True.
-            The index is the index of the site in the original (non-supercell)
-            structure. This is needed for ewaldmatrix by keeping track of which
-            sites contribute to the ewald sum.
+    Returns:
+        A list of a list of nearest neighbors for each site, i.e.,
+        [[(site, dist, index, image) ...], ..]
+        Index only supplied if include_index = True.
+        The index is the index of the site in the original (non-supercell)
+        structure. This is needed for ewaldmatrix by keeping track of which
+        sites contribute to the ewald sum.
 
 
-        """
-        recp_len = np.array(structure.lattice.reciprocal_lattice.abc)
-        maxr = np.ceil((r + 0.15) * recp_len / (2 * math.pi))
-        nmin = np.floor(np.min(structure.frac_coords, axis=0)) - maxr
-        nmax = np.ceil(np.max(structure.frac_coords, axis=0)) + maxr
+    """
+    recp_len = np.array(structure.lattice.reciprocal_lattice.abc)
+    maxr = np.ceil((r + 0.15) * recp_len / (2 * math.pi))
+    nmin = np.floor(np.min(structure.frac_coords, axis=0)) - maxr
+    nmax = np.ceil(np.max(structure.frac_coords, axis=0)) + maxr
 
-        all_ranges = [np.arange(x, y) for x, y in zip(nmin, nmax)]
+    all_ranges = [np.arange(x, y) for x, y in zip(nmin, nmax)]
 
-        latt = structure._lattice
-        neighbors = [list() for i in range(len(structure._sites))]
-        all_fcoords = np.mod(structure.frac_coords, 1)
-        coords_in_cell = latt.get_cartesian_coords(all_fcoords)
-        site_coords = structure.cart_coords
+    latt = structure._lattice
+    neighbors = [list() for i in range(len(structure._sites))]
+    all_fcoords = np.mod(structure.frac_coords, 1)
+    coords_in_cell = latt.get_cartesian_coords(all_fcoords)
+    site_coords = structure.cart_coords
 
-        indices = np.arange(len(structure))
-        for image in itertools.product(*all_ranges):
-            coords = latt.get_cartesian_coords(image) + coords_in_cell
-            all_dists = dist.dist(coords, site_coords, len(coords))
-            all_within_r = np.bitwise_and(all_dists <= r, all_dists > 1e-8)
+    indices = np.arange(len(structure))
+    for image in itertools.product(*all_ranges):
+        coords = latt.get_cartesian_coords(image) + coords_in_cell
+        all_dists = dist.dist(coords, site_coords, len(coords))
+        all_within_r = np.bitwise_and(all_dists <= r, all_dists > 1e-8)
 
-            for (j, d, within_r) in zip(indices, all_dists, all_within_r):
-                nnsite = PeriodicSite(structure[j].species_and_occu, coords[j],
-                                      latt, properties=structure[j].properties,
-                                      coords_are_cartesian=True)
-                for i in indices[within_r]:
-                    item = (nnsite, d[i], j, image) if include_index else (
-                        nnsite, d[i])
-                    neighbors[i].append(item)
-        return neighbors
+        for (j, d, within_r) in zip(indices, all_dists, all_within_r):
+            nnsite = PeriodicSite(structure[j].species_and_occu, coords[j],
+                                    latt, properties=structure[j].properties,
+                                    coords_are_cartesian=True)
+            for i in indices[within_r]:
+                item = (nnsite, d[i], j, image) if include_index else (
+                    nnsite, d[i])
+                neighbors[i].append(item)
+    return neighbors
 
 
 def create_halo(structure, neighbours):
@@ -122,6 +119,7 @@ def create_halo(structure, neighbours):
         neighbours  [[(site, dist, index, image) ...], ..]: list of neighbours for sites in structure
     Returns:
         None
+
     """
     x = 3
     y = 3
@@ -250,8 +248,6 @@ def clusters_from_file(filename, rcut, elements):
     Returns:
         clusters ({clusters}): set of clusters 
 
-
-
     """
     
     structure = Structure.from_file(filename)
@@ -296,8 +292,6 @@ def clusters_from_structure(structure, rcut, elements):
         elements ({str,str,.....}): set of element strings to include in setting up graph
     Returns:
         clusters ({clusters}): set of clusters 
-
-
 
     """
 

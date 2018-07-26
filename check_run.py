@@ -1,24 +1,15 @@
 #! /usr/bin/env python3
 
-from crystal_torture.pymatgen_interface import graph_from_file, structure_from_cluster
-import time
 
-#graph = graph_from_file("crystal_torture/tests/STRUCTURE_FILES/POSCAR_UC.vasp",4.0,["Li"])
-#graph = graph_from_file("POSCAR.vasp",4.0,["Li"])
-#clusters = clusters_from_file("crystal_torture/tests/STRUCTURE_FILES/POSCAR_UC.vasp",4.0)
-#graph = graph_from_file("crystal_torture/tests/STRUCTURE_FILES/POSCAR_SPINEL_SPLIT.vasp",4.0,["Li"])
-#graph = graph_from_file("crystal_torture/tests/STRUCTURE_FILES/POSCAR_CUT.vasp",4.0,["Li"])
-graph = graph_from_file("POSCAR_tem.vasp",4.0,["Li"])
-print("Got graph - torturing")
+from pymatgen import Structure
+spinel=Structure.from_file("examples/POSCAR_SPINEL.vasp")
+spinel.add_site_property("label",["A"]*8+["B"]*16+["O"]*32)
+spinel.make_supercell([3,3,3])
+import crystal_torture.pymatgen_doping as pd
 
-for i,cluster in enumerate(graph.clusters):
-   if cluster.periodic > 0:
-      time1=time.time()
-      cluster.torture_fort()
-      print("Cluster av tort",cluster.tortuosity)
-      time2=time.time()
-      print("Time",time2-time1)
-   clus_struct=structure_from_cluster(cluster,"POSCAR_temp.vasp")
-   print(clus_struct)
-   clus_struct.to(fmt='poscar',filename="TCLUS_"+str(i)+".vasp")
+spinel = pd.dope_structure(spinel,conc=0.9,species_to_rem="Mg",species_to_insert=["Li","Al"],label_to_remove="A")
 
+
+from crystal_torture.pymatgen_interface import graph_from_structure
+graph = graph_from_structure(structure=spinel,rcut=4.0,elements={"Li"})
+graph.torture()

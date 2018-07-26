@@ -1,6 +1,6 @@
-
 from pymatgen import Structure, Molecule, PeriodicSite
 import random
+
 "Simple functions for manipulating and doping a pymatgen structure"
 
 

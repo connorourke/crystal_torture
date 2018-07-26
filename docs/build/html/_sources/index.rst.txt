@@ -12,7 +12,7 @@ crystal_torture:  a crystal tortuosity module
 * relative path tortuosity to traverse a crystal within a connected cluster to be calculated for each site
 
 
-API documentation is `here <modules.html>`__.
+Documentation is `here <>`.
 
 Examples are provided in a Jupyter notebook `here <http://nbviewer.jupyter.org/github/connorourke/crystal_torture/blob/master/examples/crystal_torture_examples.ipynb>`__
 
@@ -35,27 +35,13 @@ The code has been tested with Python versions 3.5 and above.
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
- 
-.. autoclass:: crystal_torture.Graph
-   :members:
+   :maxdepth: 3
+   :caption: Documentation:
 
-.. autoclass:: crystal_torture.Cluster
-   :members:
+   modules
 
-.. autoclass:: crystal_torture.Node
-   :members:
-
-.. autoclass:: crystal_torture.minimal_cluster
-   :members:
-
-.. automodule:: crystal_torture.pymatgen_interface
-
-.. automodule:: crystal_torture.pymatgen_doping
-
-Indices and tables
-==================
+Index
+=====
 
 * :ref:`genindex`
 * :ref:`modindex`
@@ -63,6 +49,6 @@ Indices and tables
 
 .. |Build Status| image:: https://travis-ci.com/connorourke/crystal_torture.svg?token=nTMqYYEUasQRTBsU6oCc&branch=master
    :target: https://travis-ci.com/connorourke/crystal_torture
-.. |Test Coverage| image:: https://codeclimate.com/github/bjmorgan/bsym/badges/coverage.svg
-   :target: https://codeclimate.com/github/bjmorgan/bsym/coverage
+.. |Test Coverage| image:: https://coveralls.io/repos/github/connorourke/crystal_torture/badge.svg?branch=master
+   :target: https://coveralls.io/github/connorourke/crystal_torture?branch=master
 
