@@ -14,7 +14,12 @@
 #
 import os
 import sys
-#sys.path.insert(0,os.path.abspath('../crystal_torture/'))
+import alabaster
+
+html_theme_path = [alabaster.get_path()]
+extensions = ['alabaster']
+html_theme = 'alabaster'
+
 sys.path.append('/home/cor/bin/src/crystal_torture/')
 
 # -- Project information -----------------------------------------------------
@@ -42,6 +47,23 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.githubpages',
 ]
+
+
+# Custom sidebar templates, must be a dictionary that maps document names
+# to template names.
+#
+# This is required for the alabaster theme
+# refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',  # needs 'show_related': True theme option to display
+        'searchbox.html',
+        'donate.html',
+    ]
+}
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -1,6 +1,7 @@
 
-from crystal_torture import __version__
+#from crystal_torture import __version__
 from setuptools import setup
+import subprocess
 import distutils.cmd
 import distutils.log
 import os
@@ -13,17 +14,28 @@ class BuildDistCommand(distutils.cmd.Command):
     description = 'wrap and compile dist.f90'
     user_options = []
 
-    def run(self):
-    """Run command to compile & wrap"""
+    def initialize_options(self):
+       """Set default values for options."""
+       # Each user option must be listed here with their default value.
+       self.pylint_rcfile = ''
 
-    command = ['f2py -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m dist dist.f90']
-    cwd = os.getcwd()
-    top_dir = cwd + '/crystal_torture'
-    os.chdir(src_dir)
-    self.announce(
-        'Running command: %s' % str(command),level=distutils.log.INFO)
-    subprocess.check_call(command)
-    os.chdir(top_dir)
+    def finalize_options(self):
+        """Post-process options."""
+        if self.pylint_rcfile:
+           assert os.path.exists(self.pylint_rcfile), (
+                'Pylint config file %s does not exist.' % self.pylint_rcfile)
+
+    def run(self):
+        """Run command to compile & wrap"""
+
+        command = ['f2py -c --opt=\'-O3\' --f90flags=\'-fopenmp\' -lgomp -m dist dist.f90']
+        top_dir = os.getcwd()
+        src_dir = top_dir + '/crystal_torture'
+        os.chdir(src_dir)
+        self.announce(
+            'Running command: %s' % str(command),level=distutils.log.INFO)
+        subprocess.check_call(command,shell=True)
+        os.chdir(top_dir)
 
 class BuildTortCommand(distutils.cmd.Command):
     """
@@ -32,28 +44,40 @@ class BuildTortCommand(distutils.cmd.Command):
 
     description = 'wrap and compile tort.f90'
     user_options = []
-    
+
+    def initialize_options(self):
+        """Set default values for options."""
+        # Each user option must be listed here with their default value.
+        self.pylint_rcfile = ''
+
+    def finalize_options(self):
+        """Post-process options."""
+        if self.pylint_rcfile:
+           assert os.path.exists(self.pylint_rcfile), (
+                 'Pylint config file %s does not exist.' % self.pylint_rcfile)
+
     def run(self):
-    """Run command to compile & wrap"""
+        """Run command to compile & wrap"""
     
-    command1 = ['gfortran -c -O3 -fPIC tort.f90']
-    command2 = ['f2py-f90wrap -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m _tort f90wrap_tort.f90 tort.o']
-    top_dir = os.getcwd()
-    src_dir = cwd + '/crystal_torture'
-    os.chdir(src_dir)
-    self.announce(
-        'Running command: %s' % str(command1),level=distutils.log.INFO)
-    subprocess.check_call(command1)
-    self.announce(
-        'Running command: %s' % str(command2),level=distutils.log.INFO)
-    subprocess.check_call(command2)
-    os.chdir(top_dir)
+        command1 = ['gfortran -c -O3 -fPIC tort.f90']
+        command2 = ['f2py-f90wrap -c --opt=\'-O3\' --f90flags=\'-fopenmp\' -lgomp -m _tort f90wrap_tort.f90 tort.o']
+
+        top_dir = os.getcwd()
+        src_dir = top_dir + '/crystal_torture'
+        os.chdir(src_dir)
+        self.announce(
+            'Running command: %s' % str(command1),level=distutils.log.INFO)
+        subprocess.check_call(command1, shell=True)
+        self.announce(
+            'Running command: %s' % str(command2),level=distutils.log.INFO)
+        subprocess.check_call(command2,shell=True)
+        os.chdir(top_dir)
 
 
 long_description = open('README.md').read()
 
 config = {'name':'CrystalTorture',
-     'version':__version__,
+     'version':"1.0.0",#__version__,
      'description':'A Crystal Tortuosity Module',
      'long_description':long_description,
      'author':'Conn O\'Rourke',
@@ -63,7 +87,7 @@ config = {'name':'CrystalTorture',
      'packages':['crystal_torture'],
      'name': 'crystal_torture',
      'license': 'MIT',
-     'install_reuires': [ 'alabaster==0.7.11',
+     'install_requires': [ 'alabaster==0.7.11',
                           'Babel==2.6.0',
                           'backcall==0.1.0',
                           'bleach==2.1.3',
@@ -137,8 +161,8 @@ config = {'name':'CrystalTorture',
                           'wcwidth==0.1.7',
                           'webencodings==0.5.1',
                           'widgetsnbextension==3.2.1']
-     }
+}
 
 setup(cmdclass={'dist':BuildDistCommand, 'tort':BuildTortCommand},**config)
-
+#setup(**config)
 

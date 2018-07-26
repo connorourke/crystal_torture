@@ -12,7 +12,7 @@ crystal_torture:  a crystal tortuosity module
 * relative path tortuosity to traverse a crystal within a connected cluster to be calculated for each site
 
 
-Documentation is `here <>`.
+Documentation is  `here <modules.html>`__.
 
 Examples are provided in a Jupyter notebook `here <http://nbviewer.jupyter.org/github/connorourke/crystal_torture/blob/master/examples/crystal_torture_examples.ipynb>`__
 
