@@ -1,0 +1,7 @@
+[run]
+source = crystal_torture
+omit = 
+       *ENV* 
+       *test* 
+       *_*
+
