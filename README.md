@@ -40,7 +40,8 @@ python -m unittest discover
 ```
 
 ## Examples
-Examples on how to use `crystal_torture` can be found in a Jupyter notebook in the `examples` directory [crystal_torture_examples.ipynb](httpsL//nbviewer.jupyter.org/github/connorourke/crystal_torture/blob/master/examples/crystal_torture_examples.ipynb)
+Examples on how to use `crystal_torture` can be found in a Jupyter notebook in the `examples` directory [crystal_torture_examples.ipynb](http://nbviewer.jupyter.org/github/connorourke/crystal_torture/blob/master/examples/crystal_torture_examples.ipynb)
+
 
 ## Documentation
 Documentation can be found  [here](https://crystal-torture.readthedocs.io/en/latest/)

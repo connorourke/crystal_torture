@@ -18,3 +18,4 @@ crystal_torture.egg-info*
 build*
 dist*
 MANIFEST.in
+crystal_torture-*
