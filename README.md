@@ -18,7 +18,7 @@ that enable:
 pip install crystal_torture
 ```
 
-or download directly from [GitHub](httpsL//github.com/connorourke/crystal_torture/releases), or clone:
+or download directly from [GitHub](http://github.com/connorourke/crystal_torture/releases), or clone:
 
 ```
  git clone https://github.com/connorourke/crystal_torture
@@ -33,7 +33,7 @@ python setup.py install
 
 ## Tests
 
-`crystal_torture` is automatically tested on each commit [here](httpsL//travis-ci.org/connorourke/crystal_torture), but the tests can be manually run:
+`crystal_torture` is automatically tested on each commit [here](http://travis-ci.org/connorourke/crystal_torture), but the tests can be manually run:
 
 ```
 python -m unittest discover
