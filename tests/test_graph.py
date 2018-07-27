@@ -5,6 +5,7 @@ from pymatgen import Structure
 from crystal_torture import Cluster, Graph, Node, tort
 from crystal_torture.pymatgen_interface import graph_from_file, clusters_from_file
 from ddt import ddt, data, unpack
+import subprocess
 
 @ddt
 class GraphTestCase( unittest.TestCase ):
@@ -49,7 +50,7 @@ class GraphTestCase( unittest.TestCase ):
         graph = graph_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0, elements={"Li"})
         
         graph.output_clusters(fmt='poscar',periodic=True)
-        os.rename('CLUS_0.vasp','tests/STRUCTURE_FILES/POSCAR_CLUS_0.vasp')
+        subprocess.run('mv *CLUS* tests/STRUCTURE_FILES/',shell=True)
         clusters = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_CLUS_0.vasp",rcut=4.0,elements={"Li"})
         
         c_nodes = set([node.index for node in clusters.pop().nodes])
@@ -61,7 +62,7 @@ class GraphTestCase( unittest.TestCase ):
         graph = graph_from_file(filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",rcut=4.0, elements={"Li"})
 
         graph.output_clusters(fmt='cif')
-        os.rename('CLUS_0.cif','tests/STRUCTURE_FILES/POSCAR_CLUS_0.cif')
+        subprocess.run('mv *CLUS* tests/STRUCTURE_FILES/',shell=True)
         clusters = clusters_from_file(filename="tests/STRUCTURE_FILES/POSCAR_CLUS_0.cif",rcut=4.0,elements={"Li"})
 
         c_nodes = set([node.index for node in clusters.pop().nodes])
@@ -75,6 +76,7 @@ class GraphTestCase( unittest.TestCase ):
         filename="tests/STRUCTURE_FILES/PERC/POSCAR_"+str(value)+".vasp"
         graph = graph_from_file(filename=filename,rcut=4.0, elements={"Mg"})
         graph.output_clusters(fmt='poscar')
+        subprocess.run('mv *CLUS* tests/STRUCTURE_FILES/',shell=True)
         self.assertEqual(value, round(graph.return_frac_percolating(),3))
         
 if __name__ =='__main__':

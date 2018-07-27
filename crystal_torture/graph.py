@@ -160,53 +160,6 @@ class Graph:
     
             cluster_structure.to(fmt=fmt,filename="CLUS_"+str(index)+"."+tail)
 
-#    def output_clusters(self,fmt,structure_file,periodic=None):
-#        """
-#        Outputs the unique unit cell clusters from the graph
-
-#        Args:
-#        fmt (str): output format for pymatgen structures set up from clusters
-#        structure_file (str): pymatgen file the original graph was formed from
-#        periodic (Boolean): Whether to output only periodic clusters
-
-#        Outputs:
-#        CLUS_*."fmt": A cluster structure file for each cluster in the graph
-#        """
-
-
-#        if fmt == 'poscar':
-#           tail = 'vasp'
-#        else:
-#           tail = fmt
-
-#        graph_structure = Structure.from_file(structure_file)
-
-#        site_sets = []
-
-#        for cluster in self.clusters:
-#           if periodic:
-#              if cluster.periodic > 0:
-#                 site_sets.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
-#           else:
-#              site_sets.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
-#
-#        site_sets = set(site_sets)
-
-#        for index,site_list in enumerate(site_sets):
-#            cluster_structure = Structure(lattice=graph_structure.lattice,species=[],coords=[])
-#            symbols = [species for species in graph_structure.symbol_set]
-#
-#            for symbol in symbols:
-#                for site in site_list:
-#                    site=graph_structure.sites[site]
-#
-#                    if site.species_string == symbol:
-#                       cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
-#
-#
-#            cluster_structure.to(fmt=fmt,filename="CLUS_"+str(index)+"."+tail)
-
-
     def return_frac_percolating(self):
         """
         Calculates the fraction of nodes in the graph that are in a periodic cluster

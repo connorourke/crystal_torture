@@ -6,7 +6,7 @@
  `crystal_torture` is a Python, Fortran and OpenMP crystal structure analysis module. The module contains a set of classes
 that enable:
 
-* a crystal structure to be converted into a graph for network analysis, 
+* a crystal structure to be converted into a graph for network analysis 
 * connected clusters of crystal sites (nodes) to be retrieved and output
 * periodicity of connected clusters of crystal sites to be determined
 * relative path tortuosity to traverse a crystal within a connected cluster to be calculated for each site
@@ -28,7 +28,7 @@ or download directly from [GitHub](httpsL//github.com/connorourke/crystal_tortur
 
 ```
 cd crystal_torture
-python setup.py install dist tort
+python setup.py install
 ```
 
 ## Tests

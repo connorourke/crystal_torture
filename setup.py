@@ -1,60 +1,26 @@
 
-#from crystal_torture import __version__
-from setuptools import setup
 import subprocess
-import distutils.cmd
+from distutils.core import setup, Command
 import distutils.log
 import os
+import sys
+from setuptools.command.install import install
+from setuptools.command.develop import develop
+from setuptools.command.egg_info import egg_info
 
-class BuildDistCommand(distutils.cmd.Command):
-    """
-    Command to compile and wrap dist.f90
-    """
 
-    description = 'wrap and compile dist.f90'
-    user_options = []
+def check_compiler_gnu():
 
-    def initialize_options(self):
-       """Set default values for options."""
-       # Each user option must be listed here with their default value.
-       self.dist_rcfile = ''
+    result = subprocess.check_output('f2py -c --help-fcompiler | grep -A 1 \'Fortran compilers found\' ',shell=True)
 
-    def finalize_options(self):
-        """Post-process options."""
-        print("finalised")
+    return('GNU' in str(result))
 
-    def run(self):
-        """Run command to compile & wrap"""
 
-        command = ['f2py -c --opt=\'-O3\' --f90flags=\'-fopenmp\' -lgomp -m dist dist.f90']
-        top_dir = os.getcwd()
-        src_dir = top_dir + '/crystal_torture'
-        os.chdir(src_dir)
-        self.announce(
-            'Running command: %s' % str(command),level=distutils.log.INFO)
-        subprocess.check_call(command,shell=True)
-        os.chdir(top_dir)
+def custom_command():    
+    """Run command to compile & wrap"""
 
-class BuildTortCommand(distutils.cmd.Command):
-    """
-    Command to compile and wrap tort.f90
-    """
-
-    description = 'wrap and compile tort.f90'
-    user_options = []
-
-    def initialize_options(self):
-        """Set default values for options."""
-        # Each user option must be listed here with their default value.
-        self.tort_rcfile = ''
-
-    def finalize_options(self):
-        """Post-process options."""
-        print('finalised')    
-    
-
-    def run(self):
-        """Run command to compile & wrap"""
+    if check_compiler_gnu():
+        command = ['f2py -c --opt=\'-O3\' --f90flags=\'-fopenmp\' -lgomp -m dist dist.f90 > /home/cor/temp']
     
         command1 = ['gfortran -c -O3 -fPIC tort.f90']
         command2 = ['f2py-f90wrap -c --opt=\'-O3\' --f90flags=\'-fopenmp\' -lgomp -m _tort f90wrap_tort.f90 tort.o']
@@ -62,13 +28,27 @@ class BuildTortCommand(distutils.cmd.Command):
         top_dir = os.getcwd()
         src_dir = top_dir + '/crystal_torture'
         os.chdir(src_dir)
-        self.announce(
-            'Running command: %s' % str(command1),level=distutils.log.INFO)
         subprocess.check_call(command1, shell=True)
-        self.announce(
-            'Running command: %s' % str(command2),level=distutils.log.INFO)
         subprocess.check_call(command2,shell=True)
+        subprocess.check_call(command,shell=True)
         os.chdir(top_dir)
+    else:
+        sys.exit("Error: f2py is using a compiler other than gfortran. Please install gfortran.")
+
+class CustomInstallCommand(install):
+    def run(self):
+        install.run(self)
+        custom_command()
+
+class CustomDevelopCommand(develop):
+    def run(self):
+        develop.run(self)
+        custom_command()
+
+class CustomEggInfoCommand(egg_info):
+    def run(self):
+        egg_info.run(self)
+        custom_command()
 
 
 try:
@@ -80,19 +60,22 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-#long_description = open('README.md').read()
 version_file = open(os.getcwd()+'/crystal_torture/'+ 'VERSION')
 __version__ = version_file.read().strip()
 
 config = {'name':'CrystalTorture',
      'version':__version__,
+     'project_description':'A Crystal Tortuosity Module',
      'description':'A Crystal Tortuosity Module',
      'long_description': read('README.md'),
+     'long_description_content_type':'text/markdown',
      'author':'Conn O\'Rourke',
      'author_email':'conn.orourke@gmail.com',
      'url':'https://github.com/connorourke/crystaltorture',
      'python_requires':'>=3.5',
      'packages':['crystal_torture'],
+     'package_dir':{'crystal_torture':'crystal_torture'},
+     'package_data':{'crystal_torture':['*so','*tort*','*dist*']},
      'name': 'crystal_torture',
      'license': 'MIT',
      'install_requires': [ 'alabaster==0.7.11',
@@ -171,6 +154,11 @@ config = {'name':'CrystalTorture',
                           'widgetsnbextension==3.2.1']
 }
 
-setup(cmdclass={'dist':BuildDistCommand, 'tort':BuildTortCommand},**config)
-#setup(**config)
 
+setup(
+    cmdclass={
+        'install': CustomInstallCommand,
+        'develop': CustomDevelopCommand,
+        'egg_info': CustomEggInfoCommand,
+    },**config
+)
