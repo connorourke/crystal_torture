@@ -11,8 +11,7 @@ from setuptools.command.egg_info import egg_info
 
 def check_compiler_gnu():
 
-    result = subprocess.check_output('f2py -c --help-fcompiler | grep -A 1 \'Fortran compilers found\' ',shell=True)
-
+    result = subprocess.check_output('gfortran --version | grep GNU',shell=True)
     return('GNU' in str(result))
 
 
@@ -20,7 +19,7 @@ def custom_command():
     """Run command to compile & wrap"""
 
     if check_compiler_gnu():
-        command = ['f2py -c --opt=\'-O3\' --f90flags=\'-fopenmp\' -lgomp -m dist dist.f90 > /home/cor/temp']
+        command = ['f2py -c --opt=\'-O3\' --f90flags=\'-fopenmp\' -lgomp -m dist dist.f90']
     
         command1 = ['gfortran -c -O3 -fPIC tort.f90']
         command2 = ['f2py-f90wrap -c --opt=\'-O3\' --f90flags=\'-fopenmp\' -lgomp -m _tort f90wrap_tort.f90 tort.o']
@@ -63,6 +62,7 @@ def read(fname):
 version_file = open(os.getcwd()+'/crystal_torture/'+ 'VERSION')
 __version__ = version_file.read().strip()
 
+
 config = {'name':'CrystalTorture',
      'version':__version__,
      'project_description':'A Crystal Tortuosity Module',
@@ -72,7 +72,7 @@ config = {'name':'CrystalTorture',
      'author':'Conn O\'Rourke',
      'author_email':'conn.orourke@gmail.com',
      'url':'https://github.com/connorourke/crystaltorture',
-     'python_requires':'>=3.5',
+     'python_requires':'==3.3',
      'packages':['crystal_torture'],
      'package_dir':{'crystal_torture':'crystal_torture'},
      'package_data':{'crystal_torture':['*so','*tort*','*dist*']},
@@ -117,7 +117,7 @@ config = {'name':'CrystalTorture',
                           'notebook==5.5.0',
                           'packaging==17.1',
                           'palettable==3.1.1',
-                          'pandas==0.23.1',
+                          'pandas==0.20.1',
                           'pandocfilters==1.4.2',
                           'parso==0.3.1',
                           'pexpect==4.6.0',

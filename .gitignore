@@ -1,3 +1,5 @@
+*egg*
+ENV*
 crystal_torture/devel
 */*/*.swp
 */*o
