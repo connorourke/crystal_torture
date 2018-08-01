@@ -17,7 +17,10 @@ crystal_torture/ENV
 tests/STRUCTURE_FILES/UNUSED
 *coverage
 crystal_torture.egg-info*
-build*
 dist*
 MANIFEST.in
 crystal_torture-*
+build
+MANIFEST
+README.rst
+README.txt
