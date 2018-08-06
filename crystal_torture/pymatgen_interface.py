@@ -18,20 +18,24 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
 
     Takes a list of neighbour indices for sites in the original unit cell, 
     and maps them on to all of the supercell sites.
-    
-        Args:
-            uc_neighbours(list(list(int))): list of lists containing neighbour inndices for the nodes
-            that are in the primitive cell
+   
+    Parameters
+    ----------
+
+    uc_neighbours(list(list(int))): list of lists containing neighbour indices for the nodes
+    that are in the primitive cell
       
-            uc_index(list(int)): list of indices corresponding to the primitive cell nodes
-            x_d (int): x dimension of supercell
-            y_d (int): y dimension of supercell
-            z_d (int): z dimension of supercell
+    uc_index(list(int)): list of indices corresponding to the primitive cell nodes
+    x_d (int): x dimension of supercell
+    y_d (int): y dimension of supercell
+    z_d (int): z dimension of supercell
 
 
-        Returns:
-    
-            neigh ([[int]...[int]]): list of neighbour indices for all nodes
+    Returns
+    -------
+
+    neigh ([[int]...[int]]): list of neighbour indices for all nodes
+
     """
 
     no_atoms = len(uc_index)
