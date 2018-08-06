@@ -5,4 +5,3 @@ python:
     version: 3.5
     setup_py_install: true
 
-requirements_file: requirements.txt   
