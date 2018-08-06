@@ -45,7 +45,7 @@ html_theme = 'alabaster'
 
 
 
-#import crystal_torture
+import crystal_torture
 
 
 # -- Project information -----------------------------------------------------
