@@ -23,6 +23,15 @@
 #        cmd = ['pip install numpy']
 #    subprocess.call(cmd, shell=True)
 
+from unittest.mock import MagicMock
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        return MagicMock()
+
+MOCK_MODULES = ['dist','_tort','tort', 'numpy','f90wrap','crystal_torture._tort','crystal_torture.dist']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
 import os
