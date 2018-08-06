@@ -15,6 +15,7 @@
 import os
 import sys
 import alabaster
+import crystal_torture
 
 html_theme_path = [alabaster.get_path()]
 extensions = ['alabaster']
