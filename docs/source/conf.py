@@ -13,16 +13,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 
-
-#def install_numpy():
-#    import subprocess
-#    subprocess.call['sudo apt-get install gfortran'],shell=True)
-#    if '--user' in sys.argv:
-#        cmd = ['pip install numpy --user']
-#    else:
-#        cmd = ['pip install numpy']
-#    subprocess.call(cmd, shell=True)
-
 from unittest.mock import MagicMock
 import sys
 
@@ -42,11 +32,6 @@ import subprocess
 html_theme_path = [alabaster.get_path()]
 extensions = ['alabaster']
 html_theme = 'alabaster'
-
-#subprocess.cmd(['f2py -c --help-fcompiler'], shell= True])
-
-#install_numpy()
-
 
 
 sys.path.append('../../crystal_torture/')
@@ -236,13 +221,3 @@ epub_exclude_files = ['search.html']
 
 # -- Extension configuration -------------------------------------------------
 
-#import sys
-from unittest.mock import MagicMock
-
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return MagicMock()
-
-MOCK_MODULES = ['dist','_tort','tort', 'numpy','f90wrap']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)

@@ -21,6 +21,7 @@ dist*
 MANIFEST.in
 crystal_torture-*
 build/*
+docs/build/*
 MANIFEST
 README.rst
 README.txt
