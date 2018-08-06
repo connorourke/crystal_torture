@@ -15,10 +15,13 @@ import time
 
 def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
     """
-
+    =========
+    map_index
+    =========
     Takes a list of neighbour indices for sites in the original unit cell, 
     and maps them on to all of the supercell sites.
    
+    ----------
     Parameters
     ----------
 
@@ -30,7 +33,7 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
     y_d (int): y dimension of supercell
     z_d (int): z dimension of supercell
 
-
+    -------
     Returns
     -------
 
