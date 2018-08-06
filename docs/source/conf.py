@@ -12,21 +12,28 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+
+
+def install_numpy():
+    import subprocess
+    if '--user' in sys.argv:
+        cmd = ['pip install numpy --user']
+    else:
+        cmd = ['pip install numpy']
+    subprocess.call(cmd, shell=True)
+
+
+
 import os
 import sys
 import alabaster
-from subprocess import call
 
 html_theme_path = [alabaster.get_path()]
 extensions = ['alabaster']
 html_theme = 'alabaster'
 
 
-call(['ls','-l'])
-call(['ls','../'])
-call(['ls','../../'])
-call(['ls','../../../'])
-call(['pwd'])
+install_numpy()
 
 
 
