@@ -5,5 +5,5 @@ build:
 
 python:
     version: 3.5
-    setup_py_install: True
+    setup_py_install: False
 
