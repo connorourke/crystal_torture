@@ -27,6 +27,9 @@ call(['ls','../'])
 call(['ls','../../'])
 call(['ls','../../../'])
 call(['pwd'])
+
+
+
 #sys.path.append('../../crystal_torture/')
 #sys.path.insert(0, os.path.abspath('../../'))
 
@@ -212,14 +215,4 @@ epub_copyright = copyright
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
-from unittest.mock import MagicMock
-
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return MagicMock()
-
-MOCK_MODULES = ['_tort','dist','numpy']
-
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 # -- Extension configuration -------------------------------------------------
