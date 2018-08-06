@@ -23,7 +23,7 @@ html_theme = 'alabaster'
 
 
 call(['ls','-l'])
-call(['ls'.'../'])
+call(['ls','../'])
 call(['ls','../../'])
 call(['ls','../../../'])
 call(['pwd'])
