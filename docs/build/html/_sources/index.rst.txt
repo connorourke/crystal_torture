@@ -35,7 +35,7 @@ The code has been tested with Python versions 3.5 and above.
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: Documentation:
 
    modules

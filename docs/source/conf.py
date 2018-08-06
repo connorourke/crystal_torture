@@ -15,13 +15,16 @@
 import os
 import sys
 import alabaster
-import crystal_torture
 
 html_theme_path = [alabaster.get_path()]
 extensions = ['alabaster']
 html_theme = 'alabaster'
 
-sys.path.append('/home/cor/bin/src/crystal_torture/')
+#sys.path.append('/crystal_torture/')
+sys.path.insert(0, os.path.abspath('../../'))
+
+import crystal_torture
+
 
 # -- Project information -----------------------------------------------------
 
