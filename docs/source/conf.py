@@ -15,15 +15,24 @@
 import os
 import sys
 import alabaster
+from subprocess import call
 
 html_theme_path = [alabaster.get_path()]
 extensions = ['alabaster']
 html_theme = 'alabaster'
 
-sys.path.append('../../crystal_torture/')
-sys.path.insert(0, os.path.abspath('../../'))
 
-import crystal_torture
+call(['ls','-l'])
+call(['ls'.'../'])
+call(['ls','../../'])
+call(['ls','../../../'])
+call(['pwd'])
+#sys.path.append('../../crystal_torture/')
+#sys.path.insert(0, os.path.abspath('../../'))
+
+
+
+#import crystal_torture
 
 
 # -- Project information -----------------------------------------------------
