@@ -24,6 +24,7 @@
 #    subprocess.call(cmd, shell=True)
 
 from unittest.mock import MagicMock
+import sys
 
 class Mock(MagicMock):
     @classmethod
@@ -35,7 +36,6 @@ sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
 import os
-import sys
 import alabaster
 import subprocess
 
