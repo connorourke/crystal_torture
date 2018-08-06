@@ -27,11 +27,13 @@ def install_numpy():
 import os
 import sys
 import alabaster
+import subprocess
 
 html_theme_path = [alabaster.get_path()]
 extensions = ['alabaster']
 html_theme = 'alabaster'
 
+subprocess.cmd(['f2py -c --help-fcompiler'], shell= True])
 
 install_numpy()
 
