@@ -1,0 +1,212 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>crystal_torture.Cluster &#8212; crystal_torture 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="crystal_torture.Node" href="node.html" />
+    <link rel="prev" title="crystal_torture.Graph" href="graph.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="crystal-torture-cluster">
+<h1>crystal_torture.Cluster<a class="headerlink" href="#crystal-torture-cluster" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="crystal_torture.Cluster">
+<em class="property">class </em><code class="descclassname">crystal_torture.</code><code class="descname">Cluster</code><span class="sig-paren">(</span><em>nodes</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.Cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Cluster class: group of connected nodes within graph</p>
+<dl class="method">
+<dt id="crystal_torture.Cluster.grow_cluster">
+<code class="descname">grow_cluster</code><span class="sig-paren">(</span><em>key=None</em>, <em>value=None</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.Cluster.grow_cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grow cluster by adding neighbours</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>key (str): label key to selectively choose nodes in cluster
+value : value for label to selectively choose nodes in cluster</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal_torture.Cluster.is_neighbour">
+<code class="descname">is_neighbour</code><span class="sig-paren">(</span><em>other_cluster</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.Cluster.is_neighbour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if one cluster of nodes is connected to another</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal_torture.Cluster.merge">
+<code class="descname">merge</code><span class="sig-paren">(</span><em>other_cluster</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.Cluster.merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge two clusters into one</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>other_cluster (Cluster): cluster to be joined</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal_torture.Cluster.return_index_node">
+<code class="descname">return_index_node</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.Cluster.return_index_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="crystal_torture.Cluster.return_key_nodes">
+<code class="descname">return_key_nodes</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.Cluster.return_key_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the nodes in a cluster corresponding to a particular label</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>key (str): Dictionary key for filtering nodes
+value    : value held in dictionary for label key</dd>
+<dt>Returns:</dt>
+<dd>key_nodes (set(Node)): set of nodes in cluster for which (node.labels[key] == value)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal_torture.Cluster.return_uc_indices">
+<code class="descname">return_uc_indices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.Cluster.return_uc_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the unit-cell indices of nodes in a cluster (i.e. reduces the full list of uc_indices
+included in the unit-cell and the halo to contain the indices only once)</p>
+<p>Args: None</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>uc_nodes (set(Int)): set of unit-cell indices for nodes in cluster</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal_torture.Cluster.torture_fort">
+<code class="descname">torture_fort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.Cluster.torture_fort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs tortuosity analysis on nodes in cluster using BFS in Fortran90 and OpenMP:
+Significantly faster than the python version above for large systems.
+Calculates the integer number of node-node steps it requires to get from a 
+node to its periodic image.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Sets:</dt>
+<dd>node.tortuosity (int): tortuosity for node
+self.tortuosity (int): average tortuosity for cluster</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal_torture.Cluster.torture_py">
+<code class="descname">torture_py</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.Cluster.torture_py" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs tortuosity analysis on nodes in cluster in pure python using a BFS:
+Calculates the integer number of node-node steps it requires to get from a 
+node to its periodic image.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Sets:</dt>
+<dd>node.tortuosity (int): tortuosity for node
+self.tortuosity (int): average tortuosity for cluster</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">crystal_torture</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">crystal_torture</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="graph.html">crystal_torture.Graph</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">crystal_torture.Cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="node.html">crystal_torture.Node</a></li>
+<li class="toctree-l2"><a class="reference internal" href="minimal_cluster.html">crystal_torture.minimal_cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymatgen_interface.html">crystal_torture.pymatgen_interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymatgen_doping.html">crystal_torture.pymatgen_doping</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../modules.html">crystal_torture</a><ul>
+      <li>Previous: <a href="graph.html" title="previous chapter">crystal_torture.Graph</a></li>
+      <li>Next: <a href="node.html" title="next chapter">crystal_torture.Node</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Conn O'Rourke.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/mod/cluster.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,283 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>crystal_torture.pymatgen_interface &#8212; crystal_torture 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="crystal_torture.pymatgen_doping" href="pymatgen_doping.html" />
+    <link rel="prev" title="crystal_torture.minimal_cluster" href="minimal_cluster.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-crystal_torture.pymatgen_interface">
+<span id="crystal-torture-pymatgen-interface"></span><h1>crystal_torture.pymatgen_interface<a class="headerlink" href="#module-crystal_torture.pymatgen_interface" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.clusters_from_file">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">clusters_from_file</code><span class="sig-paren">(</span><em>filename</em>, <em>rcut</em>, <em>elements</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.clusters_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a pymatgen compatible file, and converts it to a cluster object
+Args:</p>
+<blockquote>
+<div>filename (str): name of file to set up graph from
+rcut (float):   cut-off radii for node-node connections in forming clusters
+elements ([str,str,…..]): list of elements to include in setting up graph</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>clusters ({clusters}): set of clusters</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.clusters_from_structure">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">clusters_from_structure</code><span class="sig-paren">(</span><em>structure</em>, <em>rcut</em>, <em>elements</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.clusters_from_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a pymatgen structure, and converts it to a graph object
+Args:</p>
+<blockquote>
+<div>structure (Structure): pymatgen structure object to set up graph from
+rcut (float):   cut-off radii for node-node connections in forming clusters
+elements ({str,str,…..}): set of element strings to include in setting up graph</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>clusters ({clusters}): set of clusters</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.create_halo">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">create_halo</code><span class="sig-paren">(</span><em>structure</em>, <em>neighbours</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.create_halo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a pymatgen structure object, sets up a halo by making a 3x3x3 supercell,</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>structure (Structure): pymatgen Structure object
+neighbours  [[(site, dist, index, image) …], ..]: list of neighbours for sites in structure</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.get_all_neighbors_and_image">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">get_all_neighbors_and_image</code><span class="sig-paren">(</span><em>structure</em>, <em>r</em>, <em>include_index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.get_all_neighbors_and_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modified from pymatgen: (<a class="reference external" href="http://pymatgen.org/_modules/pymatgen/core/structure.html#IStructure.get_all_neighbors">http://pymatgen.org/_modules/pymatgen/core/structure.html#IStructure.get_all_neighbors</a>) 
+to return image (used for mapping to supercell), and to use the f2py wrapped
+OpenMP dist subroutine to get the distances (smaller memory footprint and faster
+than numpy).</p>
+<p>Get neighbors for each atom in the unit cell, out to a distance r
+Returns a list of list of neighbors for each site in structure.
+Use this method if you are planning on looping over all sites in the
+crystal. If you only want neighbors for a particular site, use the
+method get_neighbors as it may not have to build such a large supercell
+However if you are looping over all sites in the crystal, this method
+is more efficient since it only performs one pass over a large enough
+supercell to contain all possible atoms out to a distance r.
+The return type is a [(site, dist) …] since most of the time,
+subsequent processing requires the distance.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>r (float): Radius of sphere.
+include_index (bool): Whether to include the non-supercell site
+in the returned data</dd>
+<dt>Returns:</dt>
+<dd>A list of a list of nearest neighbors for each site, i.e.,
+[[(site, dist, index, image) …], ..]
+Index only supplied if include_index = True.
+The index is the index of the site in the original (non-supercell)
+structure. This is needed for ewaldmatrix by keeping track of which
+sites contribute to the ewald sum.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.graph_from_file">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">graph_from_file</code><span class="sig-paren">(</span><em>filename</em>, <em>rcut</em>, <em>elements</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.graph_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a pymatgen compatible file, and converts it to a graph object
+Args:</p>
+<blockquote>
+<div>filename (str): name of file to set up graph from
+rcut (float):   cut-off radii for node-node connections in forming clusters
+elements ([str,str,…..]): list of elements to include in setting up graph</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>graph (Graph): graph object for structure</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.graph_from_structure">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">graph_from_structure</code><span class="sig-paren">(</span><em>structure</em>, <em>rcut</em>, <em>elements</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.graph_from_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a pymatgen compatible file, and converts it to a graph object
+Args:</p>
+<blockquote>
+<div>structure (Structure): pymatgen structure object to set up graph from
+rcut (float):   cut-off radii for node-node connections in forming clusters
+elements ([str,str,…..]): list of elements to include in setting up graph</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>graph (Graph): graph object for structure</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.map_index">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">map_index</code><span class="sig-paren">(</span><em>uc_neighbours</em>, <em>uc_index</em>, <em>x_d</em>, <em>y_d</em>, <em>z_d</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.map_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of neighbour indices for sites in the original unit cell, 
+and maps them on to all of the supercell sites.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">uc_neighbours(list(list(int))): list of lists containing neighbour inndices for the nodes
+that are in the primitive cell</p>
+<p class="last">uc_index(list(int)): list of indices corresponding to the primitive cell nodes
+x_d (int): x dimension of supercell
+y_d (int): y dimension of supercell
+z_d (int): z dimension of supercell</p>
+</dd>
+</dl>
+<p>Returns:</p>
+<blockquote>
+<div>neigh ([[int]…[int]]): list of neighbour indices for all nodes</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.nodes_from_structure">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">nodes_from_structure</code><span class="sig-paren">(</span><em>structure</em>, <em>rcut</em>, <em>get_halo=False</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.nodes_from_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a pymatgen structure object and converts to Nodes for interogation.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>structure (Structure): pymatgen Structure object
+rcut (float): cut-off radius for crystal site neighbour set-up
+halo (bool): whether to set up halo nodes (i.e. 3x3x3 supercell)</dd>
+<dt>Returns:</dt>
+<dd>nodes (set(Nodes)): set of Node objects representing structure sites</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.set_cluster_periodic">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">set_cluster_periodic</code><span class="sig-paren">(</span><em>cluster</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.set_cluster_periodic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the periodicty of the cluster by counting through the number of 
+labelled UC nodes it contains</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Sets:</dt>
+<dd>cluster.periodic (int): periodicity of the cluster (1=1D,2=2D,3=3D)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal_torture.pymatgen_interface.set_fort_nodes">
+<code class="descclassname">crystal_torture.pymatgen_interface.</code><code class="descname">set_fort_nodes</code><span class="sig-paren">(</span><em>nodes</em><span class="sig-paren">)</span><a class="headerlink" href="#crystal_torture.pymatgen_interface.set_fort_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets up a copy of the nodes and the neighbour indices in the tort.f90 Fortran module
+to allow access if using the Fortran tortuosity routines.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Sets:</dt>
+<dd>tort.tort_mod.nodes(:) : allocates space to hold node indices for full graph
+tort.tort_mod.uc_tort(:) : allocates space to hold unit cell node tortuosity for full graph</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">crystal_torture</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">crystal_torture</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="graph.html">crystal_torture.Graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cluster.html">crystal_torture.Cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="node.html">crystal_torture.Node</a></li>
+<li class="toctree-l2"><a class="reference internal" href="minimal_cluster.html">crystal_torture.minimal_cluster</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">crystal_torture.pymatgen_interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymatgen_doping.html">crystal_torture.pymatgen_doping</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../modules.html">crystal_torture</a><ul>
+      <li>Previous: <a href="minimal_cluster.html" title="previous chapter">crystal_torture.minimal_cluster</a></li>
+      <li>Next: <a href="pymatgen_doping.html" title="next chapter">crystal_torture.pymatgen_doping</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Conn O'Rourke.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="../_sources/mod/pymatgen_interface.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
