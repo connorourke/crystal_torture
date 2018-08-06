@@ -5,9 +5,9 @@ crystal_torture
    :maxdepth: 4
    :glob:
 
-   docs/graph
-   docs/cluster
-   docs/node
-   docs/minimal_cluster
-   docs/pymatgen_interface
-   docs/pymatgen_doping   
+   mod/graph
+   mod/cluster
+   mod/node
+   mod/minimal_cluster
+   mod/pymatgen_interface
+   mod/pymatgen_doping   

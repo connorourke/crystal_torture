@@ -121,7 +121,7 @@ if __name__ == '__main__':
               'version':__version__,
               'project_description':'A Crystal Tortuosity Module',
               'description':'A Crystal Tortuosity Module',
-              'long_description': open('README.txt').read(),#read('README.txt'),
+              'long_description': open('README.txt').read(),
               'long_description_content_type':'text/markdown',
               'author':'Conn O\'Rourke',
      'author_email':'conn.orourke@gmail.com',
@@ -209,8 +209,7 @@ if __name__ == '__main__':
 }
 
     config_tort = setup_tort_ext(args,parent_package='crystal_torture',top_path='')
-   # config_tort.add_library(name='',sources=None,include_dirs=[return_include_dir()])
-    config2 = dict(config,**config_tort.todict())#**setup_tort_ext(args,parent_package='crystal_torture',top_path='').todict())
+    config2 = dict(config,**config_tort.todict())
 
     setup(**config2)   
 

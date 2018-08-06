@@ -20,7 +20,7 @@ crystal_torture.egg-info*
 dist*
 MANIFEST.in
 crystal_torture-*
-build
+build/*
 MANIFEST
 README.rst
 README.txt
