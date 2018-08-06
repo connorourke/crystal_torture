@@ -226,3 +226,14 @@ epub_copyright = copyright
 epub_exclude_files = ['search.html']
 
 # -- Extension configuration -------------------------------------------------
+
+#import sys
+from unittest.mock import MagicMock
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        return MagicMock()
+
+MOCK_MODULES = ['dist','_tort','tort', 'numpy']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
