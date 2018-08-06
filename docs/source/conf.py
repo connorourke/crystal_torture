@@ -16,6 +16,7 @@
 
 def install_numpy():
     import subprocess
+    subprocess.call['sudo apt-get install gfortran'],shell=True)
     if '--user' in sys.argv:
         cmd = ['pip install numpy --user']
     else:
@@ -33,7 +34,7 @@ html_theme_path = [alabaster.get_path()]
 extensions = ['alabaster']
 html_theme = 'alabaster'
 
-subprocess.cmd(['f2py -c --help-fcompiler'], shell= True])
+#subprocess.cmd(['f2py -c --help-fcompiler'], shell= True])
 
 install_numpy()
 
