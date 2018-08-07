@@ -28,7 +28,6 @@ or download directly from [GitHub](http://github.com/connorourke/crystal_torture
 
 ```
 cd crystal_torture
-pip install -r requirements.txt
 python setup.py install
 ```
 

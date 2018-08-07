@@ -112,9 +112,9 @@ if __name__ == '__main__':
     
     from numpy.distutils.core import setup
 
-    version_file = open(os.getcwd()+'/crystal_torture/'+ 'VERSION')
-    __version__ = version_file.read().strip()
-
+#    version_file = open(os.getcwd()+'/crystal_torture/'+ 'VERSION')
+#    __version__ = version_file.read().strip()
+     exec(open('crystal_torture/version.py').read())
 
     args = check_f2py_compiler()
 
