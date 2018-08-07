@@ -14,12 +14,12 @@ class minimal_Cluster:
 
     def __init__(self,site_indices,size):
         """
-        Initialise a cluster.
+        Initialise a minimal cluster.
 
         Args:
-            site_indices ((int)): set of site indices in the cluster.
-            periodicity (int): degree of periodicity in cluster
-            tortuosity (real): average tortuosity of cluster
+            - site_indices ((int)): set of site indices in the cluster.
+            - periodicity (int): degree of periodicity in cluster
+            - tortuosity (real): average tortuosity of cluster
             
         """
 

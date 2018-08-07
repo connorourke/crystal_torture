@@ -17,10 +17,10 @@ class Graph:
         is no repetition.
 
         Args:
-            clusters  (set(Clusters)): set of clusters in the graph
-            tortuosity (dict (node_index:tortuosity)): dict to hold the tortuosity for each node
-            self.minimal_clusters (list[minimal_Cluster]): list of minimal clusters for cluster output
-            self.structure (Structure): the pymatgen Structure object the graph has been formed from
+            - clusters  (set(Clusters)): set of clusters in the graph
+            - tortuosity (dict (node_index:tortuosity)): dict to hold the tortuosity for each node
+            - self.minimal_clusters (list[minimal_Cluster]): list of minimal clusters for cluster output
+            - self.structure (Structure): the pymatgen Structure object the graph has been formed from
 
         """
         
@@ -48,10 +48,10 @@ class Graph:
         gets a set unique cluster sites and sets up minimal_Cluster object to store and access the data
 
         Args:
-            None
+            - None
 
         Output:
-            self.unit_clusters (set(minimal_Cluster)): a set of minimal_Cluster objects for unit cell in graph
+            - self.unit_clusters (set(minimal_Cluster)): a set of minimal_Cluster objects for unit cell in graph
              
         
         """
@@ -88,7 +88,7 @@ class Graph:
         a halo of clusters. 
 
         Args:
-         
+            - none
    
         """       
         for cluster in self.clusters:
@@ -105,7 +105,7 @@ class Graph:
         a halo of clusters.
 
         Args:
-
+            - none
 
         """
         for cluster in self.clusters:
@@ -165,9 +165,9 @@ class Graph:
         Calculates the fraction of nodes in the graph that are in a periodic cluster
 
         Args:
-            None
+            - None
         Returns:
-            frac(real): nodes in graph in periodic clusers / total number of nodes
+            - frac(real): nodes in graph in periodic clusers / total number of nodes
         """
          
         total_nodes = 0
