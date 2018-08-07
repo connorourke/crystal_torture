@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
 #    version_file = open(os.getcwd()+'/crystal_torture/'+ 'VERSION')
 #    __version__ = version_file.read().strip()
-     exec(open('crystal_torture/version.py').read())
+    exec(open('crystal_torture/version.py').read())
 
     args = check_f2py_compiler()
 
