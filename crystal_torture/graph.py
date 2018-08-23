@@ -149,15 +149,17 @@ class Graph:
         for index,site_list in enumerate(site_sets):
             cluster_structure = Structure(lattice=self.structure.lattice,species=[],coords=[])
             symbols = [species for species in self.structure.symbol_set]
-            
+            if "X" in set(symbols):
+                symbols.remove("X")
+                symbols.append("X0+")
             for symbol in symbols:
                 for site in site_list:
+                    
                     site=self.structure.sites[site]
                 
                     if site.species_string == symbol:
                        cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
           
-    
             cluster_structure.to(fmt=fmt,filename="CLUS_"+str(index)+"."+tail)
 
     def return_frac_percolating(self):

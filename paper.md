@@ -38,9 +38,7 @@ $$\tau= \frac{n^{steps}_{path}}{n^{steps}_{direct}}$$
 
 # `crystal_torture`
 
-``crystal_torture`` is a Python, Fortran and OpenMP module that enables network analysis to be performed on crystal structures. The code includes an interface with `pymatgen` `Structure` objects [OngEtAl_CompMaterSci2013], allowing graphs to be set-up from crystal structures. These graphs can then be interogated to obtain connected clusters of nodes within the graph, which can be output as `pymatgen` `Structure` objects. It can establish whether these clusters form percolation networks, and the periodicity of the clusters. Finally it can perform a breadth-first-search to calculate the crystal site tortuosity of the percolation networks. 
-
-Also included are simple doping routines which when coupled with the network analysis can be quickly used to build up statistics on the connectivty and tortuousity of particular doping regimes and thereby determine the viability of particular doping strategies in the production of conductive crystals.
+``crystal_torture`` is a Python, Fortran and OpenMP module that enables network analysis to be performed on crystal structures. The code includes an interface with `pymatgen` `Structure` objects [OngEtAl_CompMaterSci2013], allowing graphs to be set-up from crystal structures. These graphs can then be interogated to obtain connected clusters of nodes within the graph, which can be output as `pymatgen` `Structure` objects. It can establish whether these clusters form percolation networks, and the periodicity of the clusters. Finally it can perform a breadth-first-search to calculate the crystal site tortuosity of the percolation networks. Also included are simple doping routines which when coupled with the network analysis can be quickly used to build up statistics on the connectivty and tortuousity of particular doping regimes, and thereby determine the viability of particular doping strategies in the production of conductive crystals.
 
 
 
