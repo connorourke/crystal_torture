@@ -142,10 +142,8 @@ def dope_structure_by_no(structure,no_dopants,species_to_rem,species_to_insert,l
 
     '''
     if {species_to_rem}.issubset(structure.symbol_set):
-
         no_sites = count_sites(structure,species=species_to_rem,labels=label_to_remove)
         site_indices = index_sites(structure,species=species_to_rem,labels=label_to_remove)
- 
         random.shuffle(site_indices)
 
         for species in species_to_insert:

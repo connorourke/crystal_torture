@@ -365,12 +365,14 @@ def graph_from_structure(structure,rcut,elements):
   
     """
     clusters = clusters_from_structure(structure=structure,rcut=rcut,elements=elements)
+#    print(elements)
+
     all_elements = set([species for species in structure.symbol_set])
     remove_elements = [x for x in all_elements if x not in elements]
-
+#    print(structure)
+    print("***********")
     structure.remove_species(remove_elements)
-
-
+#    print(structure)
     graph = Graph(clusters=clusters, structure=structure)
 
     return graph
