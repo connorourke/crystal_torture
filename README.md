@@ -18,7 +18,7 @@ that enable:
 pip install crystal_torture
 ```
 
-or download directly from [GitHub](http://github.com/connorourke/crystal_torture/releases), or clone:
+or download directly from [GitHub](https://github.com/connorourke/crystal_torture/archive/v1.0.0.tar.gz), or clone:
 
 ```
  git clone https://github.com/connorourke/crystal_torture
