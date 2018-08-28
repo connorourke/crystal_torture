@@ -1,4 +1,4 @@
-import _tort
+from crystal_torture import _tort
 import f90wrap.runtime
 import logging
 
