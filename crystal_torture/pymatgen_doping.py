@@ -75,7 +75,7 @@ def sort_structure(structure,order):
        symbols.remove("X")
        symbols.append("X0+")
 
-    if True:#(set(symbols) == set(order)):
+    if (set(symbols) == set(order)):
         structure_sorted=Structure(lattice=structure.lattice,species=[],coords=[])
         for symbol in symbols:
            for i,site in enumerate(structure.sites):
