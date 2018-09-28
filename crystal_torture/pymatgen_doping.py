@@ -75,12 +75,12 @@ def sort_structure(structure,order):
        symbols.remove("X")
        symbols.append("X0+")
 
-    if (set(symbols) == set(order)):
+    if True:#(set(symbols) == set(order)):
         structure_sorted=Structure(lattice=structure.lattice,species=[],coords=[])
-        for symbol in order:
+        for symbol in symbols:
            for i,site in enumerate(structure.sites):
                if (site.species_string==symbol):
-                  structure_sorted.append(symbol,site.coords,coords_are_cartesian=True)
+                  structure_sorted.append(symbol,site.coords,coords_are_cartesian=True,properties=site.properties)
     else:
        print('Error: sort structure elements in list passed in order does not match that found in POSCAR')
        print('Passed: ',order)
@@ -149,7 +149,6 @@ def dope_structure_by_no(structure,no_dopants,species_to_rem,species_to_insert,l
         for species in species_to_insert:
             for dopant in range(no_dopants):
                  structure[site_indices.pop()]=species
-
         structure = sort_structure(structure=structure, order=[species for species in structure.symbol_set])
 
         return structure

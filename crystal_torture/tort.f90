@@ -45,8 +45,8 @@ CONTAINS
 
         call tear_down()
 
-        ALLOCATE(nodes(0:n-1))
-        ALLOCATE(uc_tort(0:n2-1))
+        ALLOCATE(nodes(0:2*n-1))
+        ALLOCATE(uc_tort(0:2*n2-1))
         uc_tort(:) = 0
      END SUBROUTINE allocate_nodes
 
