@@ -29,7 +29,6 @@ Typically the tortuosity, when defined in the context of ionic conductivity, rel
 
 Taking vacancy mediated diffusion of a Li<sup>+</sup> dopant through a solid electrolyte as an example, in the case where the atoms of the original crystal lattice are immobile and form blocks on the network of crystal sites. Li<sup>+</sup> diffusion in this instance will proceed along the network of connected sites occupied by Li<sup>+</sup> and \[Vac\]. Long range diffusion, and therefore the viability of the material as a solid electrolyte, depends on the Li<sup>+</sup>-\[Vac\] occupied sites forming a percolation network (i.e. the probability of Li<sup>+</sup>-\[Vac\] site occupancy surpassing the critical percolation threshold). Establishing the connectivity of clusters formed by different doping regimes in this context therefore allows statistics to be generated on the concentration required to surpass this percolation threshold, and provides a computationally inexpensive approach for checking if a particular crystal structure is a suitable candidate as a solid Li<sup>+</sup> electrolyte. 
 
-
 <div id="image-table">
     <table>
 	    <tr>
@@ -48,7 +47,7 @@ Taking vacancy mediated diffusion of a Li<sup>+</sup> dopant through a solid ele
 
 The relative bulk crystal tortuosity, &tau;<sub>rel</sub>, can be defined as the ratio of the length of the shortest possible diffusion pathway through the crystal from a site to its periodic image, to the length of the direct path. In our case we are considering atoms on crystal sites as our nodes, so the tortuosity may be defined as the number of inter-nodal steps between two periodic site images in the actual pathway to that in an idealised direct pathway:
 
-$$\tau_{rel}= \frac{n^{steps}_{path}}{n^{steps}_{direct}}$$
+$$\tau_\mathrm{rel}= \frac{n^\mathrm{steps}_\mathrm{path}}{n^\mathrm{steps}_\mathrm{direct}}$$
 
 # `crystal_torture`
 
@@ -65,13 +64,13 @@ For example, in a potential solid electrolyte in which doping with Li results in
 	    <tr>
     	    <td style="padding:5px">
         	    <img src="paper/Images/stats.png">
-        	      <figcaption>Figure 2: Cumulative distribution of the inverse average site tortuosity for 1000 (20x20x20) supercells of a potential solid Li<sup>+</sup> electrolyte at varying lithium concentrations. </figcaption>
+        	      <figcaption>Figure 2: Cumulative distribution of the inverse average site tortuosity for 1000 (20&times;20&times;20) supercells of a potential solid Li<sup>+</sup> electrolyte at varying lithium concentrations. </figcaption>
       	    </td>
         </tr>
    </table>
 </div>
 
-An inverse tortuosity value of 0 tells us there are no percolation networks formed, while a value of 1 tells us there are direct routes through the crystal. From the data produced we can see that in order for the percolation threshold to be crossed, the dopant concentration *x*<sub>Li</sub> ≈  0.425, and even for this high concentration very few of the LI ions are in percolation networks. Performing this analysis  provides a simple and quick way of establishing whether a potential material is viable as an ionic conductor.
+An inverse tortuosity value of 0 tells us there are no percolation networks formed, while a value of 1 tells us there are direct routes through the crystal. From the data produced we can see that in order for the percolation threshold to be crossed, the dopant concentration *x*<sub>Li</sub> &asymp;  0.425, and even for this high concentration very few of the Li ions are in percolation networks. Performing this analysis  provides a simple and quick way of establishing whether a potential material is viable as an ionic conductor.
 
 
 
