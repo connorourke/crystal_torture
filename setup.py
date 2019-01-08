@@ -97,6 +97,11 @@ def install_numpy():
         cmd = ['pip install numpy==1.14.5']
     subprocess.call(cmd, shell=True)
 
+def build_f90_src_for_tests():
+    subprocess.call('cd crystal_torture', shell=True)
+    subprocess.call('.build_tort.sh', shell=True)
+    subprocess.call('cd ..', shell=True)
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -109,6 +114,7 @@ if __name__ == '__main__':
     
     install_numpy()
     install_dependencies()
+    build_f90_src_for_tests()
     
     from numpy.distutils.core import setup
 
@@ -122,7 +128,7 @@ if __name__ == '__main__':
               'version':__version__,
               'project_description':'A Crystal Tortuosity Module',
               'description':'A Crystal Tortuosity Module',
-              'long_description': open('README.txt').read(),
+              'long_description': open('README.md').read(),
               'long_description_content_type':'text/markdown',
               'author':'Conn O\'Rourke',
      'author_email':'conn.orourke@gmail.com',
