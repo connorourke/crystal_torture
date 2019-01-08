@@ -99,7 +99,7 @@ def install_numpy():
 
 def build_f90_src_for_tests():
     subprocess.call('cd crystal_torture', shell=True)
-    subprocess.call('.build_tort.sh', shell=True)
+    subprocess.call('./build_tort.sh', shell=True)
     subprocess.call('cd ..', shell=True)
 
 
