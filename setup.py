@@ -94,7 +94,7 @@ def install_numpy():
     if '--user' in sys.argv:
         cmd = ['pip install numpy --user']
     else:
-        cmd = ['pip install numpy']
+        cmd = ['pip install numpy==1.14.5']
     subprocess.call(cmd, shell=True)
 
 
