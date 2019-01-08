@@ -98,9 +98,12 @@ def install_numpy():
     subprocess.call(cmd, shell=True)
 
 def build_f90_src_for_tests():
-    subprocess.call('cd crystal_torture', shell=True)
+    import os
+    os.chdir('crystal_torture/')
+    subprocess.call('pwd', shell=True)
+    subprocess.call('ls', shell=True)
     subprocess.call('./build_tort.sh', shell=True)
-    subprocess.call('cd ..', shell=True)
+    os.chdir('../')
 
 
 def read(fname):
