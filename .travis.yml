@@ -22,7 +22,7 @@ os:
 
 install:
    - pip install -r requirements.txt
-   - pip install -U numpy
+   - pip install -U numpy==1.14.5
 before_script:
    - cd crystal_torture    
    - f2py -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m dist dist.f90
