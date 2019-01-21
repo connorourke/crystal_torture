@@ -162,6 +162,45 @@ class Graph:
           
             cluster_structure.to(fmt=fmt,filename="CLUS_"+str(index)+"."+tail)
 
+    def return_periodic_structure(self,fmt):
+        """
+        Gathers all periodic clusters in the graph as a single pymatgen Structure
+
+        Args:
+        fmt (str): output format for pymatgen structure set up from cluster
+
+        Returns:
+        #CLUS_PER."fmt": A structure file containing periodic sites in the graph.
+        cluster_structure (pymatgen Structure): Structure object containing all periodic clusters
+
+        """
+
+        sites = []
+
+        for cluster in self.clusters:
+            if cluster.periodic > 0:
+                sites.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
+
+        sites = set(sites)
+        cluster_structure = Structure(lattice=self.structure.lattice,species=[],coords=[])
+
+
+        for index,site_list in enumerate(sites):
+            symbols = [species for species in self.structure.symbol_set]
+            if "X" in set(symbols):
+                symbols.remove("X")
+                symbols.append("X0+")
+            for symbol in symbols:
+                for site in site_list:
+                    
+                    site=self.structure.sites[site]
+                
+                    if site.species_string == symbol:
+                       cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
+          
+
+        return cluster_structure
+
     def return_frac_percolating(self):
         """
         Calculates the fraction of nodes in the graph that are in a periodic cluster

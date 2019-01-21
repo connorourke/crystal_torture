@@ -318,7 +318,7 @@ def clusters_from_structure(structure, rcut, elements):
     
     
     symbols = set([species for species in structure.symbol_set])
-    print(symbols)
+    #print(symbols)
 
     if elements.issubset(structure.symbol_set):
 
@@ -365,10 +365,10 @@ def graph_from_structure(structure,rcut,elements):
         - graph (Graph): graph object for structure
   
     """
-    print(elements)
+    #print(elements)
     clusters = clusters_from_structure(structure=structure,rcut=rcut,elements=elements)
     all_elements = set([species for species in structure.symbol_set])
-    print(all_elements)
+    #print(all_elements)
     remove_elements = [x for x in all_elements if x not in elements]
     structure.remove_species(remove_elements)
     graph = Graph(clusters=clusters, structure=structure)
