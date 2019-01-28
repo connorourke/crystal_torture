@@ -92,9 +92,9 @@ def install_dependencies():
 
 def install_numpy():
     if '--user' in sys.argv:
-        cmd = ['pip install numpy==1.15.4 --user']
+        cmd = ['pip install numpy --user']
     else:
-        cmd = ['pip install numpy==1.15.4']
+        cmd = ['pip install numpy']
     subprocess.call(cmd, shell=True)
 
 def build_f90_src_for_tests():
