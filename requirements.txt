@@ -1,5 +1,4 @@
 coverage
-f90wrap
 jupyter
 numpy
 pymatgen
