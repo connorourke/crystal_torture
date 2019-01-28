@@ -141,6 +141,7 @@ if __name__ == '__main__':
      'name': 'crystal_torture',
      'license': 'MIT',
      'install_requires': ['coverage',
+                          'f90wrap',
                           'numpy',
                           'pymatgen'
                           ]
