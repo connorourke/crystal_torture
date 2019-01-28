@@ -140,7 +140,8 @@ if __name__ == '__main__':
      'package_data':{'crystal_torture':['*so','*tort*','*dist*','*o*']},
      'name': 'crystal_torture',
      'license': 'MIT',
-     'install_requires': ['coverage',
+     'install_requires': ['ddt',
+                          'coverage',
                           'f90wrap',
                           'numpy',
                           'pymatgen'
