@@ -144,7 +144,6 @@ def create_halo(structure, neighbours):
 
     return structure, neighbours
 
-#@profile
 def nodes_from_structure(structure, rcut, get_halo=False):
     """
     Takes a pymatgen structure object and converts to Nodes for interogation.
@@ -195,7 +194,6 @@ def nodes_from_structure(structure, rcut, get_halo=False):
 
     return set(nodes)
 
-#@profile
 def set_cluster_periodic(cluster):
     """
     Sets the periodicty of the cluster by counting through the number of 
