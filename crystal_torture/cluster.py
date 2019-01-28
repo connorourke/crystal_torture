@@ -1,7 +1,6 @@
 from crystal_torture.node import  Node
 import copy
 import sys
-#import pathos.multiprocessing as mp
 from queue import Queue
 from crystal_torture import tort
 from threading import Thread
