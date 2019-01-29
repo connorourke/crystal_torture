@@ -6,5 +6,3 @@ certifi
 docutils
 ddt
 coverage
-pymatgen
-f90wrap
