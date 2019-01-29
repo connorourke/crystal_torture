@@ -4,5 +4,4 @@ alabaster
 bleach
 certifi
 docutils
-unittest
 -r ../requirements.txt
