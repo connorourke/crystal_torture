@@ -48,7 +48,7 @@ def check_compiler_gnu():
 
 def check_f2py_compiler():
 
-    result = subprocess.check_output('f2py -c --help-fcompiler | grep -A 1 \'Fortran compilers found\' ',shell=True)
+    result = subprocess.check_output('f2py3 -c --help-fcompiler | grep -A 1 \'Fortran compilers found\' ',shell=True)
     print(result)
 
     if not check_compiler_gnu():
