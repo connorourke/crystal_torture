@@ -33,7 +33,6 @@ html_theme_path = [alabaster.get_path()]
 extensions = ['alabaster']
 html_theme = 'alabaster'
 
-
 sys.path.append('../../crystal_torture/')
 sys.path.insert(0, os.path.abspath('../../'))
 
