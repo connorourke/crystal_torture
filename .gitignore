@@ -7,6 +7,7 @@ crystal_torture/devel
 *.swp
 *pyc
 crystal_torture/.f2py_f2cmap
+crystal_torture/_tort*
 check_run.py
 check_doping.py
 */*so
