@@ -4,4 +4,3 @@ alabaster
 bleach
 certifi
 docutils
--r ../requirements.txt
