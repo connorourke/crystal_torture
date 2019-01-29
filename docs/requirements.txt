@@ -4,4 +4,7 @@ alabaster
 bleach
 certifi
 docutils
--r ../requirements.txt
+ddt
+coverage
+pymatgen
+f90wrap
