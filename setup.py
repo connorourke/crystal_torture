@@ -49,13 +49,10 @@ def check_compiler_gnu():
 def check_f2py_compiler():
 
     result = subprocess.check_output('f2py -c --help-fcompiler | grep -A 1 \'Fortran compilers found\' ',shell=True)
-    print(result)
-
     if not check_compiler_gnu():
         print(' GNU compiler not installed. Checking f2py comompiler - this is UNTESTED' )
         print(' Speculatively setting flags - if compile fails, or OpenMP doesn\'t work install gfortran and retry')
 
-     
     if 'GNU' in str(result):
         print('Found gnu compiler. Setting OpenMP flag to \'-fopenmp\'')
         compile_args = ['-fopenmp', '-lgomp', '-O3']
@@ -122,7 +119,7 @@ if __name__ == '__main__':
     from numpy.distutils.core import setup
 
     exec(open('crystal_torture/version.py').read())
-
+    
     args = check_f2py_compiler()
 
     config = {'name':'CrystalTorture',
@@ -134,7 +131,7 @@ if __name__ == '__main__':
               'author':'Conn O\'Rourke',
      'author_email':'conn.orourke@gmail.com',
      'url':'https://github.com/connorourke/crystaltorture',
-     'python_requires':'>=3.3',
+     'python_requires':'>=3.5',
      'packages':['crystal_torture'],
      'package_dir':{'crystal_torture':'crystal_torture'},
      'package_data':{'crystal_torture':['*so','*tort*','*dist*','*o*']},
@@ -143,7 +140,7 @@ if __name__ == '__main__':
      'install_requires': ['ddt',
                           'coverage',
                           'f90wrap',
-                          'numpy',
+                          'numpy>=1.15.4',
                           'pymatgen'
                           ]
 }
