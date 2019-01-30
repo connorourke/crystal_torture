@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.com/connorourke/crystal_torture.svg?token=nTMqYYEUasQRTBsU6oCc&branch=master)](https://travis-ci.com/connorourke/crystal_torture)
 [![Coverage Status](https://coveralls.io/repos/github/connorourke/crystal_torture/badge.svg?branch=master)](https://coveralls.io/github/connorourke/crystal_torture?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/crystal-torture/badge/?version=latest)](https://crystal-torture.readthedocs.io/en/latest/?badge=latest)
+[![Python 3.6+](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 
 ### **crystal_torture:** 
  `crystal_torture` is a Python, Fortran and OpenMP crystal structure analysis module. The module contains a set of classes
@@ -16,11 +17,13 @@ that enable:
  
 ## Installation
 
+`crystal_torture` requires python 3.5 and above. To install do:
+
 ```
 pip install crystal_torture
 ```
 
-or download directly from [GitHub](https://github.com/connorourke/crystal_torture/archive/v1.0.0.tar.gz), or clone:
+or download directly from [GitHub](https://github.com/connorourke/crystal_torture/releases/latest), or clone:
 
 ```
  git clone https://github.com/connorourke/crystal_torture

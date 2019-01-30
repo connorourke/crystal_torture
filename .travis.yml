@@ -17,6 +17,11 @@ python:
    - "3.5-dev"
    - "3.6"
    - "3.6-dev" 
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
 os:
    - linux     
 
