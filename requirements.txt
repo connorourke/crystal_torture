@@ -1,5 +1,5 @@
 coverage
 ddt
-numpy
+numpy>=1.15.4
 f90wrap
 pymatgen
