@@ -1,4 +1,4 @@
-|Build Status| |Coverage Status|
+|PyPI version| |Build Status| |Coverage Status| |Documentation Status| 
 
 **crystal\_torture:**
 ~~~~~~~~~~~~~~~~~~~~~
