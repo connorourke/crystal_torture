@@ -141,7 +141,7 @@ if __name__ == '__main__':
      'install_requires': ['ddt',
                           'coverage',
                           'f90wrap',
-                          'numpy>=1.15.4',
+                          'numpy',
                           'pymatgen'
                           ]
 }
