@@ -5,6 +5,16 @@ def return_major_minor_python():
     return str(sys.version_info[0])+"."+str(sys.version_info[1])
 
 
+def check_python_version():
+    import sys
+
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 5:
+       return True 
+    
+    return False
+         
+
+
 def return_include_dir():
     from distutils.util import get_platform    
     return get_platform()+'-'+return_major_minor_python()
@@ -41,32 +51,27 @@ def setup_tort_ext(args,parent_package='',top_path=''):
     return config
 
 
-def check_compiler_gnu():
-
-    result = subprocess.check_output('gfortran --version | grep GNU',shell=True)
-    return('GNU' in str(result))
-
 def check_f2py_compiler():
+    from numpy.distutils.fcompiler import get_default_fcompiler
+    f2py_compiler = get_default_fcompiler()
 
-    result = subprocess.check_output('f2py -c --help-fcompiler | grep -A 1 \'Fortran compilers found\' ',shell=True)
-
-    if not check_compiler_gnu():
+    if 'gnu' not in f2py_compiler:
         print(' GNU compiler not installed. Checking f2py comompiler - this is UNTESTED' )
         print(' Speculatively setting flags - if compile fails, or OpenMP doesn\'t work install gfortran and retry')
 
-    if 'GNU' in str(result):
+    if 'gnu' in f2py_compiler:
         print('Found gnu compiler. Setting OpenMP flag to \'-fopenmp\'')
         compile_args = ['-fopenmp', '-lgomp', '-O3']
         link_args = ['-lgomp']
-    elif 'Intel' in str(result):
+    elif 'intel' in f2py_compiler:
         print('Found intel compiler. Setting OpenMP flag to \'-openmp\'')
         compile_args = ['-openmp', '-O3']
         link_args = []
-    elif 'Portland' in str(result):
+    elif 'pg' in f2py_comopiler:
         print('Found portland compiler. Setting OpenMP flag to \'-mp\'')
         compile_args = ['-mp', '-O3']
         link_args = []
-    elif 'NAG' in str(result):
+    elif 'nag' in f2py_compiler:
         print('Found NAG compiler. Setting OpenMP flag to \'-openmp\'')
         compile_args = ['-openmp', '-O3']
         link_args = [] 
@@ -112,12 +117,17 @@ if __name__ == '__main__':
     import sys
     import subprocess
     import os
-    
+    from numpy.distutils.core import setup
+
+    try:
+        assert(check_python_version() )
+    except AssertionError:
+        sys.exit("Exiting: Please use python version > 3.5")
+        
     install_numpy()
     install_dependencies()
     build_f90_src_for_tests()
     
-    from numpy.distutils.core import setup
 
     exec(open('crystal_torture/version.py').read())
     
