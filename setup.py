@@ -1,29 +1,22 @@
+import sys
+import os
+
 def return_major_minor_python():
-
-    import sys
-
     return str(sys.version_info[0])+"."+str(sys.version_info[1])
 
 
 def check_python_version():
-    import sys
-
     if sys.version_info[0] >= 3 and sys.version_info[1] >= 5:
        return True 
-    
     return False
-         
-
 
 def return_include_dir():
     from distutils.util import get_platform    
     return get_platform()+'-'+return_major_minor_python()
- 
 
 def setup_tort_ext(args,parent_package='',top_path=''):
     from numpy.distutils.misc_util import Configuration
     from os.path import join
-    import sys
 
     config = Configuration('',parent_package,top_path)
     tort_src = [join('crystal_torture/','tort.f90')]
@@ -46,7 +39,6 @@ def setup_tort_ext(args,parent_package='',top_path=''):
                           sources=dist_src,
                           extra_f90_compile_args = args["compile_args"],
                           extra_link_args=args["link_args"])
-
 
     return config
 
@@ -101,7 +93,6 @@ def install_numpy():
     subprocess.call(cmd, shell=True)
 
 def build_f90_src_for_tests():
-    import os
     os.chdir('crystal_torture/')
     subprocess.call('pwd', shell=True)
     subprocess.call('ls', shell=True)
@@ -113,21 +104,15 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 if __name__ == '__main__':
-
-    import sys
     import subprocess
-    import os
-    from numpy.distutils.core import setup
-
     try:
         assert(check_python_version() )
     except AssertionError:
         sys.exit("Exiting: Please use python version > 3.5")
-        
     install_numpy()
+    from numpy.distutils.core import setup
     install_dependencies()
     build_f90_src_for_tests()
-    
 
     exec(open('crystal_torture/version.py').read())
     
