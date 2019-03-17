@@ -268,8 +268,8 @@ def clusters_from_file(filename, rcut, elements):
     symbols = set([species for species in structure.symbol_set])
     if set(elements).issubset(symbols):
 
-       sites = [site.to_unit_cell for site in structure.sites]
-       structure = Structure.from_sites(sites)
+       for site in structure.sites:
+           site.to_unit_cell(in_place=True)
 
        all_elements = set([species for species in structure.symbol_set])
        remove_elements = [x for x in all_elements if x not in elements]
@@ -320,8 +320,8 @@ def clusters_from_structure(structure, rcut, elements):
 
     if elements.issubset(structure.symbol_set):
 
-       sites = [site.to_unit_cell for site in structure.sites]
-       structure = Structure.from_sites(sites)
+       for site in structure.sites:
+           site.to_unit_cell(in_place=True)
 
        all_elements = set([species for species in structure.symbol_set])
        remove_elements = [x for x in all_elements if x not in elements]
