@@ -101,7 +101,7 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
         all_within_r = np.bitwise_and(all_dists <= r, all_dists > 1e-8)
 
         for (j, d, within_r) in zip(indices, all_dists, all_within_r):
-            nnsite = PeriodicSite(structure[j].species_and_occu, coords[j],
+            nnsite = PeriodicSite(structure[j].species, coords[j],
                                     latt, properties=structure[j].properties,
                                     coords_are_cartesian=True)
             for i in indices[within_r]:
