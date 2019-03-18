@@ -101,7 +101,7 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
         all_within_r = np.bitwise_and(all_dists <= r, all_dists > 1e-8)
 
         for (j, d, within_r) in zip(indices, all_dists, all_within_r):
-            nnsite = PeriodicSite(structure[j].species_and_occu, coords[j],
+            nnsite = PeriodicSite(structure[j].species, coords[j],
                                     latt, properties=structure[j].properties,
                                     coords_are_cartesian=True)
             for i in indices[within_r]:
@@ -268,8 +268,8 @@ def clusters_from_file(filename, rcut, elements):
     symbols = set([species for species in structure.symbol_set])
     if set(elements).issubset(symbols):
 
-       sites = [site.to_unit_cell for site in structure.sites]
-       structure = Structure.from_sites(sites)
+       for site in structure.sites:
+           site.to_unit_cell(in_place=True)
 
        all_elements = set([species for species in structure.symbol_set])
        remove_elements = [x for x in all_elements if x not in elements]
@@ -320,8 +320,8 @@ def clusters_from_structure(structure, rcut, elements):
 
     if elements.issubset(structure.symbol_set):
 
-       sites = [site.to_unit_cell for site in structure.sites]
-       structure = Structure.from_sites(sites)
+       for site in structure.sites:
+           site.to_unit_cell(in_place=True)
 
        all_elements = set([species for species in structure.symbol_set])
        remove_elements = [x for x in all_elements if x not in elements]
