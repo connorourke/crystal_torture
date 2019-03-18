@@ -25,9 +25,8 @@ def count_sites(structure, species=None, labels=None):
        return len([i for i,site in enumerate(structure) if site.species_string in species])
     elif labels and not species:
        return  len([i for i,site in enumerate(structure) if site.label in labels])
-    elif not labels and not species:
-       print("Need to supply either specie, or label to count_sites")
-       raise ValueError
+    else:
+       raise ValueError("Need to supply either specie, or label to count_sites")
 
 def index_sites(structure,species=None,labels=None):
     """
@@ -41,8 +40,6 @@ def index_sites(structure,species=None,labels=None):
      Returns:
          - ([int]): list with site indices occupied by species or label (or both) in structure
 
- 
-
     """
     if labels and species:
        return [i for i,site in enumerate(structure) if ((site.label in labels) and (site.species_string in species))]
@@ -50,10 +47,8 @@ def index_sites(structure,species=None,labels=None):
        return [i for i,site in enumerate(structure) if site.species_string in species]
     elif labels and not species:
        return [i for i,site in enumerate(structure) if site.label in labels]
-    elif not labels and not species:
-       print("Need to supply either specie, or label to index_sites")
-       raise ValueError
-
+    else:
+       raise ValueError("Need to supply either specie, or label to index_sites")
 
 def sort_structure(structure,order):
     ''' 
@@ -82,14 +77,11 @@ def sort_structure(structure,order):
                if (site.species_string==symbol):
                   structure_sorted.append(symbol,site.coords,coords_are_cartesian=True,properties=site.properties)
     else:
-       print('Error: sort structure elements in list passed in order does not match that found in POSCAR')
-       print('Passed: ',order)
-       print('POSCAR: ',symbols)
-       raise ValueError
-
+       error_msg = 'Error: sort structure elements in list passed in order does not match that found in POSCAR\n'
+       error_msg += 'Passed: {}\n'.format(order)
+       error_msg += 'POSCAR: {}\n'.format(symbols)
+       raise ValueError(error_msg)
     return structure_sorted
-
-
 
 def dope_structure(structure,conc,species_to_rem,species_to_insert,label_to_remove=None):
     '''
@@ -105,26 +97,18 @@ def dope_structure(structure,conc,species_to_rem,species_to_insert,label_to_remo
        - label_to_remove (str): label of sites to select for removal.
 
     '''
-   
     if {species_to_rem}.issubset(structure.symbol_set): 
-
         no_sites = count_sites(structure,species=species_to_rem,labels=label_to_remove)
         site_indices = index_sites(structure,species=species_to_rem,labels=label_to_remove)
-
         no_dopants = int(round(conc*no_sites)/len(species_to_insert))
         random.shuffle(site_indices)
-
         for species in species_to_insert:
             for dopant in range(no_dopants):
                 structure[site_indices.pop()]=species
-
         structure = sort_structure(structure=structure, order=[species for species in structure.symbol_set])
-
         return structure
     else:
-        print("dope_structure: species_to_rem is not in structure")
-        raise ValueError
-
+        raise ValueError('dope_structure: species_to_rem is not in structure')
 
 def dope_structure_by_no(structure,no_dopants,species_to_rem,species_to_insert,label_to_remove=None):
     '''
@@ -139,7 +123,6 @@ def dope_structure_by_no(structure,no_dopants,species_to_rem,species_to_insert,l
        - species_to_insert ([str,str]): a list of species to equally distribute over sites that are removed
        - label_to_remove (str): label of sites to select for removal.
 
-
     '''
     if {species_to_rem}.issubset(structure.symbol_set):
         no_sites = count_sites(structure,species=species_to_rem,labels=label_to_remove)
@@ -153,6 +136,5 @@ def dope_structure_by_no(structure,no_dopants,species_to_rem,species_to_insert,l
 
         return structure
     else:
-        print("dope_structure_by_no: species_to_rem is not in structure")
-        raise ValueError
+        raise ValueError('dope_struture_by_no: species_to_rem is not in structure')
 
