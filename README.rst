@@ -1,7 +1,7 @@
-|PyPI version| |Build Status| |Coverage Status| |Documentation Status| 
+|JOSS status| |PyPI version| |Build Status| |Coverage Status| |Documentation Status| |Python 3.5| |Python 3.6| |Python 3.7|
 
 **crystal\_torture:**
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 ``crystal_torture`` is a Python, Fortran and OpenMP crystal structure
 analysis module. The module contains a set of classes that enable:
@@ -16,7 +16,7 @@ analysis module. The module contains a set of classes that enable:
 Installation
 ------------
 
-`crystal_torture` requires python 3.5 and above. To install do:
+``crystal_torture`` requires python 3.5 and above. To install do:
 
 ::
 
@@ -61,7 +61,20 @@ Documentation
 Documentation can be found
 `here <https://crystal-torture.readthedocs.io/en/latest/>`__
 
+.. |JOSS status| image:: http://joss.theoj.org/papers/c3d8e702ecfee04f16a0ad6f14d96419/status.svg
+   :target: http://joss.theoj.org/papers/c3d8e702ecfee04f16a0ad6f14d96419
+.. |PyPI version| image:: https://badge.fury.io/py/crystal-torture.svg 
+   :target: https://badge.fury.io/py/crystal-torture
 .. |Build Status| image:: https://travis-ci.com/connorourke/crystal_torture.svg?token=nTMqYYEUasQRTBsU6oCc&branch=master
    :target: https://travis-ci.com/connorourke/crystal_torture
 .. |Coverage Status| image:: https://coveralls.io/repos/github/connorourke/crystal_torture/badge.svg?branch=master
    :target: https://coveralls.io/github/connorourke/crystal_torture?branch=master
+.. |Documentation Status| image:: https://readthedocs.org/projects/crystal-torture/badge/?version=latest
+   :target: https://crystal-torture.readthedocs.io/en/latest/?badge=latest
+.. |Python 3.5| image:: https://img.shields.io/badge/python-3.5-blue.svg 
+   :target: https://www.python.org/downloads/release/python-360/
+.. |Python 3.6| image:: https://img.shields.io/badge/python-3.6-blue.svg 
+   :target: https://www.python.org/downloads/release/python-360/
+.. |Python 3.7| image:: https://img.shields.io/badge/python-3.7-blue.svg 
+   :target: https://www.python.org/downloads/release/python-360/
+

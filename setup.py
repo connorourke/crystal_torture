@@ -105,6 +105,7 @@ def read(fname):
 
 if __name__ == '__main__':
     import subprocess
+#    from setuptools import setup
     try:
         assert(check_python_version() )
     except AssertionError:
@@ -117,21 +118,24 @@ if __name__ == '__main__':
     exec(open('crystal_torture/version.py').read())
     
     args = check_f2py_compiler()
+    this_directory = os.path.abspath(os.path.dirname(__file__))
+
+    with open(os.path.join(this_directory, 'README.rst')) as f:
+        long_description = f.read()
 
     config = {'name':'CrystalTorture',
               'version':__version__,
-              'project_description':'A Crystal Tortuosity Module',
               'description':'A Crystal Tortuosity Module',
-              'long_description': open('README.txt').read(),
-              'long_description_content_type':'text/markdown',
+              'long_description': long_description,
+              'long_description_content_type':"text/x-rst",
               'author':'Conn O\'Rourke',
      'author_email':'conn.orourke@gmail.com',
-     'url':'https://github.com/connorourke/crystaltorture',
+     'url':'https://github.com/connorourke/crystal_torture',
      'python_requires':'>=3.5',
      'packages':['crystal_torture'],
      'package_dir':{'crystal_torture':'crystal_torture'},
      'package_data':{'crystal_torture':['*so','*tort*','*dist*','*o*']},
-     'name': 'crystal_torture',
+     'include_package_data':True,
      'license': 'MIT',
      'install_requires': ['ddt',
                           'coverage',
@@ -143,6 +147,5 @@ if __name__ == '__main__':
 
     config_tort = setup_tort_ext(args,parent_package='crystal_torture',top_path='')
     config2 = dict(config,**config_tort.todict())
-
     setup(**config2)   
 

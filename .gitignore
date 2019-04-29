@@ -24,7 +24,7 @@ crystal_torture-*
 build/*
 docs/build/*
 MANIFEST
-README.rst
+README.txt
 .idea/
 .DS_Store
 paper/apa.csl
