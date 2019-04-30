@@ -28,7 +28,7 @@ class Graph:
         self.clusters = clusters
 
         self.tortuosity = None
-        self.minimal_clusters = None
+        self.min_clusters = None
         self.structure = structure
 
     def set_site_tortuosity(self):
@@ -65,21 +65,21 @@ class Graph:
 
         site_sets = set(site_sets)
 
-        self.minimal_clusters = []
+        self.min_clusters = []
 
         for sites in site_sets:
-            self.minimal_clusters.append(
+            self.min_clusters.append(
                 minimal_Cluster(site_indices=list(sites), size=len(sites))
             )
 
         for cluster in self.clusters:
-            for min_clus in self.minimal_clusters:
+            for min_clus in self.min_clusters:
                 if min_clus.site_indices[0] in set(
                     [int(node.labels["UC_index"]) for node in cluster.nodes]
                 ):
                     min_clus.periodic = cluster.periodic
 
-        for min_clus in self.minimal_clusters:
+        for min_clus in self.min_clusters:
             if min_clus.periodic > 0:
                 min_clus.tortuosity = 0
                 for site in min_clus.site_indices:
@@ -238,3 +238,11 @@ class Graph:
                 periodic_nodes += len(cluster.return_key_nodes(key="Halo", value=False))
 
         return periodic_nodes / total_nodes
+
+    @property
+    def minimal_clusters(self):
+        if self.min_clusters == None:
+            raise ValueError("minimal_clusters is not set until graph.torture() or graph.torture_py() have been called")
+        else:
+            return self.min_clusters
+        

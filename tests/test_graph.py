@@ -26,6 +26,9 @@ class GraphTestCase( unittest.TestCase ):
         self.cluster = Cluster({self.nodes.pop()})
         self.graph = Graph({self.cluster})
 
+    def wrap_minimal_clusters(self):
+        return self.graph.minimal_clusters
+
     def test_graph_is_initialised( self ):
         self.cluster.grow_cluster()
         graph = Graph({self.cluster})
@@ -78,6 +81,11 @@ class GraphTestCase( unittest.TestCase ):
         graph.output_clusters(fmt='poscar')
         subprocess.run('mv *CLUS* tests/STRUCTURE_FILES/',shell=True)
         self.assertEqual(value, round(graph.return_frac_percolating(),3))
+
+    @data("POSCAR_2_clusters.vasp")
+    def test_no_minimal_before_torture(self,value):
+        self.assertRaises(ValueError, self.wrap_minimal_clusters)
+
         
 if __name__ =='__main__':
     unittest.main()

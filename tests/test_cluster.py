@@ -94,6 +94,8 @@ class ClusterTestCase( unittest.TestCase ):
 
         self.assertEqual([c.tortuosity for c in list(graph_p.clusters)],[c.tortuosity for c in list(graph_f.clusters)])
 
+
+
 if __name__ =='__main__':
     unittest.main()
 
