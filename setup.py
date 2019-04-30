@@ -141,7 +141,7 @@ if __name__ == '__main__':
                           'coverage',
                           'f90wrap',
                           'numpy',
-                          'pymatgen'
+                          'pymatgen>=2019.4.11'
                           ]
 }
 
