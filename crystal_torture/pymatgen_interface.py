@@ -317,7 +317,9 @@ def clusters_from_file(filename, rcut, elements):
 
         return clusters
     else:
-        raise ValueError("The element set fed to 'clusters_from_file' is not a subset of the elements in the file")
+        raise ValueError(
+            "The element set fed to 'clusters_from_file' is not a subset of the elements in the file"
+        )
 
 
 def clusters_from_structure(structure, rcut, elements):
@@ -364,7 +366,9 @@ def clusters_from_structure(structure, rcut, elements):
 
         return clusters
     else:
-        raise ValueError("The element set fed to 'clusters_from_file' is not a subset of the elements in the file")
+        raise ValueError(
+            "The element set fed to 'clusters_from_file' is not a subset of the elements in the file"
+        )
 
 
 def graph_from_structure(structure, rcut, elements):

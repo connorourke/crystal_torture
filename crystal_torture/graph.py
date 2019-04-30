@@ -242,7 +242,8 @@ class Graph:
     @property
     def minimal_clusters(self):
         if self.min_clusters == None:
-            raise ValueError("minimal_clusters is not set until graph.torture() or graph.torture_py() have been called")
+            raise ValueError(
+                "minimal_clusters is not set until graph.torture() or graph.torture_py() have been called"
+            )
         else:
             return self.min_clusters
-        
