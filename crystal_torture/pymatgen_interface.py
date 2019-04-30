@@ -109,7 +109,7 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
 
         for (j, d, within_r) in zip(indices, all_dists, all_within_r):
             nnsite = PeriodicSite(
-                structure[j].species_and_occu,
+                structure[j].specie,
                 coords[j],
                 latt,
                 properties=structure[j].properties,
