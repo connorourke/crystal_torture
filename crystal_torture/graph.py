@@ -1,8 +1,9 @@
-#from crystal_torture.cluster import  Cluster
-#from crystal_torture.pymatgen_interface import clusters_from_file
+# from crystal_torture.cluster import  Cluster
+# from crystal_torture.pymatgen_interface import clusters_from_file
 from pymatgen import Structure
 from crystal_torture.minimal_cluster import minimal_Cluster
 from crystal_torture import tort
+
 
 class Graph:
     """
@@ -23,11 +24,11 @@ class Graph:
             - self.structure (Structure): the pymatgen Structure object the graph has been formed from
 
         """
-        
+
         self.clusters = clusters
 
         self.tortuosity = None
-        self.minimal_clusters = None 
+        self.minimal_clusters = None
         self.structure = structure
 
     def set_site_tortuosity(self):
@@ -35,12 +36,12 @@ class Graph:
         Sets a dict containing the site by site tortuosity for sites in the graph unit cell
         """
 
-        tortuosity={}
+        tortuosity = {}
         for cluster in self.clusters:
-            for node in cluster.return_key_nodes(key="Halo",value=False):
-                tortuosity[str(node.labels["UC_index"])]=node.tortuosity
+            for node in cluster.return_key_nodes(key="Halo", value=False):
+                tortuosity[str(node.labels["UC_index"])] = node.tortuosity
 
-        self.tortuosity =  tortuosity
+        self.tortuosity = tortuosity
 
     def set_minimal_clusters(self):
         """
@@ -55,31 +56,35 @@ class Graph:
              
         
         """
-        site_sets=[] 
+        site_sets = []
         for cluster in self.clusters:
-             indices = frozenset([int(node.labels["UC_index"]) for node in cluster.nodes])
-             site_sets.append(indices)
+            indices = frozenset(
+                [int(node.labels["UC_index"]) for node in cluster.nodes]
+            )
+            site_sets.append(indices)
 
         site_sets = set(site_sets)
-        
+
         self.minimal_clusters = []
 
         for sites in site_sets:
-            self.minimal_clusters.append(minimal_Cluster(site_indices = list(sites), size = len(sites)))
-        
+            self.minimal_clusters.append(
+                minimal_Cluster(site_indices=list(sites), size=len(sites))
+            )
 
         for cluster in self.clusters:
-           for min_clus in self.minimal_clusters:
-               if min_clus.site_indices[0] in set([int(node.labels["UC_index"]) for node in cluster.nodes]):
-                  min_clus.periodic = cluster.periodic
+            for min_clus in self.minimal_clusters:
+                if min_clus.site_indices[0] in set(
+                    [int(node.labels["UC_index"]) for node in cluster.nodes]
+                ):
+                    min_clus.periodic = cluster.periodic
 
         for min_clus in self.minimal_clusters:
             if min_clus.periodic > 0:
-               min_clus.tortuosity = 0
-               for site in min_clus.site_indices:
-                   min_clus.tortuosity+=self.tortuosity[str(site)]
-               min_clus.tortuosity = min_clus.tortuosity / min_clus.size
-
+                min_clus.tortuosity = 0
+                for site in min_clus.site_indices:
+                    min_clus.tortuosity += self.tortuosity[str(site)]
+                min_clus.tortuosity = min_clus.tortuosity / min_clus.size
 
     def torture(self):
         """
@@ -90,10 +95,10 @@ class Graph:
         Args:
             - none
    
-        """       
+        """
         for cluster in self.clusters:
             if cluster.periodic > 0:
-               cluster.torture_fort()
+                cluster.torture_fort()
 
         self.set_site_tortuosity()
         self.set_minimal_clusters()
@@ -110,13 +115,12 @@ class Graph:
         """
         for cluster in self.clusters:
             if cluster.periodic > 0:
-               cluster.torture_py()
+                cluster.torture_py()
 
         self.set_site_tortuosity()
         self.set_minimal_clusters()
 
-
-    def output_clusters(self,fmt,periodic=None):
+    def output_clusters(self, fmt, periodic=None):
         """
         Outputs the unique unit cell clusters from the graph
 
@@ -126,43 +130,51 @@ class Graph:
 
         Outputs:
         CLUS_*."fmt": A cluster structure file for each cluster in the graph
-        """   
+        """
 
-
-        if fmt == 'poscar':
-           tail = 'vasp'
+        if fmt == "poscar":
+            tail = "vasp"
         else:
-           tail = fmt
-
+            tail = fmt
 
         site_sets = []
 
         for cluster in self.clusters:
-           if periodic:
-              if cluster.periodic > 0:
-                 site_sets.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
-           else:
-              site_sets.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
+            if periodic:
+                if cluster.periodic > 0:
+                    site_sets.append(
+                        frozenset(
+                            [int(node.labels["UC_index"]) for node in cluster.nodes]
+                        )
+                    )
+            else:
+                site_sets.append(
+                    frozenset([int(node.labels["UC_index"]) for node in cluster.nodes])
+                )
 
         site_sets = set(site_sets)
 
-        for index,site_list in enumerate(site_sets):
-            cluster_structure = Structure(lattice=self.structure.lattice,species=[],coords=[])
+        for index, site_list in enumerate(site_sets):
+            cluster_structure = Structure(
+                lattice=self.structure.lattice, species=[], coords=[]
+            )
             symbols = [species for species in self.structure.symbol_set]
             if "X" in set(symbols):
                 symbols.remove("X")
                 symbols.append("X0+")
             for symbol in symbols:
                 for site in site_list:
-                    
-                    site=self.structure.sites[site]
-                
-                    if site.species_string == symbol:
-                       cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
-          
-            cluster_structure.to(fmt=fmt,filename="CLUS_"+str(index)+"."+tail)
 
-    def return_periodic_structure(self,fmt):
+                    site = self.structure.sites[site]
+
+                    if site.species_string == symbol:
+                        cluster_structure.append(
+                            symbol, site.coords, coords_are_cartesian=True
+                        )
+
+            cluster_structure.to(fmt=fmt, filename="CLUS_" + str(index) + "." + tail)
+
+    def return_periodic_structure(self, fmt):
         """
         Gathers all periodic clusters in the graph as a single pymatgen Structure
 
@@ -179,25 +191,29 @@ class Graph:
 
         for cluster in self.clusters:
             if cluster.periodic > 0:
-                sites.append(frozenset([int(node.labels["UC_index"]) for node in cluster.nodes]))
+                sites.append(
+                    frozenset([int(node.labels["UC_index"]) for node in cluster.nodes])
+                )
 
         sites = set(sites)
-        cluster_structure = Structure(lattice=self.structure.lattice,species=[],coords=[])
+        cluster_structure = Structure(
+            lattice=self.structure.lattice, species=[], coords=[]
+        )
 
-
-        for index,site_list in enumerate(sites):
+        for index, site_list in enumerate(sites):
             symbols = [species for species in self.structure.symbol_set]
             if "X" in set(symbols):
                 symbols.remove("X")
                 symbols.append("X0+")
             for symbol in symbols:
                 for site in site_list:
-                    
-                    site=self.structure.sites[site]
-                
+
+                    site = self.structure.sites[site]
+
                     if site.species_string == symbol:
-                       cluster_structure.append(symbol,site.coords,coords_are_cartesian=True)
-          
+                        cluster_structure.append(
+                            symbol, site.coords, coords_are_cartesian=True
+                        )
 
         return cluster_structure
 
@@ -210,16 +226,15 @@ class Graph:
         Returns:
             - frac(real): nodes in graph in periodic clusers / total number of nodes
         """
-         
+
         total_nodes = 0
-        periodic_nodes = 0 
+        periodic_nodes = 0
 
         for cluster in self.clusters:
-             
-            total_nodes += len(cluster.return_key_nodes(key='Halo',value=False))
-            
+
+            total_nodes += len(cluster.return_key_nodes(key="Halo", value=False))
+
             if cluster.periodic > 0:
-               periodic_nodes += len(cluster.return_key_nodes(key='Halo',value=False))
+                periodic_nodes += len(cluster.return_key_nodes(key="Halo", value=False))
 
-        return periodic_nodes/total_nodes
-
+        return periodic_nodes / total_nodes

@@ -1,10 +1,9 @@
-
 class minimal_Cluster:
     """
     minimal_Cluster class: minimal cluster object for returning tortuosity data from graph
     """
 
-    def __init__(self,site_indices,size):
+    def __init__(self, site_indices, size):
         """
         Initialise a minimal cluster.
 
@@ -17,5 +16,5 @@ class minimal_Cluster:
 
         self.site_indices = site_indices
         self.periodic = None
-        self.tortuosity = None 
+        self.tortuosity = None
         self.size = size

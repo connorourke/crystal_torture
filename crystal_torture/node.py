@@ -1,11 +1,9 @@
-
-
 class Node:
     """
     Node class
     """
 
-    def __init__(self, index, element, labels, neighbours_ind, neighbours = None):
+    def __init__(self, index, element, labels, neighbours_ind, neighbours=None):
         """
         Initialise a Node.
 
@@ -17,7 +15,7 @@ class Node:
             - neighbours(set{Node}): set of neighbour Nodes for the node in unit cell
             - halo_neigh_ind(set{int}): set of neighbour indices for node in halo
             - halo_neigh(set{Node}): set of neighbour Nodes for this node in halo
-        """    
+        """
         self.index = index
         self.element = element
         self.labels = labels
@@ -25,4 +23,3 @@ class Node:
         self.neighbours = neighbours
         self.tortuosity = None
         self.dist = 0
-    

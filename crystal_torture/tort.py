@@ -2,6 +2,7 @@ from crystal_torture import _tort
 import f90wrap.runtime
 import logging
 
+
 class Tort_Mod(f90wrap.runtime.FortranModule):
     """
     Module tort_mod
@@ -10,6 +11,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
     Defined at tort.f90 lines 1-271
     
     """
+
     class Test_Node(f90wrap.runtime.FortranDerivedType):
         """
         Type(name=test_node)
@@ -18,6 +20,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         Defined at tort.f90 lines 7-16
         
         """
+
         def __init__(self, handle=None):
             """
             self = Test_Node()
@@ -36,7 +39,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             """
             f90wrap.runtime.FortranDerivedType.__init__(self)
             self._handle = _tort.f90wrap_test_node_initialise()
-        
+
         def __del__(self):
             """
             Destructor for class Test_Node
@@ -54,7 +57,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             """
             if self._alloc:
                 _tort.f90wrap_test_node_finalise(this=self._handle)
-        
+
         @property
         def node_index(self):
             """
@@ -65,11 +68,11 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             
             """
             return _tort.f90wrap_test_node__get__node_index(self._handle)
-        
+
         @node_index.setter
         def node_index(self, node_index):
             _tort.f90wrap_test_node__set__node_index(self._handle, node_index)
-        
+
         @property
         def uc_index(self):
             """
@@ -80,11 +83,11 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             
             """
             return _tort.f90wrap_test_node__get__uc_index(self._handle)
-        
+
         @uc_index.setter
         def uc_index(self, uc_index):
             _tort.f90wrap_test_node__set__uc_index(self._handle, uc_index)
-        
+
         @property
         def neigh_ind(self):
             """
@@ -94,34 +97,37 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             Defined at tort.f90 line 14
             
             """
-            array_ndim, array_type, array_shape, array_handle = \
-                _tort.f90wrap_test_node__array__neigh_ind(self._handle)
+            array_ndim, array_type, array_shape, array_handle = _tort.f90wrap_test_node__array__neigh_ind(
+                self._handle
+            )
             if array_handle in self._arrays:
                 neigh_ind = self._arrays[array_handle]
             else:
-                neigh_ind = f90wrap.runtime.get_array(f90wrap.runtime.sizeof_fortran_t,
-                                        self._handle,
-                                        _tort.f90wrap_test_node__array__neigh_ind)
+                neigh_ind = f90wrap.runtime.get_array(
+                    f90wrap.runtime.sizeof_fortran_t,
+                    self._handle,
+                    _tort.f90wrap_test_node__array__neigh_ind,
+                )
                 self._arrays[array_handle] = neigh_ind
             return neigh_ind
-        
+
         @neigh_ind.setter
         def neigh_ind(self, neigh_ind):
             self.neigh_ind[...] = neigh_ind
-        
+
         def __str__(self):
-            ret = ['<test_node>{\n']
-            ret.append('    node_index : ')
+            ret = ["<test_node>{\n"]
+            ret.append("    node_index : ")
             ret.append(repr(self.node_index))
-            ret.append(',\n    uc_index : ')
+            ret.append(",\n    uc_index : ")
             ret.append(repr(self.uc_index))
-            ret.append(',\n    neigh_ind : ')
+            ret.append(",\n    neigh_ind : ")
             ret.append(repr(self.neigh_ind))
-            ret.append('}')
-            return ''.join(ret)
-        
+            ret.append("}")
+            return "".join(ret)
+
         _dt_array_initialisers = []
-        
+
     class Queued_Node(f90wrap.runtime.FortranDerivedType):
         """
         Type(name=queued_node)
@@ -130,6 +136,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         Defined at tort.f90 lines 18-27
         
         """
+
         def __init__(self, handle=None):
             """
             self = Queued_Node()
@@ -148,7 +155,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             """
             f90wrap.runtime.FortranDerivedType.__init__(self)
             self._handle = _tort.f90wrap_queued_node_initialise()
-        
+
         def __del__(self):
             """
             Destructor for class Queued_Node
@@ -166,7 +173,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             """
             if self._alloc:
                 _tort.f90wrap_queued_node_finalise(this=self._handle)
-        
+
         @property
         def node_index(self):
             """
@@ -177,11 +184,11 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
             
             """
             return _tort.f90wrap_queued_node__get__node_index(self._handle)
-        
+
         @node_index.setter
         def node_index(self, node_index):
             _tort.f90wrap_queued_node__set__node_index(self._handle, node_index)
-        
+
         @property
         def next_node(self):
             """
@@ -198,23 +205,23 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
                 next_node = tort_mod.Queued_Node.from_handle(next_node_handle)
                 self._objs[tuple(next_node_handle)] = next_node
             return next_node
-        
+
         @next_node.setter
         def next_node(self, next_node):
             next_node = next_node._handle
             _tort.f90wrap_queued_node__set__next_node(self._handle, next_node)
-        
+
         def __str__(self):
-            ret = ['<queued_node>{\n']
-            ret.append('    node_index : ')
+            ret = ["<queued_node>{\n"]
+            ret.append("    node_index : ")
             ret.append(repr(self.node_index))
-            ret.append(',\n    next_node : ')
+            ret.append(",\n    next_node : ")
             ret.append(repr(self.next_node))
-            ret.append('}')
-            return ''.join(ret)
-        
+            ret.append("}")
+            return "".join(ret)
+
         _dt_array_initialisers = []
-        
+
     @staticmethod
     def allocate_nodes(n, n2):
         """
@@ -230,7 +237,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         
         """
         _tort.f90wrap_allocate_nodes(n=n, n2=n2)
-    
+
     @staticmethod
     def tear_down():
         """
@@ -242,7 +249,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         
         """
         _tort.f90wrap_tear_down()
-    
+
     @staticmethod
     def set_neighbours(ind, uc_ind, n, neigh):
         """
@@ -260,7 +267,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         
         """
         _tort.f90wrap_set_neighbours(ind=ind, uc_ind=uc_ind, n=n, neigh=neigh)
-    
+
     @staticmethod
     def torture(n, uc_nodes):
         """
@@ -276,7 +283,7 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         
         """
         _tort.f90wrap_torture(n=n, uc_nodes=uc_nodes)
-    
+
     @property
     def uc_tort(self):
         """
@@ -286,30 +293,32 @@ class Tort_Mod(f90wrap.runtime.FortranModule):
         Defined at tort.f90 line 31
         
         """
-        array_ndim, array_type, array_shape, array_handle = \
-            _tort.f90wrap_tort_mod__array__uc_tort(f90wrap.runtime.empty_handle)
+        array_ndim, array_type, array_shape, array_handle = _tort.f90wrap_tort_mod__array__uc_tort(
+            f90wrap.runtime.empty_handle
+        )
         if array_handle in self._arrays:
             uc_tort = self._arrays[array_handle]
         else:
-            uc_tort = f90wrap.runtime.get_array(f90wrap.runtime.sizeof_fortran_t,
-                                    f90wrap.runtime.empty_handle,
-                                    _tort.f90wrap_tort_mod__array__uc_tort)
+            uc_tort = f90wrap.runtime.get_array(
+                f90wrap.runtime.sizeof_fortran_t,
+                f90wrap.runtime.empty_handle,
+                _tort.f90wrap_tort_mod__array__uc_tort,
+            )
             self._arrays[array_handle] = uc_tort
         return uc_tort
-    
+
     @uc_tort.setter
     def uc_tort(self, uc_tort):
         self.uc_tort[...] = uc_tort
-    
+
     def __str__(self):
-        ret = ['<tort_mod>{\n']
-        ret.append('    uc_tort : ')
+        ret = ["<tort_mod>{\n"]
+        ret.append("    uc_tort : ")
         ret.append(repr(self.uc_tort))
-        ret.append('}')
-        return ''.join(ret)
-    
+        ret.append("}")
+        return "".join(ret)
+
     _dt_array_initialisers = []
-    
+
 
 tort_mod = Tort_Mod()
-
