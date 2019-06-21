@@ -16,6 +16,11 @@
 * connected clusters of crystal sites (nodes) to be retrieved and output.
 * periodicity of connected clusters of crystal sites to be determined.
 * relative path tortuosity to traverse a crystal within a connected cluster to be calculated for each site.
+
+Ionic diffusion through crystalline solids depends not only on the dynamics of ions within the crystal, but also the connectivity of the transport network. Understanding how the connectivity of diffusion pathways in crystal structures is affected by changes in chemistry is necessary for understanding how chemical modifications change ionic conductivities, for example the doping of solid electrolytes.
+
+`crystal-torture` provides a [Python API](https://crystal-torture.readthedocs.io/en/latest/) for interrogating network connectivity and diffusion pathways in partially blocked crystal structures. It can be used as a tool for materials scientists to quickly build up network connectivity statistics in order to determine the viability of potential ionic conductors, and how chemical modification affects network connectivity, before the use of more computationally expensive approaches modelling the full dynamics.
+
  
 ## Installation
 
