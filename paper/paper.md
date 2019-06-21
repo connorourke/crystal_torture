@@ -24,7 +24,8 @@ bibliography: paper.bib
 ---
 # Summary
 
-`crystal-torture` is a Python, Fortran, and OpenMP module for the analysis of diffusion networks in crystal structures.  Ionic diffusion through crystalline solids depends not only on the dynamics of ions within the crystal, but also the connectivity of the transport network. `crystal-torture` provides a [Python API](https://crystal-torture.readthedocs.io/en/latest/) for interrogating network connectivity and diffusion pathways in partially blocked crystal structures. It can be used as a tool for materials scientists to quickly build up network connectivity statistics to determine the viability of potential ionic conductors, before the use of more computationally expensive approaches modelling the full dynamics.
+`crystal-torture` is a Python, Fortran, and OpenMP module for the analysis of diffusion networks in crystal structures. Ionic diffusion through crystalline solids depends not only on the dynamics of ions within the crystal, but also the connectivity of the transport network. Understanding how the connectivity of diffusion pathways in crystal structures is affected by changes in chemistry is necessary for understanding how chemical modifications change ionic conductivities, for example the doping of solid electrolytes.
+ `crystal-torture` provides a [Python API](https://crystal-torture.readthedocs.io/en/latest/) for interrogating network connectivity and diffusion pathways in partially blocked crystal structures. It can be used as a tool for materials scientists to quickly build up network connectivity statistics to determine the viability of potential ionic conductors, and how chemical modification affects network connectivity, before the use of more computationally expensive approaches modelling the full dynamics.
 
 
 # Scientific Context
