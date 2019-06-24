@@ -1,4 +1,4 @@
-|JOSS status| |PyPI version| |Build Status| |Coverage Status| |Documentation Status| |Python 3.5| |Python 3.6| |Python 3.7|
+|JOSS status| |DOI| |PyPI version| |Build Status| |Coverage Status| |Documentation Status| |Python 3.5| |Python 3.6| |Python 3.7|
 
 **crystal\_torture:**
 ---------------------
@@ -77,4 +77,5 @@ Documentation can be found
    :target: https://www.python.org/downloads/release/python-360/
 .. |Python 3.7| image:: https://img.shields.io/badge/python-3.7-blue.svg 
    :target: https://www.python.org/downloads/release/python-360/
-
+.. |DOI| image:: https://zenodo.org/badge/139595328.svg
+   :target: https://zenodo.org/badge/latestdoi/139595328
