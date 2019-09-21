@@ -1,4 +1,4 @@
-|JOSS status| |DOI| |PyPI version| |Build Status| |Coverage Status| |Documentation Status| |Python 3.5| |Python 3.6| |Python 3.7|
+|JOSS status| |DOI| |PyPI version| |Build Status| |Coverage Status| |Documentation Status| |Python 3.6| |Python 3.7|
 
 **crystal\_torture:**
 ---------------------
@@ -16,7 +16,7 @@ analysis module. The module contains a set of classes that enable:
 Installation
 ------------
 
-``crystal_torture`` requires python 3.5 and above. To install do:
+``crystal_torture`` requires python 3.6 and above. To install do:
 
 ::
 
@@ -71,8 +71,6 @@ Documentation can be found
    :target: https://coveralls.io/github/connorourke/crystal_torture?branch=master
 .. |Documentation Status| image:: https://readthedocs.org/projects/crystal-torture/badge/?version=latest
    :target: https://crystal-torture.readthedocs.io/en/latest/?badge=latest
-.. |Python 3.5| image:: https://img.shields.io/badge/python-3.5-blue.svg 
-   :target: https://www.python.org/downloads/release/python-360/
 .. |Python 3.6| image:: https://img.shields.io/badge/python-3.6-blue.svg 
    :target: https://www.python.org/downloads/release/python-360/
 .. |Python 3.7| image:: https://img.shields.io/badge/python-3.7-blue.svg 

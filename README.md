@@ -5,7 +5,6 @@
 [![Build Status](https://travis-ci.com/connorourke/crystal_torture.svg?token=nTMqYYEUasQRTBsU6oCc&branch=master)](https://travis-ci.com/connorourke/crystal_torture)
 [![Coverage Status](https://coveralls.io/repos/github/connorourke/crystal_torture/badge.svg?branch=master)](https://coveralls.io/github/connorourke/crystal_torture?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/crystal-torture/badge/?version=latest)](https://crystal-torture.readthedocs.io/en/latest/?badge=latest)
-[![Python 3.5](https://img.shields.io/badge/python-3.5-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-360/)
 
@@ -25,7 +24,7 @@ Ionic diffusion through crystalline solids depends not only on the dynamics of i
  
 ## Installation
 
-`crystal_torture` requires python 3.5 and above. To install do:
+`crystal_torture` requires python 3.6 and above. To install do:
 
 ```
 pip install crystal_torture

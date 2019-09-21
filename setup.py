@@ -131,7 +131,7 @@ if __name__ == '__main__':
               'author':'Conn O\'Rourke',
      'author_email':'conn.orourke@gmail.com',
      'url':'https://github.com/connorourke/crystal_torture',
-     'python_requires':'>=3.5',
+     'python_requires':'>=3.6',
      'packages':['crystal_torture'],
      'package_dir':{'crystal_torture':'crystal_torture'},
      'package_data':{'crystal_torture':['*so','*tort*','*dist*','*o*']},
