@@ -55,9 +55,13 @@ def check_f2py_compiler():
         print('Found gnu compiler. Setting OpenMP flag to \'-fopenmp\'')
         compile_args = ['-fopenmp', '-lgomp', '-O3']
         link_args = ['-lgomp']
-    elif 'intel' in f2py_compiler:
+    elif f2py_compiler =='intel':
         print('Found intel compiler. Setting OpenMP flag to \'-openmp\'')
         compile_args = ['-openmp', '-O3']
+        link_args = []
+    elif f2py_compiler == 'intelem':
+        print('Found intel compiler. Setting OpenMP flag to \'-openmp\'')
+        compile_args = ['-qopenmp', '-O3']
         link_args = []
     elif 'pg' in f2py_comopiler:
         print('Found portland compiler. Setting OpenMP flag to \'-mp\'')
