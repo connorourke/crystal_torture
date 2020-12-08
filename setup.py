@@ -19,6 +19,9 @@ def setup_tort_ext(args,parent_package='',top_path=''):
     from os.path import join
 
     config = Configuration('',parent_package,top_path)
+
+    try config.have_f90c():
+
     tort_src = [join('crystal_torture/','tort.f90')]
 
     config.add_library('_tort', sources=tort_src,
@@ -44,11 +47,17 @@ def setup_tort_ext(args,parent_package='',top_path=''):
 
 
 def check_f2py_compiler():
-    from numpy.distutils.fcompiler import get_default_fcompiler
+    from numpy.distutils.fcompiler import get_default_fcompiler, CompilerNotFound
+    from numpy.distutils.fcompiler import CompilerNotFound
     f2py_compiler = get_default_fcompiler()
+    
+    if f2py_compiler == None:
+        raise CompilerNotFound('You don\'t have a Fortran compiler installed. Please install one and try again')
+        sys.exit()
+        
 
     if 'gnu' not in f2py_compiler:
-        print(' GNU compiler not installed. Checking f2py comompiler - this is UNTESTED' )
+        print(' GNU compiler not installed. Checking f2py compiler - this is UNTESTED' )
         print(' Speculatively setting flags - if compile fails, or OpenMP doesn\'t work install gfortran and retry')
 
     if 'gnu' in f2py_compiler:
@@ -57,7 +66,7 @@ def check_f2py_compiler():
         link_args = ['-lgomp']
     elif f2py_compiler =='intel':
         print('Found intel compiler. Setting OpenMP flag to \'-openmp\'')
-        compile_args = ['-openmp', '-O3']
+        compile_args = ['-qopenmp', '-O3']
         link_args = []
     elif f2py_compiler == 'intelem':
         print('Found intel compiler. Setting OpenMP flag to \'-openmp\'')
@@ -70,7 +79,7 @@ def check_f2py_compiler():
     elif 'nag' in f2py_compiler:
         print('Found NAG compiler. Setting OpenMP flag to \'-openmp\'')
         compile_args = ['-openmp', '-O3']
-        link_args = [] 
+        link_args = []
     else:   
         print('Not sure what compiler f2py uses. Speculatively setting OpenMP flag to \'-openmp\'')
         compile_args = ['-openmp', '-O3']
