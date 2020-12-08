@@ -20,7 +20,6 @@ def setup_tort_ext(args,parent_package='',top_path=''):
 
     config = Configuration('',parent_package,top_path)
 
-    try config.have_f90c():
 
     tort_src = [join('crystal_torture/','tort.f90')]
 
