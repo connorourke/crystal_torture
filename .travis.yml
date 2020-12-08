@@ -24,6 +24,7 @@ os:
    - linux     
 
 install:
+   - pip install -U numpy
    - pip install -r requirements.txt
    - pip install -U numpy
 before_script:
