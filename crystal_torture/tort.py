@@ -1,5 +1,5 @@
 from __future__ import print_function, absolute_import, division
-import tort
+import _tort
 import f90wrap.runtime
 import logging
 
