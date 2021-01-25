@@ -1,8 +1,7 @@
 from __future__ import print_function, absolute_import, division
-import tort
+from crystal_torture import _tort
 import f90wrap.runtime
 import logging
-
 
 class Tort_Mod(f90wrap.runtime.FortranModule):
     """
