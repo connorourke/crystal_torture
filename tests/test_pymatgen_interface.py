@@ -7,7 +7,7 @@ from crystal_torture.pymatgen_interface import (
     clusters_from_structure,
     graph_from_structure,
 )
-from pymatgen import Structure
+from pymatgen.core import Structure
 
 
 class PymatgenTestCase(unittest.TestCase):

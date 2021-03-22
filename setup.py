@@ -143,7 +143,7 @@ if __name__ == '__main__':
               'author':'Conn O\'Rourke',
      'author_email':'conn.orourke@gmail.com',
      'url':'https://github.com/connorourke/crystal_torture',
-     'python_requires':'>=3.6',
+     'python_requires':'>=3.7',
      'packages':['crystal_torture'],
      'package_dir':{'crystal_torture':'crystal_torture'},
      'package_data':{'crystal_torture':['*so','*tort*','*dist*','*o*']},
@@ -153,7 +153,7 @@ if __name__ == '__main__':
                           'coverage',
                           'f90wrap',
                           'numpy',
-                          'pymatgen>=2019.4.11'
+                          'pymatgen>=2022.0.0'
                           ]
 }
 

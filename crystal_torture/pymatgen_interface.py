@@ -3,7 +3,7 @@ from crystal_torture.cluster import Cluster
 from crystal_torture.graph import Graph
 from crystal_torture import dist
 from crystal_torture import tort
-from pymatgen import Structure, Molecule, PeriodicSite
+from pymatgen.core import Structure, Molecule, PeriodicSite
 import numpy as np
 import itertools
 import math

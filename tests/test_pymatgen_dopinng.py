@@ -9,7 +9,7 @@ from crystal_torture.pymatgen_doping import (
     sort_structure,
     index_sites,
 )
-from pymatgen import Structure
+from pymatgen.core import Structure
 from ddt import ddt, data, unpack
 
 

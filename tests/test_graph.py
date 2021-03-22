@@ -1,7 +1,7 @@
 import unittest
 import os
 from unittest.mock import Mock
-from pymatgen import Structure
+from pymatgen.core import Structure
 from crystal_torture import Cluster, Graph, Node, tort
 from crystal_torture.pymatgen_interface import graph_from_file, clusters_from_file
 from ddt import ddt, data, unpack

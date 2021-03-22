@@ -1,6 +1,6 @@
 # from crystal_torture.cluster import  Cluster
 # from crystal_torture.pymatgen_interface import clusters_from_file
-from pymatgen import Structure
+from pymatgen.core import Structure
 from crystal_torture.minimal_cluster import minimal_Cluster
 from crystal_torture import tort
 
