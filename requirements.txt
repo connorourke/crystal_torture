@@ -1,5 +1,5 @@
 coverage
 ddt
-numpy
-f90wrap
+numpy>=1.20.3
+f90wrap>=0.2.3
 pymatgen>=2022.0.0
