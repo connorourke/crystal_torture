@@ -151,8 +151,8 @@ if __name__ == '__main__':
      'license': 'MIT',
      'install_requires': ['ddt',
                           'coverage',
-                          'f90wrap',
-                          'numpy',
+                          'f90wrap>=0.2.3',
+                          'numpy>=1.20.3',
                           'pymatgen>=2022.0.0'
                           ]
 }
