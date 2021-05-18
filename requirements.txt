@@ -1,5 +1,5 @@
 coverage
 ddt
-numpy>=1.20.3
-f90wrap>=0.2.3
+numpy
+#f90wrap need to install from git for bug fix - change back when pypi updated
 pymatgen>=2022.0.0

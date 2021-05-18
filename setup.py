@@ -104,6 +104,16 @@ def install_numpy():
         cmd = ['pip install numpy']
     subprocess.call(cmd, shell=True)
 
+def install_f90warp():
+    cmd = ['git clone https://github.com/jameskermode/f90wrap']
+    subprocess.call(cmd, shell=True)
+    if '--user' in sys.argv:
+        cmd = ['pip install ./f90wrap --user']
+    else:
+        cmd = ['pip install ./f90wrap']
+    subprocess.call(cmd, shell=True)
+
+    pip install ./f90wrap
 def build_f90_src_for_tests():
     os.chdir('crystal_torture/')
     subprocess.call('pwd', shell=True)
@@ -123,6 +133,7 @@ if __name__ == '__main__':
     except AssertionError:
         sys.exit("Exiting: Please use python version > 3.5")
     install_numpy()
+    install_f90wrap()
     from numpy.distutils.core import setup
     install_dependencies()
     build_f90_src_for_tests()
@@ -151,10 +162,10 @@ if __name__ == '__main__':
      'license': 'MIT',
      'install_requires': ['ddt',
                           'coverage',
-                          'f90wrap>=0.2.3',
-                          'numpy>=1.20.3',
+                          'numpy',
                           'pymatgen>=2022.0.0'
                           ]
+                         # 'f90wrap' - needs to be installed from repo for bug fix until pypi updated
 }
 
     config_tort = setup_tort_ext(args,parent_package='crystal_torture',top_path='')

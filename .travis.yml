@@ -25,6 +25,8 @@ os:
 install:
    - pip install -U numpy
    - pip install -r requirements.txt
+   - git clone https://github.com/jameskermode/f90wrap
+   - pip install ./f90wrap 
    - pip install -U numpy
 before_script:
    - gfortran -v
