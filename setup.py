@@ -1,6 +1,7 @@
 import sys
 import os
 
+
 def return_major_minor_python():
     return str(sys.version_info[0])+"."+str(sys.version_info[1])
 
