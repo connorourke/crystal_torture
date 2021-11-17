@@ -105,7 +105,7 @@ def install_numpy():
         cmd = ['pip install numpy']
     subprocess.call(cmd, shell=True)
 
-def install_f90warp():
+def install_f90wrap():
     cmd = ['git clone https://github.com/jameskermode/f90wrap']
     subprocess.call(cmd, shell=True)
     if '--user' in sys.argv:
@@ -114,7 +114,7 @@ def install_f90warp():
         cmd = ['pip install ./f90wrap']
     subprocess.call(cmd, shell=True)
 
-    pip install ./f90wrap
+    #pip install ./f90wrap
 def build_f90_src_for_tests():
     os.chdir('crystal_torture/')
     subprocess.call('pwd', shell=True)
