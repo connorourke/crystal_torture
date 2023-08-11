@@ -6,3 +6,4 @@ certifi
 docutils
 ddt
 coverage
+-r ../requirements.txt
