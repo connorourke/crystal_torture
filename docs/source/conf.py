@@ -21,7 +21,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
         return MagicMock()
 
-MOCK_MODULES = ['numpy','dist','_tort','tort','f90wrap','crystal_torture._tort','crystal_torture.dist','crystal_torture.tort']
+MOCK_MODULES = ['dist','_tort','tort','f90wrap','crystal_torture._tort','crystal_torture.dist','crystal_torture.tort']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
