@@ -17,7 +17,7 @@ jobs:
           uses: actions/setup-python@v2
           with:
             python-version: ${{matrix.python-version}}
-        - name: Before install:
+        - name: Before install
           run: |
             sudo apt-get install gfortran
             pip install coveralls
