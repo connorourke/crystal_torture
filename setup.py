@@ -1,175 +1,139 @@
-import sys
+"""Setup script for crystal_torture package."""
 import os
+import sys
+import subprocess
+from pathlib import Path
+
+# Only import setuptools components that we need
+from setuptools import setup
+from setuptools.command.build_py import build_py
+from setuptools.command.develop import develop
+from setuptools.command.install import install
 
 
-def return_major_minor_python():
-    return str(sys.version_info[0])+"."+str(sys.version_info[1])
-
-
-def check_python_version():
-    if sys.version_info[0] >= 3 and sys.version_info[1] >= 5:
-       return True 
-    return False
-
-def return_include_dir():
-    from distutils.util import get_platform    
-    return get_platform()+'-'+return_major_minor_python()
-
-def setup_tort_ext(args,parent_package='',top_path=''):
-    from numpy.distutils.misc_util import Configuration
-    from os.path import join
-
-    config = Configuration('',parent_package,top_path)
-
-
-    tort_src = [join('crystal_torture/','tort.f90')]
-
-    config.add_library('_tort', sources=tort_src,
-                           extra_f90_compile_args = args["compile_args"],
-                           extra_link_args=args["link_args"])
-
-    sources = [join('crystal_torture','f90wrap_tort.f90')]
+def build_fortran_extensions():
+    """Build the Fortran extensions using the original build script."""
+    # Change to crystal_torture directory for compilation
+    original_dir = os.getcwd()
+    crystal_torture_dir = Path(__file__).parent / "crystal_torture"
     
-    config.add_extension(name='_tort',
-                          sources=sources,
-                          extra_f90_compile_args = args["compile_args"],
-                          extra_link_args=args["link_args"],
-                          libraries=['_tort'],
-                          include_dirs=['build/temp.' + return_include_dir()])
-
-    dist_src = [join('crystal_torture/','dist.f90')]
-    config.add_extension(name='dist',
-                          sources=dist_src,
-                          extra_f90_compile_args = args["compile_args"],
-                          extra_link_args=args["link_args"])
-
-    return config
-
-
-def check_f2py_compiler():
-    from numpy.distutils.fcompiler import get_default_fcompiler, CompilerNotFound
-    from numpy.distutils.fcompiler import CompilerNotFound
-    f2py_compiler = get_default_fcompiler()
-    
-    if f2py_compiler == None:
-        raise CompilerNotFound('You don\'t have a Fortran compiler installed. Please install one and try again')
-        sys.exit()
-        
-
-    if 'gnu' not in f2py_compiler:
-        print(' GNU compiler not installed. Checking f2py compiler - this is UNTESTED' )
-        print(' Speculatively setting flags - if compile fails, or OpenMP doesn\'t work install gfortran and retry')
-
-    if 'gnu' in f2py_compiler:
-        print('Found gnu compiler. Setting OpenMP flag to \'-fopenmp\'')
-        compile_args = ['-fopenmp', '-lgomp', '-O3']
-        link_args = ['-lgomp']
-    elif f2py_compiler =='intel':
-        print('Found intel compiler. Setting OpenMP flag to \'-openmp\'')
-        compile_args = ['-qopenmp', '-O3']
-        link_args = []
-    elif f2py_compiler == 'intelem':
-        print('Found intel compiler. Setting OpenMP flag to \'-openmp\'')
-        compile_args = ['-qopenmp', '-O3']
-        link_args = []
-    elif 'pg' in f2py_comopiler:
-        print('Found portland compiler. Setting OpenMP flag to \'-mp\'')
-        compile_args = ['-mp', '-O3']
-        link_args = []
-    elif 'nag' in f2py_compiler:
-        print('Found NAG compiler. Setting OpenMP flag to \'-openmp\'')
-        compile_args = ['-openmp', '-O3']
-        link_args = []
-    else:   
-        print('Not sure what compiler f2py uses. Speculatively setting OpenMP flag to \'-openmp\'')
-        compile_args = ['-openmp', '-O3']
-        link_args = [] 
-
-    args = {'link_args':link_args,'compile_args':compile_args}
-
-    return args
-
-
-
-def install_dependencies():
-    if '--user' in sys.argv:
-        cmd = ['pip install -r requirements.txt --user']
-    else:
-        cmd = ['pip install -r requirements.txt']
-    subprocess.call(cmd, shell=True)
-
-def install_numpy():
-    if '--user' in sys.argv:
-        cmd = ['pip install numpy --user']
-    else:
-        cmd = ['pip install numpy']
-    subprocess.call(cmd, shell=True)
-
-def install_f90wrap():
-    cmd = ['git clone https://github.com/jameskermode/f90wrap']
-    subprocess.call(cmd, shell=True)
-    if '--user' in sys.argv:
-        cmd = ['pip install ./f90wrap --user']
-    else:
-        cmd = ['pip install ./f90wrap']
-    subprocess.call(cmd, shell=True)
-
-    #pip install ./f90wrap
-def build_f90_src_for_tests():
-    os.chdir('crystal_torture/')
-    subprocess.call('pwd', shell=True)
-    subprocess.call('ls', shell=True)
-    subprocess.call('./build_tort.sh', shell=True)
-    os.chdir('../')
-
-
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
-
-if __name__ == '__main__':
-    import subprocess
-#    from setuptools import setup
     try:
-        assert(check_python_version() )
-    except AssertionError:
-        sys.exit("Exiting: Please use python version > 3.5")
-    install_numpy()
-    install_f90wrap()
-    from numpy.distutils.core import setup
-    install_dependencies()
-    build_f90_src_for_tests()
+        os.chdir(crystal_torture_dir)
+        
+        # Make build script executable and run it
+        build_script = Path("build_tort.sh")
+        if build_script.exists():
+            # Make executable
+            os.chmod(build_script, 0o755)
+            # Run the build script
+            result = subprocess.run(["bash", str(build_script)], 
+                                  capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"Build script failed with return code {result.returncode}")
+                print(f"STDOUT: {result.stdout}")
+                print(f"STDERR: {result.stderr}")
+                raise RuntimeError("Failed to build Fortran extensions")
+        else:
+            print("Warning: build_tort.sh not found. Trying manual build...")
+            _manual_build()
+            
+    except Exception as e:
+        print(f"Error building Fortran extensions: {e}")
+        print("Make sure you have gfortran and f90wrap installed.")
+        # Don't raise here - allow installation to continue for development
+    finally:
+        os.chdir(original_dir)
 
-    exec(open('crystal_torture/version.py').read())
+
+def _manual_build():
+    """Manually build the extensions if build script is missing."""
+    try:
+        # Build dist extension
+        subprocess.run([
+            "f2py", "-c", "--opt=-O3", "--f90flags=-fopenmp",
+            "-lgomp", "-m", "dist", "dist.f90"
+        ], check=True)
+        
+        # Compile tort.f90 to object file
+        subprocess.run([
+            "gfortran", "-O3", "-Wall", "-c", "-fopenmp", 
+            "-fPIC", "tort.f90"
+        ], check=True)
+        
+        # Build tort extension with f90wrap
+        subprocess.run([
+            "f2py-f90wrap", "-c", "--opt=-O3", 
+            "--f90flags=-fopenmp", "-lgomp", 
+            "-m", "_tort", "f90wrap_tort.f90", "tort.o"
+        ], check=True)
+        
+    except subprocess.CalledProcessError as e:
+        print(f"Manual build failed: {e}")
+        raise
+
+
+class CustomBuildPy(build_py):
+    """Custom build_py to build Fortran extensions."""
     
-    args = check_f2py_compiler()
-    this_directory = os.path.abspath(os.path.dirname(__file__))
+    def run(self):
+        # Build Fortran extensions first
+        build_fortran_extensions()
+        # Then run normal build_py
+        super().run()
 
-    with open(os.path.join(this_directory, 'README.rst')) as f:
-        long_description = f.read()
 
-    config = {'name':'CrystalTorture',
-              'version':__version__,
-              'description':'A Crystal Tortuosity Module',
-              'long_description': long_description,
-              'long_description_content_type':"text/x-rst",
-              'author':'Conn O\'Rourke',
-     'author_email':'conn.orourke@gmail.com',
-     'url':'https://github.com/connorourke/crystal_torture',
-     'python_requires':'>=3.7',
-     'packages':['crystal_torture'],
-     'package_dir':{'crystal_torture':'crystal_torture'},
-     'package_data':{'crystal_torture':['*so','*tort*','*dist*','*o*']},
-     'include_package_data':True,
-     'license': 'MIT',
-     'install_requires': ['ddt',
-                          'coverage',
-                          'numpy',
-                          'pymatgen>=2022.0.0'
-                          ]
-                         # 'f90wrap' - needs to be installed from repo for bug fix until pypi updated
-}
+class CustomDevelop(develop):
+    """Custom develop command to build Fortran extensions."""
+    
+    def run(self):
+        # Build Fortran extensions first
+        build_fortran_extensions()
+        # Then run normal develop
+        super().run()
 
-    config_tort = setup_tort_ext(args,parent_package='crystal_torture',top_path='')
-    config2 = dict(config,**config_tort.todict())
-    setup(**config2)   
 
+class CustomInstall(install):
+    """Custom install command to build Fortran extensions."""
+    
+    def run(self):
+        # Build Fortran extensions first
+        build_fortran_extensions()
+        # Then run normal install
+        super().run()
+
+
+def check_fortran_compiler():
+    """Check if gfortran is available."""
+    try:
+        subprocess.run(["gfortran", "--version"], 
+                      capture_output=True, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+
+def main():
+    """Main setup function."""
+    # Check for Fortran compiler
+    if not check_fortran_compiler():
+        print("Warning: gfortran not found. Fortran extensions may not build.")
+        print("Please install gfortran to enable full functionality.")
+    
+    # Read version from version.py
+    version_file = Path(__file__).parent / "crystal_torture" / "version.py"
+    version_globals = {}
+    exec(version_file.read_text(), version_globals)
+    version = version_globals["__version__"]
+    
+    setup(
+        version=version,
+        cmdclass={
+            "build_py": CustomBuildPy,
+            "develop": CustomDevelop,
+            "install": CustomInstall,
+        },
+    )
+
+
+if __name__ == "__main__":
+    main()

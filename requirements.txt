@@ -1,5 +1,11 @@
+# Core dependencies
+numpy>=1.19.0
+pymatgen>=2022.0.0
+
+# Development and testing dependencies
+pytest>=6.0
+pytest-cov
 coverage
 ddt
-numpy
-#f90wrap need to install from git for bug fix - change back when pypi updated
-pymatgen>=2022.0.0
+
+# Note: f90wrap is installed as a build dependency via pyproject.toml
