@@ -1,14 +1,21 @@
 from crystal_torture.node import Node
 from crystal_torture.cluster import Cluster
 from crystal_torture.graph import Graph
-from crystal_torture import dist
-from pymatgen.core import Structure, Molecule, PeriodicSite
 import numpy as np
 import itertools
 import math
 import copy
 import sys
 import time
+from pymatgen.core import Structure, Molecule, PeriodicSite
+
+try:
+    from . import dist
+except ImportError:
+    dist = None
+    import warnings
+    warnings.warn("Fortran dist module not available. Some functions will not work.",
+                  UserWarning)
 
 try:
     from . import tort
@@ -19,6 +26,48 @@ except ImportError:
                   UserWarning)
 
 "Functions for setting up a node, cluster and graph using pymatgen"
+
+
+def _python_dist(coord1, coord2, n):
+    """
+    Pure Python fallback for distance calculation when Fortran dist module is not available.
+    
+    Args:
+        coord1: Array of coordinates
+        coord2: Array of coordinates  
+        n: Number of coordinates
+        
+    Returns:
+        Distance matrix
+    """
+    dist_matrix = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            dist_matrix[i, j] = np.sqrt(
+                (coord1[i, 0] - coord2[j, 0])**2 + 
+                (coord1[i, 1] - coord2[j, 1])**2 + 
+                (coord1[i, 2] - coord2[j, 2])**2
+            )
+    return dist_matrix
+
+
+def _python_shift_index(index_n, shift):
+    """
+    Pure Python fallback for index shifting when Fortran dist module is not available.
+    
+    Args:
+        index_n: Original index
+        shift: Shift vector [x, y, z]
+        
+    Returns:
+        New shifted index
+    """
+    new_x = (int(index_n // 9) % 3 + shift[0]) % 3
+    new_y = (int(index_n // 3) % 3 + shift[1]) % 3  
+    new_z = (index_n % 3 + shift[2]) % 3
+    
+    new_index = int(27 * int(index_n // 27) + (new_x % 3) * 9 + (new_y % 3) * 3 + (new_z % 3))
+    return new_index
 
 
 def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
@@ -41,6 +90,10 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
         - neigh ([[int]...[int]]): list of neighbour indices for all nodes
 
     """
+    if dist is None:
+        shift_func = _python_shift_index
+    else:
+        shift_func = dist.shift_index
 
     no_atoms = len(uc_index)
     count = -1
@@ -53,7 +106,7 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
                     count += 1
                     append(
                         [
-                            dist.shift_index(neighbour, [x, y, z])
+                            shift_func(neighbour, [x, y, z])
                             for neighbour in uc_neighbours[i]
                         ]
                     )
@@ -95,6 +148,12 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
 
 
     """
+    # Choose distance calculation function based on availability
+    if dist is None:
+        dist_func = _python_dist
+    else:
+        dist_func = dist.dist
+    
     recp_len = np.array(structure.lattice.reciprocal_lattice.abc)
     maxr = np.ceil((r + 0.15) * recp_len / (2 * math.pi))
     nmin = np.floor(np.min(structure.frac_coords, axis=0)) - maxr
@@ -111,7 +170,7 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
     indices = np.arange(len(structure))
     for image in itertools.product(*all_ranges):
         coords = latt.get_cartesian_coords(image) + coords_in_cell
-        all_dists = dist.dist(coords, site_coords, len(coords))
+        all_dists = dist_func(coords, site_coords, len(coords))
         all_within_r = np.bitwise_and(all_dists <= r, all_dists > 1e-8)
 
         for (j, d, within_r) in zip(indices, all_dists, all_within_r):
@@ -145,6 +204,11 @@ def create_halo(structure, neighbours):
 
 
     """
+    if dist is None:
+        shift_func = _python_shift_index
+    else:
+        shift_func = dist.shift_index
+        
     x = 3
     y = 3
     z = 3
@@ -152,7 +216,7 @@ def create_halo(structure, neighbours):
     no_sites = len(structure.sites)
     for i in range(no_sites):
         neighbours[i] = [
-            dist.shift_index((27 * neighbour[2]), neighbour[3])
+            shift_func((27 * neighbour[2]), neighbour[3])
             for neighbour in neighbours[i]
         ]
 
