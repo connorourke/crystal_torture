@@ -2,7 +2,6 @@ from crystal_torture.node import Node
 from crystal_torture.cluster import Cluster
 from crystal_torture.graph import Graph
 from crystal_torture import dist
-from crystal_torture import tort
 from pymatgen.core import Structure, Molecule, PeriodicSite
 import numpy as np
 import itertools
@@ -10,6 +9,14 @@ import math
 import copy
 import sys
 import time
+
+try:
+    from . import tort
+except ImportError:
+    tort = None
+    import warnings
+    warnings.warn("Fortran tort module not available. Some functions will not work.",
+                  UserWarning)
 
 "Functions for setting up a node, cluster and graph using pymatgen"
 
@@ -262,7 +269,9 @@ def set_fort_nodes(nodes):
        - tort.tort_mod.uc_tort(:) : allocates space to hold unit cell node tortuosity for full graph
   
     """
-
+    if tort is None:
+        raise ImportError("Fortran extensions not available. Cannot set up Fortran nodes.")
+    
     tort.tort_mod.allocate_nodes(
         len(nodes), len([node for node in nodes if node.labels["Halo"] == False])
     )
@@ -273,7 +282,6 @@ def set_fort_nodes(nodes):
             len(node.neighbours_ind),
             [ind for ind in node.neighbours_ind],
         )
-
 
 def clusters_from_file(filename, rcut, elements):
     """

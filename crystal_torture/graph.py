@@ -2,8 +2,14 @@
 # from crystal_torture.pymatgen_interface import clusters_from_file
 from pymatgen.core import Structure
 from crystal_torture.minimal_cluster import minimal_Cluster
-from crystal_torture import tort
 
+try:
+    from . import tort
+except ImportError:
+    tort = None
+    import warnings
+    warnings.warn("Fortran tort module not available. Only torture_py() method will work.",
+                  UserWarning)
 
 class Graph:
     """

@@ -2,9 +2,16 @@ from crystal_torture.node import Node
 import copy
 import sys
 from queue import Queue
-from crystal_torture import tort
 from threading import Thread
 import numpy as np
+
+try:
+    from . import tort
+except ImportError:
+    tort = None
+    import warnings
+    warnings.warn("Fortran tort module not available. Only torture_py() method will work.", 
+                  UserWarning)
 
 
 class Cluster:
@@ -185,14 +192,15 @@ class Cluster:
 
         Returns:
            None
-        
+    
         Sets:
            node.tortuosity (int): tortuosity for node
            self.tortuosity (int): average tortuosity for cluster
 
-
         """
-
+        if tort is None:
+            raise ImportError("Fortran extensions not available. Use torture_py() instead.")
+    
         uc_nodes = [
             node.index for node in self.return_key_nodes(key="Halo", value=False)
         ]
