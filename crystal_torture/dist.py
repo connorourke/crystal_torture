@@ -1,6 +1,4 @@
-"""
-dist.py - ctypes wrapper for Fortran distance calculation functions
-"""
+"""Distance calculation module - ctypes wrapper for Fortran distance functions."""
 import ctypes
 import numpy as np
 from pathlib import Path
@@ -16,7 +14,7 @@ try:
     if platform.system() == "Darwin":  # macOS
         lib_patterns = ["libdist*.dylib", "libdist*.so"]
     elif platform.system() == "Windows":
-        lib_patterns = ["libdist*.dll"]
+        lib_patterns = ["libdist*.dll", "libdist*.pyd"]
     else:  # Linux and others
         lib_patterns = ["libdist*.so"]
     
@@ -24,6 +22,8 @@ try:
     for pattern in lib_patterns:
         lib_files = list(package_dir.glob(pattern))
         if lib_files:
+            # Sort to get the most specific match first
+            lib_files.sort(key=lambda x: len(x.name), reverse=True)
             lib_file = lib_files[0]
             break
     
@@ -53,10 +53,13 @@ try:
         _dist_lib.shift_index_.restype = None
         
         _DIST_AVAILABLE = True
+        print(f"Successfully loaded Fortran dist library: {lib_file.name}")
     else:
         _dist_lib = None
         _DIST_AVAILABLE = False
-        warnings.warn("Fortran dist module not available. Some functions will not work.",
+        # List what files were actually found for debugging
+        all_files = [f.name for f in package_dir.iterdir() if f.is_file()]
+        warnings.warn(f"Fortran dist module not available. Files in package: {all_files}",
                       UserWarning)
         
 except Exception as e:
@@ -67,16 +70,15 @@ except Exception as e:
 
 
 def dist(coord1, coord2, n):
-    """
-    Compute distance matrix between two sets of coordinates.
+    """Compute distance matrix between two sets of coordinates.
     
     Args:
-        coord1: Array of coordinates (n x 3)
-        coord2: Array of coordinates (n x 3)  
-        n: Number of coordinates
+        coord1: Array of coordinates (n x 3).
+        coord2: Array of coordinates (n x 3).
+        n: Number of coordinates.
         
     Returns:
-        Distance matrix (n x n)
+        Distance matrix (n x n).
     """
     if not _DIST_AVAILABLE:
         # Fallback to Python implementation
@@ -103,16 +105,16 @@ def dist(coord1, coord2, n):
 
 
 def shift_index(index_n, shift):
-    """
-    Shift the index of a site in the unit cell to the corresponding
-    index in the 3x3x3 halo supercell.
+    """Shift the index of a site in the unit cell to the corresponding index in the 3x3x3 halo supercell.
+    
+    Used when getting neighbour list for supercell from unit cell neighbour list.
     
     Args:
-        index_n: Original index
-        shift: Shift vector [x, y, z]
+        index_n: Original index.
+        shift: Shift vector [x, y, z].
         
     Returns:
-        New shifted index
+        New shifted index for image site in supercell.
     """
     if not _DIST_AVAILABLE:
         # Fallback to Python implementation

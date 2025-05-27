@@ -4,18 +4,18 @@ project('crystal_torture', 'fortran',
   meson_version: '>= 0.64.0'
 )
 
-# Find Python and NumPy
+# Find Python installation and dependencies
 py = import('python').find_installation(pure: false)
 py_dep = py.dependency()
 np_dep = dependency('numpy')
 
-# Get Fortran compiler
+# Configure Fortran compiler
 fc = meson.get_compiler('fortran')
 
-# Basic Fortran flags
+# Set optimised Fortran compilation flags
 fortran_args = ['-O3', '-fPIC']
 
-# Try to add OpenMP support
+# Configure OpenMP support for parallel processing
 openmp_dep = dependency('openmp', required: false)
 if openmp_dep.found()
   fortran_args += ['-fopenmp']
@@ -24,7 +24,7 @@ else
   message('OpenMP not found - building without OpenMP')
 endif
 
-# Build Fortran sources
+# Define Fortran source files
 tort_sources = files(
   'crystal_torture/tort.f90',
   'crystal_torture/tort_c_interface.f90'
@@ -32,7 +32,9 @@ tort_sources = files(
 
 dist_sources = files('crystal_torture/dist.f90')
 
-# Create Python extensions and install them in the package directory
+# Build Python extensions and install them in the package directory
+# Note: The 'subdir' parameter is crucial for meson-python to install
+# extensions in the correct location within the Python package
 tort_ext = py.extension_module('_tort',
   tort_sources,
   fortran_args: fortran_args,
@@ -49,7 +51,7 @@ dist_ext = py.extension_module('libdist',
   subdir: 'crystal_torture'  # Install into crystal_torture package directory
 )
 
-# Install Python sources
+# Install Python source files
 python_sources = [
   'crystal_torture/__init__.py',
   'crystal_torture/node.py',
@@ -65,10 +67,11 @@ python_sources = [
 
 py.install_sources(python_sources, subdir: 'crystal_torture')
 
-# Summary
+# Display build configuration summary
 summary({
   'Fortran Compiler': fc.get_id(),
-  'Python': py.full_path(),
+  'Python Installation': py.full_path(),
   'NumPy Available': np_dep.found(),
   'OpenMP Support': openmp_dep.found(),
-}, section: 'Build Configuration')
+  'Extensions Built': ['_tort', 'libdist'],
+}, section: 'Crystal Torture Build Configuration')
