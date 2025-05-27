@@ -27,8 +27,34 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install build pytest pytest-cov coveralls
-          # Install in development mode
-          pip install -e .[dev]
+          
+      - name: Install package (regular install, not editable)
+        run: |
+          # This is what users will actually do
+          pip install .
+          
+      - name: Verify installation works like for end users
+        run: |
+          python -c "
+          import crystal_torture
+          print(f'Crystal Torture version: {crystal_torture.__version__}')
+          
+          # Test Fortran extensions work
+          try:
+              from crystal_torture import tort
+              print(f'SUCCESS: tort.tort_mod = {tort.tort_mod}')
+          except Exception as e:
+              print(f'tort import error: {e}')
+          
+          try:
+              from crystal_torture import dist  
+              print(f'SUCCESS: dist._DIST_AVAILABLE = {getattr(dist, \"_DIST_AVAILABLE\", \"Not found\")}')
+          except Exception as e:
+              print(f'dist import error: {e}')
+          "
+          
+          # Test basic functionality
+          python -c "from crystal_torture import Node, Cluster, Graph; print('✓ Basic imports work')"
 
       - name: Debug meson build process
         run: |
