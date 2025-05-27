@@ -1,34 +1,46 @@
-*egg*
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
 ENV*
-crystal_torture/devel
-*/*/*.swp
-*/*o
-*/*/__pycache__
+
+# Build artifacts
+dist/
+build/
+builddir/
+
+# IDE and editor files
+.idea/
 *.swp
-*pyc
-crystal_torture/.f2py_f2cmap
+.DS_Store
+
+# Development and testing
+htmlcov/
+.coverage
+*.coverage
+
+# Project-specific
+crystal_torture/devel
 crystal_torture/_tort*
+crystal_torture/todo
+tests/STRUCTURE_FILES/UNUSED
 check_run.py
 check_doping.py
-*/*so
-crystal_torture/todo
-htmlcov
 things_to_note
-crystal_torture/ENV
-tests/STRUCTURE_FILES/UNUSED
-*coverage
-crystal_torture.egg-info*
-dist*
-MANIFEST.in
-crystal_torture-*
-build/*
-docs/build/*
+
+# Documentation
+docs/build/
+
+# Legacy/generated files
 MANIFEST
 README.txt
-.idea/
-.DS_Store
+crystal_torture-*
+.zenodo.json
+
+# Paper artifacts  
 paper/apa.csl
 paper/joss-logo.png
 paper/latex.template
-*mod*
-.zenodo.json
