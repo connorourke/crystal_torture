@@ -36,17 +36,20 @@ tort_ext = py.extension_module('_tort',
   fortran_args: fortran_args,
   dependencies: [openmp_dep],
   install: true,
-  subdir: 'crystal_torture'
+  subdir: 'crystal_torture',
+  name_prefix: '',  # Ensure no extra prefix
+  name_suffix: 'so' # Ensure .so extension on Linux
 )
 
-# Build dist extension too (keeping existing functionality)
-dist_sources = files('crystal_torture/dist.f90')
+# Create Python extension for dist
 dist_ext = py.extension_module('libdist',
   dist_sources,
   fortran_args: fortran_args,
   dependencies: [openmp_dep],
   install: true,
-  subdir: 'crystal_torture'
+  subdir: 'crystal_torture',
+  name_prefix: '',
+  name_suffix: 'so'
 )
 
 # Install Python sources
