@@ -1,15 +1,14 @@
 [build-system]
 requires = [
-    "setuptools>=45",
-    "wheel",
+    "meson-python>=0.12.0",
     "numpy>=1.19.0",
-    "f90wrap@git+https://github.com/jameskermode/f90wrap.git"
+    "wheel",
 ]
-build-backend = "setuptools.build_meta"
+build-backend = "mesonpy"
 
 [project]
 name = "crystal-torture"
-version = "1.1.0"
+version = "1.2.0"  # Updated to match meson.build
 description = "A Crystal Tortuosity Module"
 readme = "README.rst"
 requires-python = ">=3.10"
@@ -34,7 +33,6 @@ classifiers = [
 dependencies = [
     "numpy>=1.19.0",
     "pymatgen>=2022.0.0",
-    "f90wrap@git+https://github.com/jameskermode/f90wrap.git"
 ]
 
 [project.optional-dependencies]
@@ -43,6 +41,8 @@ dev = [
     "pytest-cov",
     "coverage",
     "ddt",
+    "meson",
+    "ninja",
 ]
 
 [project.urls]
@@ -51,9 +51,6 @@ Repository = "https://github.com/connorourke/crystal_torture"
 Documentation = "https://github.com/connorourke/crystal_torture"
 "Bug Tracker" = "https://github.com/connorourke/crystal_torture/issues"
 
-[tool.setuptools]
-packages = ["crystal_torture"]
-include-package-data = true
-
-[tool.setuptools.package-data]
-crystal_torture = ["*.so", "*tort*", "*dist*", "*.o"]
+# Meson-python specific configuration
+[tool.meson-python.args]
+# setup = ['--wipe']  # Clean build directory on setup
