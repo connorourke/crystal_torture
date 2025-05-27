@@ -8,6 +8,7 @@ from crystal_torture.pymatgen_doping import (
     dope_structure_by_no,
     sort_structure,
     index_sites,
+    set_site_labels,
 )
 from pymatgen.core import Structure
 from ddt import ddt, data, unpack
@@ -15,12 +16,11 @@ from ddt import ddt, data, unpack
 
 @ddt
 class PymatgenDopingTestCase(unittest.TestCase):
-    """ Test simple doping routines"""
+    """Test simple doping routines"""
 
     def test_count_sites(self):
-
         structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_SPINEL.vasp")
-        structure.add_site_property("label", ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
+        set_site_labels(structure, ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
 
         self.assertEqual(count_sites(structure, species={"Mg"}), 8)
         self.assertEqual(count_sites(structure, species={"Al"}), 16)
@@ -37,9 +37,8 @@ class PymatgenDopingTestCase(unittest.TestCase):
 
     @data(3, 4, 5, 6)
     def test_doping(self, value):
-
         structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_SPINEL.vasp")
-        structure.add_site_property("label", ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
+        set_site_labels(structure, ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
 
         for conc in [0.5]:
             structure_temp = copy.deepcopy(structure)
@@ -52,9 +51,8 @@ class PymatgenDopingTestCase(unittest.TestCase):
 
     @data(3, 4, 5, 6)
     def test_doping_by_no(self, value):
-
         structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_SPINEL.vasp")
-        structure.add_site_property("label", ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
+        set_site_labels(structure, ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
 
         for no_dopants in [10, 20, 30, 40]:
             structure_temp = copy.deepcopy(structure)
@@ -68,9 +66,8 @@ class PymatgenDopingTestCase(unittest.TestCase):
             self.assertEqual(no_dopants, dopants_Al)
 
     def test_errors(self):
-
         structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_SPINEL.vasp")
-        structure.add_site_property("label", ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
+        set_site_labels(structure, ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
 
         with self.assertRaises(ValueError):
             dope_structure_by_no(structure, 10, "P", ["Li"])
