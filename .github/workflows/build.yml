@@ -95,17 +95,18 @@ jobs:
           import crystal_torture
           from pathlib import Path
           pkg_dir = Path(crystal_torture.__file__).parent
+          print('Package directory:', pkg_dir)
           print('All files in package:')
           for f in sorted(pkg_dir.iterdir()):
               if f.is_file():
-                  print(f'  {f.name}')
+                  print(f'  {f.name} ({f.stat().st_size} bytes)')
           print()
           print('Searching for extensions:')
           for pattern in ['_tort*', 'libdist*', '*.so', '*.pyd']:
               matches = list(pkg_dir.glob(pattern))
               print(f'  {pattern}: {[f.name for f in matches]}')
           "
-      
+
       - name: Debug pip installation process  
         run: |
           echo "=== Try a fresh pip install ==="
