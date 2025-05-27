@@ -26,14 +26,14 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build pytest pytest-cov coveralls
+          pip install pytest pytest-cov coveralls
           
-      - name: Install package (regular install, not editable)
+      - name: Test normal user installation (no dev dependencies)
         run: |
-          # This is what users will actually do
-          pip install .
+          echo "=== This is what a normal user would run ==="
+          pip install . -v
           
-      - name: Verify installation works like for end users
+      - name: Verify real user installation works
         run: |
           python -c "
           import crystal_torture
@@ -43,14 +43,16 @@ jobs:
           try:
               from crystal_torture import tort
               print(f'SUCCESS: tort.tort_mod = {tort.tort_mod}')
+              print('✓ Fortran tort module working')
           except Exception as e:
-              print(f'tort import error: {e}')
+              print(f'❌ tort import error: {e}')
           
           try:
               from crystal_torture import dist  
               print(f'SUCCESS: dist._DIST_AVAILABLE = {getattr(dist, \"_DIST_AVAILABLE\", \"Not found\")}')
+              print('✓ Fortran dist module working')
           except Exception as e:
-              print(f'dist import error: {e}')
+              print(f'❌ dist import error: {e}')
           "
           
           # Test basic functionality
