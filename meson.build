@@ -37,8 +37,6 @@ tort_ext = py.extension_module('_tort',
   dependencies: [openmp_dep],
   install: true,
   subdir: 'crystal_torture',
-  name_prefix: '',  # Ensure no extra prefix
-  name_suffix: 'so' # Ensure .so extension on Linux
 )
 
 # Create Python extension for dist
@@ -48,8 +46,6 @@ dist_ext = py.extension_module('libdist',
   dependencies: [openmp_dep],
   install: true,
   subdir: 'crystal_torture',
-  name_prefix: '',
-  name_suffix: 'so'
 )
 
 # Install Python sources
