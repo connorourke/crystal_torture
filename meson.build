@@ -30,6 +30,8 @@ tort_sources = files(
   'crystal_torture/tort_c_interface.f90'
 )
 
+dist_sources = files('crystal_torture/dist.f90')
+
 # Create Python extension for tort
 tort_ext = py.extension_module('_tort',
   tort_sources,
@@ -40,7 +42,6 @@ tort_ext = py.extension_module('_tort',
 )
 
 # Create Python extension for dist
-dist_sources = files('crystal_torture/dist.f90')
 dist_ext = py.extension_module('libdist',
   dist_sources,
   fortran_args: fortran_args,
