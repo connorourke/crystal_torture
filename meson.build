@@ -32,20 +32,21 @@ tort_sources = files(
 
 dist_sources = files('crystal_torture/dist.f90')
 
-# Create Python extension for tort
+# Create Python extensions and install them in the package directory
 tort_ext = py.extension_module('_tort',
   tort_sources,
   fortran_args: fortran_args,
   dependencies: [openmp_dep],
   install: true,
+  subdir: 'crystal_torture'  # Install into crystal_torture package directory
 )
 
-# Create Python extension for dist
 dist_ext = py.extension_module('libdist',
   dist_sources,
   fortran_args: fortran_args,
   dependencies: [openmp_dep],
   install: true,
+  subdir: 'crystal_torture'  # Install into crystal_torture package directory
 )
 
 # Install Python sources
