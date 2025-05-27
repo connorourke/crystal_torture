@@ -1,7 +1,7 @@
 project('crystal_torture', 'fortran',
   version: '1.2.0',
   license: 'MIT',
-  meson_version: '>= 0.64.0'  # Updated to avoid warning
+  meson_version: '>= 0.64.0'
 )
 
 # Find Python and NumPy
@@ -24,22 +24,29 @@ else
   message('OpenMP not found - building without OpenMP')
 endif
 
-# Build a simple Fortran library first (baby steps!)
-tort_sources = files('crystal_torture/tort.f90')
-tort_lib = static_library('tort_static',
-  tort_sources,
-  fortran_args: fortran_args,
-  dependencies: [openmp_dep],
-  pic: true
+# Build Fortran sources
+tort_sources = files(
+  'crystal_torture/tort.f90',
+  'crystal_torture/tort_c_interface.f90'
 )
 
-# For now, create a simple shared library as a placeholder
-# This will make our test pass while we work on the full f2py integration
-simple_fort_lib = shared_library('simple_tort',
+# Create Python extension for tort
+tort_ext = py.extension_module('_tort',
   tort_sources,
   fortran_args: fortran_args,
   dependencies: [openmp_dep],
-  install: false  # Don't install yet, just build
+  install: true,
+  subdir: 'crystal_torture'
+)
+
+# Build dist extension too (keeping existing functionality)
+dist_sources = files('crystal_torture/dist.f90')
+dist_ext = py.extension_module('libdist',
+  dist_sources,
+  fortran_args: fortran_args,
+  dependencies: [openmp_dep],
+  install: true,
+  subdir: 'crystal_torture'
 )
 
 # Install Python sources
@@ -52,6 +59,8 @@ python_sources = [
   'crystal_torture/pymatgen_interface.py',
   'crystal_torture/pymatgen_doping.py',
   'crystal_torture/tort.py',
+  'crystal_torture/dist.py',
+  'crystal_torture/dist.py',
   'crystal_torture/version.py'
 ]
 

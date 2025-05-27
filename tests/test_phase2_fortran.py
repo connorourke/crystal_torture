@@ -155,30 +155,42 @@ class TestBackwardCompatibility:
         """Test that Python-only tortuosity methods work."""
         from crystal_torture import Node, Cluster
         
-        # Create simple test nodes
+        # Create minimal periodic structure: 2 nodes with same UC_index (periodic images)
         nodes = []
-        for i in range(4):
-            node = Node(
-                index=i,
-                element="Li",
-                labels={"UC_index": str(i), "Halo": False},
-                neighbours_ind=[(i+1) % 4, (i+3) % 4]  # Simple ring
-            )
-            nodes.append(node)
+        
+        # Node 0: Unit cell node
+        node0 = Node(
+            index=0,
+            element="Li",
+            labels={"UC_index": "0", "Halo": False},
+            neighbours_ind=[1]  # Connected to node 1
+        )
+        nodes.append(node0)
+        
+        # Node 1: Periodic image of node 0  
+        node1 = Node(
+            index=1,
+            element="Li",
+            labels={"UC_index": "0", "Halo": True},  # Same UC_index, different index
+            neighbours_ind=[0]  # Connected to node 0
+        )
+        nodes.append(node1)
         
         # Set up neighbor relationships
         for node in nodes:
             node.neighbours = set([nodes[j] for j in node.neighbours_ind])
         
-        # Create cluster and test Python torture method
+        # Create cluster with both nodes
         cluster = Cluster(set(nodes))
         
         try:
             cluster.torture_py()  # This should work regardless of Fortran availability
             
-            # Should have tortuosity values
-            for node in nodes:
-                assert hasattr(node, 'tortuosity'), "Nodes should have tortuosity after torture_py"
+            # Should have tortuosity values for unit cell nodes
+            uc_nodes = list(cluster.return_key_nodes(key="Halo", value=False))
+            for node in uc_nodes:
+                assert hasattr(node, 'tortuosity'), f"Node {node.index} should have tortuosity after torture_py"
+                assert node.tortuosity is not None, f"Node {node.index} tortuosity should not be None"
                 
         except Exception as e:
             pytest.fail(f"Python-only torture method should work: {e}")
@@ -195,17 +207,28 @@ class TestBackwardCompatibility:
         except ImportError:
             pytest.skip("Fortran not available")
         
-        # Create simple test nodes (same as above)
+        # Create minimal periodic structure: 2 nodes with same UC_index (periodic images)
         nodes = []
-        for i in range(4):
-            node = Node(
-                index=i,
-                element="Li", 
-                labels={"UC_index": str(i), "Halo": False},
-                neighbours_ind=[(i+1) % 4, (i+3) % 4]
-            )
-            nodes.append(node)
         
+        # Node 0: Unit cell node
+        node0 = Node(
+            index=0,
+            element="Li",
+            labels={"UC_index": "0", "Halo": False},
+            neighbours_ind=[1]  # Connected to node 1
+        )
+        nodes.append(node0)
+        
+        # Node 1: Periodic image of node 0  
+        node1 = Node(
+            index=1,
+            element="Li",
+            labels={"UC_index": "0", "Halo": True},  # Same UC_index, different index
+            neighbours_ind=[0]  # Connected to node 0
+        )
+        nodes.append(node1)
+        
+        # Set up neighbor relationships
         for node in nodes:
             node.neighbours = set([nodes[j] for j in node.neighbours_ind])
         
@@ -215,12 +238,22 @@ class TestBackwardCompatibility:
             # This should work if Fortran extensions are properly set up
             cluster.torture_fort()
             
-            # Should have tortuosity values
-            for node in nodes:
-                assert hasattr(node, 'tortuosity'), "Nodes should have tortuosity after torture_fort"
+            # Should have tortuosity values for unit cell nodes
+            uc_nodes = [n for n in nodes if not n.labels["Halo"]]
+            for node in uc_nodes:
+                assert hasattr(node, 'tortuosity'), f"Node {node.index} should have tortuosity after torture_fort"
                 
         except ImportError as e:
             if "Fortran extensions not available" in str(e):
                 pytest.skip("This is what we're trying to fix - Fortran extensions not available")
             else:
                 pytest.fail(f"Unexpected error: {e}")
+        
+        finally:
+            # CRITICAL: Clean up Fortran state to prevent test contamination
+            try:
+                from crystal_torture import tort
+                if tort is not None and hasattr(tort, 'tort_mod'):
+                    tort.tort_mod.tear_down()
+            except:
+                pass  # Ignore cleanup errors

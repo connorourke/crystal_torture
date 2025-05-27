@@ -186,29 +186,44 @@ class Cluster:
         Significantly faster than the python version above for large systems.
         Calculates the integer number of node-node steps it requires to get from a 
         node to its periodic image.
-
+        
         Args:
-           None
-
+        None
+        
         Returns:
-           None
-    
+        None
+        
         Sets:
-           node.tortuosity (int): tortuosity for node
-           self.tortuosity (int): average tortuosity for cluster
-
+        node.tortuosity (int): tortuosity for node
+        self.tortuosity (int): average tortuosity for cluster
+        
         """
         if tort is None:
             raise ImportError("Fortran extensions not available. Use torture_py() instead.")
-    
-        uc_nodes = [
-            node.index for node in self.return_key_nodes(key="Halo", value=False)
-        ]
+        
+        # Set up Fortran module with node data
+        all_nodes = list(self.nodes)
+        uc_nodes = [node.index for node in self.return_key_nodes(key="Halo", value=False)]
+        
+        # Allocate Fortran arrays
+        tort.tort_mod.allocate_nodes(len(all_nodes), len(uc_nodes))
+        
+        # Set up each node's data in Fortran module
+        for node in all_nodes:
+            neigh_indices = list(node.neighbours_ind)
+            tort.tort_mod.set_neighbours(
+                node.index,
+                int(node.labels["UC_index"]),
+                len(neigh_indices),
+                neigh_indices
+            )
+        
+        # Now run the torture algorithm
         tort.tort_mod.torture(len(uc_nodes), uc_nodes)
-
+        
         for node in self.return_key_nodes(key="Halo", value=False):
             node.tortuosity = tort.tort_mod.uc_tort[int(node.labels["UC_index"])]
-
+        
         self.tortuosity = sum(
             [node.tortuosity for node in self.return_key_nodes(key="Halo", value=False)]
         ) / len(uc_nodes)

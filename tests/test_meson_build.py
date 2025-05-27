@@ -74,18 +74,23 @@ class TestMesonBuildSystem:
                 ], capture_output=True, text=True, timeout=120)
                 
                 if build_result.returncode == 0:
-                    # Check for expected artifacts (platform-specific extensions)
+                    # Look for Python extensions (the correct build artifacts)
                     import platform
                     if platform.system() == "Darwin":  # macOS
-                        shared_files = list(build_dir.rglob("*.dylib"))
+                        extension_files = list(build_dir.rglob("*.so"))  # Python extensions
+                        shared_files = list(build_dir.rglob("*.dylib"))   # Generic shared libs
                     elif platform.system() == "Windows":
-                        shared_files = list(build_dir.rglob("*.dll"))
+                        extension_files = list(build_dir.rglob("*.pyd"))  # Python extensions on Windows
+                        shared_files = list(build_dir.rglob("*.dll"))     # Generic shared libs
                     else:  # Linux and others
-                        shared_files = list(build_dir.rglob("*.so"))
+                        extension_files = list(build_dir.rglob("*.so"))   # Python extensions
+                        shared_files = []  # Generic shared libs
                     
-                    # Also look for static libraries as backup
+                    # Static libraries as backup
                     static_files = list(build_dir.rglob("*.a"))
-                    all_libs = shared_files + static_files
+                    
+                    # Python extensions are preferred, but any library type counts
+                    all_libs = extension_files + shared_files + static_files
                     
                     if len(all_libs) == 0:
                         # Debug: show what files were actually created
@@ -93,7 +98,16 @@ class TestMesonBuildSystem:
                         file_list = [str(f.relative_to(build_dir)) for f in all_files[:20]]  # First 20
                         pytest.fail(f"No libraries built. Files found: {file_list}")
                     
-                    assert len(all_libs) > 0, f"Should build at least one library. Found: {len(shared_files)} shared, {len(static_files)} static"
+                    # Success criteria: should have built Python extensions
+                    assert len(extension_files) >= 2, f"Should build at least 2 Python extensions (dist, _tort). Found: {[f.name for f in extension_files]}"
+                    
+                    # Verify we have the expected extensions
+                    extension_names = [f.name for f in extension_files]
+                    assert any('dist' in name for name in extension_names), f"Should have dist extension. Found: {extension_names}"
+                    assert any('_tort' in name for name in extension_names), f"Should have _tort extension. Found: {extension_names}"
+                    
+                    print(f"✅ Successfully built {len(extension_files)} Python extensions: {[f.name for f in extension_files]}")
+                    
                 else:
                     pytest.skip(f"Meson compile failed: {build_result.stderr}")
                     
