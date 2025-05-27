@@ -28,7 +28,7 @@ jobs:
           python -m pip install --upgrade pip
           
           # Install with editable mode
-          pip install -e . -v
+          pip install -e .[dev] -v
           
           # Check if extensions were built but not copied
           echo "=== Checking for built extensions ==="
