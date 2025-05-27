@@ -78,6 +78,28 @@ jobs:
               print(f'  {pattern}: {[f.name for f in matches]}')
           "
       
+      - name: Debug pip installation process  
+        run: |
+          echo "=== Try a fresh pip install ==="
+          pip uninstall crystal-torture -y
+          pip install -e . -vvv 2>&1 | tail -50
+          
+          echo "=== Check installed package ==="
+          python -c "
+          import crystal_torture
+          from pathlib import Path
+          pkg_dir = Path(crystal_torture.__file__).parent
+          print(f'Package directory: {pkg_dir}')
+          all_files = list(pkg_dir.rglob('*'))
+          for f in sorted(all_files):
+              if f.is_file():
+                  print(f'  {f.relative_to(pkg_dir)} ({f.stat().st_size} bytes)')
+          "
+          
+          echo "=== Look for build artifacts ==="
+          ls -la build* 2>/dev/null || echo "No build directories found"
+          find . -name "*.so" -type f 2>/dev/null || echo "No .so files found in project"
+      
       - name: Verify installation
         run: |
           python -c "import crystal_torture; print(f'Crystal Torture version: {crystal_torture.__version__}')"
