@@ -4,11 +4,11 @@ on: [push, pull_request]
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest, macOS]
     timeout-minutes: 30
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     
     steps:
       - uses: actions/checkout@v4
