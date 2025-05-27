@@ -23,6 +23,37 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gfortran
       
+      - name: Debug meson build process
+        run: |
+          echo "=== Environment Check ==="
+          which gfortran
+          gfortran --version
+          which meson
+          meson --version
+          
+          echo "=== Direct Meson Build Test ==="
+          # Create a temporary build directory and test meson directly
+          mkdir debug_build
+          cd debug_build
+          
+          # Run meson setup with verbose output
+          echo "Running meson setup..."
+          meson setup --verbose . ..
+          
+          # Run meson compile with verbose output
+          echo "Running meson compile..."
+          meson compile --verbose
+          
+          echo "=== Files Created ==="
+          # List all files created in build directory
+          find . -type f | head -20
+          
+          echo "=== Shared Libraries Created ==="
+          # Look specifically for shared libraries
+          find . -name "*.so" -o -name "*.dylib" -o -name "*.dll"
+          
+          cd ..
+      
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
