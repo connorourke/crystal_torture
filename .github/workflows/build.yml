@@ -45,11 +45,11 @@ jobs:
           
           # Run meson setup with verbose output
           echo "Running meson setup..."
-          meson setup --verbose . ..
+          meson setup . ..
           
           # Run meson compile with verbose output
           echo "Running meson compile..."
-          meson compile --verbose
+          meson compile -v
           
           echo "=== Files Created ==="
           # List all files created in build directory
