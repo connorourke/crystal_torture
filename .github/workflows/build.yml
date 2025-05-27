@@ -23,130 +23,38 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gfortran
       
-      - name: Install Python dependencies
+      - name: Install Python dependencies and package
         run: |
           python -m pip install --upgrade pip
           
-          # Install with editable mode
+          # Install with editable mode and dev dependencies  
           pip install -e .[dev] -v
           
-          # Check if extensions were built but not copied
-          echo "=== Checking for built extensions ==="
-          built_extensions=$(find build -name "*.so" 2>/dev/null || echo "")
-          if [ -n "$built_extensions" ]; then
-            echo "Found built extensions:"
-            echo "$built_extensions"
-            
-            # Copy them to the source directory
-            echo "=== Copying extensions to source directory ==="
-            for ext in $built_extensions; do
-              ext_name=$(basename "$ext")
-              echo "Copying $ext_name to crystal_torture/"
+          # CI workaround: ensure extensions are available in source directory
+          # (meson-python sometimes doesn't copy them during editable installs in CI)
+          if [ -d "build" ] && [ ! -f crystal_torture/_tort*.so ]; then
+            echo "Copying built extensions to source directory..."
+            find build -name "*tort*.so" -o -name "*dist*.so" | while read ext; do
               cp "$ext" crystal_torture/
+              echo "  ✓ Copied $(basename "$ext")"
             done
-          else
-            echo "No built extensions found in build directory"
           fi
-          
-          # Verify extensions are now available
-          echo "=== Verifying extensions ==="
-          ls -la crystal_torture/*.so 2>/dev/null || echo "No .so files in crystal_torture/"
-          
-          # Test import
-          python -c "
-          try:
-              from crystal_torture import tort
-              print(f'✓ TORT module loaded: {tort}')
-              print(f'✓ tort_mod: {tort.tort_mod}')
-              if tort.tort_mod:
-                  print('✓ Fortran tort module is working!')
-              else:
-                  print('❌ tort_mod is None')
-          except Exception as e:
-              print(f'❌ TORT import error: {e}')
-          
-          try:
-              from crystal_torture import dist  
-              print(f'✓ DIST module loaded: {dist}')
-              available = getattr(dist, '_DIST_AVAILABLE', False)
-              print(f'✓ DIST_AVAILABLE: {available}')
-              if available:
-                  print('✓ Fortran dist module is working!')
-              else:
-                  print('❌ dist module not available')
-          except Exception as e:
-              print(f'❌ DIST import error: {e}')
-          "
-          
-      - name: Verify real user installation works
-        run: |
-          python -c "
-          import crystal_torture
-          print(f'Crystal Torture version: {crystal_torture.__version__}')
-          
-          # Test Fortran extensions work
-          try:
-              from crystal_torture import tort
-              print(f'SUCCESS: tort.tort_mod = {tort.tort_mod}')
-              print('✓ Fortran tort module working')
-          except Exception as e:
-              print(f'❌ tort import error: {e}')
-          
-          try:
-              from crystal_torture import dist  
-              print(f'SUCCESS: dist._DIST_AVAILABLE = {getattr(dist, \"_DIST_AVAILABLE\", \"Not found\")}')
-              print('✓ Fortran dist module working')
-          except Exception as e:
-              print(f'❌ dist import error: {e}')
-          "
-          
-          # Test basic functionality
-          python -c "from crystal_torture import Node, Cluster, Graph; print('✓ Basic imports work')"
-
-      - name: Debug extension files
-        run: |
-          python -c "
-          import crystal_torture
-          from pathlib import Path
-          pkg_dir = Path(crystal_torture.__file__).parent
-          print('Package directory:', pkg_dir)
-          print('All files in package:')
-          for f in sorted(pkg_dir.iterdir()):
-              if f.is_file():
-                  print(f'  {f.name} ({f.stat().st_size} bytes)')
-          print()
-          print('Searching for extensions:')
-          for pattern in ['_tort*', 'libdist*', '*.so', '*.pyd']:
-              matches = list(pkg_dir.glob(pattern))
-              print(f'  {pattern}: {[f.name for f in matches]}')
-          "
-
-      - name: Debug pip installation process  
-        run: |
-          echo "=== Try a fresh pip install ==="
-          pip uninstall crystal-torture -y
-          pip install -e . -vvv 2>&1 | tail -50
-          
-          echo "=== Check installed package ==="
-          python -c "
-          import crystal_torture
-          from pathlib import Path
-          pkg_dir = Path(crystal_torture.__file__).parent
-          print(f'Package directory: {pkg_dir}')
-          all_files = list(pkg_dir.rglob('*'))
-          for f in sorted(all_files):
-              if f.is_file():
-                  print(f'  {f.relative_to(pkg_dir)} ({f.stat().st_size} bytes)')
-          "
-          
-          echo "=== Look for build artifacts ==="
-          ls -la build* 2>/dev/null || echo "No build directories found"
-          find . -name "*.so" -type f 2>/dev/null || echo "No .so files found in project"
       
       - name: Verify installation
         run: |
-          python -c "import crystal_torture; print(f'Crystal Torture version: {crystal_torture.__version__}')"
-          python -c "from crystal_torture import Node, Cluster, Graph; print('Import successful')"
+          python -c "
+          import crystal_torture
+          print(f'✓ Crystal Torture {crystal_torture.__version__}')
+          
+          # Test Fortran extensions
+          from crystal_torture import tort, dist
+          print(f'✓ Fortran tort module: {bool(tort.tort_mod)}')
+          print(f'✓ Fortran dist module: {getattr(dist, \"_DIST_AVAILABLE\", False)}')
+          
+          # Test basic imports
+          from crystal_torture import Node, Cluster, Graph
+          print('✓ All imports successful')
+          "
       
       - name: Run tests
         run: |
