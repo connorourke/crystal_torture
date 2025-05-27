@@ -40,6 +40,7 @@ tort_ext = py.extension_module('_tort',
 )
 
 # Create Python extension for dist
+dist_sources = files('crystal_torture/dist.f90')
 dist_ext = py.extension_module('libdist',
   dist_sources,
   fortran_args: fortran_args,
