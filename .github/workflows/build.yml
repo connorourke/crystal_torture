@@ -23,6 +23,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gfortran
       
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build pytest pytest-cov coveralls
+          # Install in development mode
+          pip install -e .[dev]
+
       - name: Debug meson build process
         run: |
           echo "=== Environment Check ==="
@@ -54,13 +61,6 @@ jobs:
           
           cd ..
       
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install build pytest pytest-cov coveralls
-          # Install in development mode
-          pip install -e .[dev]
-
       - name: Debug extension files
         run: |
           python -c "
