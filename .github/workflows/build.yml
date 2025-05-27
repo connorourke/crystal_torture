@@ -19,10 +19,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       
-      - name: Setup Fortran
-        uses: fortran-lang/setup-fortran@v1
-        with:
-          compiler: gfortran
+      - name: Install system dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran
+
+      - name: Install system dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install gfortran
       
       - name: Install Python dependencies and package
         run: |
