@@ -9,27 +9,36 @@ build-backend = "mesonpy"
 
 [project]
 name = "crystal-torture"
-version = "1.2.0"  # Updated to match meson.build
-description = "A Crystal Tortuosity Module"
+version = "1.2.0"
+description = "Crystal Tortuosity Analysis with Fortran Extensions"
 readme = "README.rst"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Conn O'Rourke", email = "conn.orourke@gmail.com"}
 ]
-keywords = ["crystallography", "materials science", "tortuosity", "percolation"]
+keywords = [
+    "crystallography", 
+    "materials science", 
+    "tortuosity", 
+    "percolation", 
+    "fortran", 
+    "scientific computing"
+]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.11", 
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Fortran",
     "Topic :: Scientific/Engineering :: Chemistry",
     "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Mathematics",
 ]
 dependencies = [
     "numpy>=1.19.0",
@@ -51,7 +60,37 @@ Homepage = "https://github.com/connorourke/crystal_torture"
 Repository = "https://github.com/connorourke/crystal_torture"
 Documentation = "https://github.com/connorourke/crystal_torture"
 "Bug Tracker" = "https://github.com/connorourke/crystal_torture/issues"
+Changelog = "https://github.com/connorourke/crystal_torture/releases"
 
-# Meson-python specific configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+]
+
+[tool.coverage.run]
+source = ["crystal_torture"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+# Meson-python configuration
 [tool.meson-python.args]
 setup = ['--reconfigure']
