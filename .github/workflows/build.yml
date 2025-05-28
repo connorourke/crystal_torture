@@ -56,20 +56,11 @@ jobs:
           echo "=== Python Environment Information ==="
           which python
           python --version
-          python -c "
-import sys, site, os
-print(f'Python executable: {sys.executable}')
-print(f'Python version: {sys.version}')
-print(f'Platform: {sys.platform}')
-print(f'Site packages: {site.getsitepackages()}')
-print(f'User site: {site.getusersitepackages()}')
-print(f'Python path: {sys.path}')
-print(f'Environment PYTHONPATH: {os.environ.get(\"PYTHONPATH\", \"Not set\")}')
-"
+          python -c "import sys, site, os; print('Python executable:', sys.executable); print('Python version:', sys.version); print('Platform:', sys.platform); print('Site packages:', site.getsitepackages()); print('User site:', site.getusersitepackages()); print('Python path:', sys.path[:3]); print('Environment PYTHONPATH:', os.environ.get('PYTHONPATH', 'Not set'))"
           
           echo "=== pip and setuptools info ==="
           python -m pip --version
-          python -c "import setuptools; print(f'setuptools: {setuptools.__version__}')" || echo "setuptools not installed"
+          python -c "import setuptools; print('setuptools:', setuptools.__version__)" || echo "setuptools not installed"
 
       - name: Install build dependencies
         run: |
@@ -91,8 +82,8 @@ print(f'Environment PYTHONPATH: {os.environ.get(\"PYTHONPATH\", \"Not set\")}')
           echo "=== Verifying build tools ==="
           meson --version
           ninja --version
-          python -c "import numpy; print(f'numpy: {numpy.__version__}')"
-          python -c "import mesonpy; print(f'meson-python: {mesonpy.__version__}')"
+          python -c "import numpy; print('numpy:', numpy.__version__)"
+          python -c "import mesonpy; print('meson-python:', mesonpy.__version__)"
 
       - name: Test manual meson build (diagnostic)
         run: |
@@ -137,7 +128,7 @@ print(f'Environment PYTHONPATH: {os.environ.get(\"PYTHONPATH\", \"Not set\")}')
           echo "--- Checking build artifacts ---"
           ls -la dist/
           
-          # Check if wheel files exist
+          # Check if wheel files exist and inspect them
           if ls dist/*.whl 1> /dev/null 2>&1; then
             echo "--- Inspecting wheel contents ---"
             python -c "
@@ -146,21 +137,21 @@ import glob
 
 wheels = glob.glob('dist/*.whl')
 if wheels:
-    print(f'Examining wheel: {wheels[0]}')
+    print('Examining wheel:', wheels[0])
     with zipfile.ZipFile(wheels[0], 'r') as z:
         files = z.namelist()
         print('All files in wheel:')
         for f in files:
-            print(f'  {f}')
+            print('  ' + f)
         
         so_files = [f for f in files if f.endswith('.so')]
-        print(f'Extension files (.so): {so_files}')
+        print('Extension files (.so):', so_files)
         
         tort_files = [f for f in files if 'tort' in f.lower()]
-        print(f'Tort-related files: {tort_files}')
+        print('Tort-related files:', tort_files)
         
         dist_files = [f for f in files if 'dist' in f.lower()]
-        print(f'Dist-related files: {dist_files}')
+        print('Dist-related files:', dist_files)
 else:
     print('No wheel files found')
 "
@@ -189,17 +180,17 @@ else:
 import crystal_torture
 import os
 
-print(f'✅ Crystal Torture {crystal_torture.__version__}')
-print(f'Package location: {crystal_torture.__file__}')
+print('✅ Crystal Torture', crystal_torture.__version__)
+print('Package location:', crystal_torture.__file__)
 
 pkg_dir = os.path.dirname(crystal_torture.__file__)
-print(f'Package directory: {pkg_dir}')
+print('Package directory:', pkg_dir)
 
 print('Files in package directory:')
 for f in sorted(os.listdir(pkg_dir)):
     full_path = os.path.join(pkg_dir, f)
     size = os.path.getsize(full_path) if os.path.isfile(full_path) else 'DIR'
-    print(f'  {f} ({size} bytes)')
+    print('  {} ({} bytes)'.format(f, size))
 "
 
       - name: Test Fortran extension loading
@@ -210,59 +201,54 @@ for f in sorted(os.listdir(pkg_dir)):
 print('--- Testing tort module ---')
 try:
     from crystal_torture import tort
-    print(f'tort module: {tort}')
+    print('tort module:', tort)
     
     if tort is not None and hasattr(tort, 'tort_mod'):
-        print(f'tort.tort_mod: {tort.tort_mod}')
+        print('tort.tort_mod:', tort.tort_mod)
         if tort.tort_mod is not None:
             print('✅ Fortran tort module loaded successfully')
-            # Test basic functionality
             try:
                 tort.tort_mod.allocate_nodes(10, 5)
                 tort.tort_mod.tear_down()
                 print('✅ Basic tort functionality working')
             except Exception as e:
-                print(f'⚠️  tort functionality error: {e}')
+                print('⚠️  tort functionality error:', e)
         else:
             print('❌ tort.tort_mod is None')
     else:
         print('❌ tort module not properly loaded')
         
 except Exception as e:
-    print(f'❌ tort import failed: {e}')
-    
-    # Debug the import failure
+    print('❌ tort import failed:', e)
     print('--- Debugging tort import failure ---')
     import traceback
     traceback.print_exc()
 
-print('\n--- Testing dist module ---')
+print()
+print('--- Testing dist module ---')
 try:
     from crystal_torture import dist
-    print(f'dist module: {dist}')
+    print('dist module:', dist)
     
     if hasattr(dist, '_DIST_AVAILABLE'):
-        print(f'dist._DIST_AVAILABLE: {dist._DIST_AVAILABLE}')
+        print('dist._DIST_AVAILABLE:', dist._DIST_AVAILABLE)
         
         if dist._DIST_AVAILABLE:
             print('✅ Fortran dist module loaded successfully')
-            # Test basic functionality
             try:
                 import numpy as np
                 coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float32)
                 result = dist.dist(coords, coords, 2)
-                print(f'✅ Basic dist functionality working: {result.shape}')
+                print('✅ Basic dist functionality working:', result.shape)
             except Exception as e:
-                print(f'⚠️  dist functionality error: {e}')
+                print('⚠️  dist functionality error:', e)
         else:
             print('❌ dist module fallback to Python implementation')
     else:
         print('❌ dist module not properly configured')
         
 except Exception as e:
-    print(f'❌ dist import failed: {e}')
-    
-    # Debug the import failure  
+    print('❌ dist import failed:', e)
     print('--- Debugging dist import failure ---')
     import traceback
     traceback.print_exc()
@@ -283,23 +269,20 @@ import glob
 
 for site_dir in site.getsitepackages() + [site.getusersitepackages()]:
     if os.path.exists(site_dir):
-        print(f'Searching in: {site_dir}')
+        print('Searching in:', site_dir)
         
-        # Look for crystal_torture directory
         ct_dir = os.path.join(site_dir, 'crystal_torture')
         if os.path.exists(ct_dir):
-            print(f'  Found crystal_torture directory: {ct_dir}')
+            print('  Found crystal_torture directory:', ct_dir)
             for f in os.listdir(ct_dir):
-                full_path = os.path.join(ct_dir, f)
-                print(f'    {f}')
+                print('    ' + f)
         
-        # Look for any .so files
         so_files = glob.glob(os.path.join(site_dir, '**/*.so'), recursive=True)
         relevant_so = [f for f in so_files if 'tort' in f or 'dist' in f or 'crystal' in f]
         if relevant_so:
-            print(f'  Relevant .so files:')
+            print('  Relevant .so files:')
             for so_file in relevant_so:
-                print(f'    {so_file}')
+                print('    ' + so_file)
 "
 
       - name: Test pip install without isolation
@@ -319,7 +302,7 @@ for site_dir in site.getsitepackages() + [site.getusersitepackages()]:
           python -c "
 try:
     import crystal_torture
-    print(f'✅ Package imported: {crystal_torture.__version__}')
+    print('✅ Package imported:', crystal_torture.__version__)
     
     from crystal_torture import tort, dist
     print('✅ Modules imported')
@@ -335,7 +318,7 @@ try:
         print('❌ dist module not available')
         
 except Exception as e:
-    print(f'❌ Import failed: {e}')
+    print('❌ Import failed:', e)
     import traceback
     traceback.print_exc()
 "
