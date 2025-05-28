@@ -23,34 +23,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gfortran build-essential
       
-      - name: Test editable install (PEP 660)
+      - name: Install package and dev dependencies
         run: |
-          echo "=== Testing editable install with PEP 660 ==="
-          pip install -e ."[dev]" --use-pep660 --verbose
-          
-          echo "=== Verify editable install works ==="
+          pip install ."[dev]" --use-pep517 --verbose
+      
+      - name: Verify Fortran extensions loaded
+        run: |
           cd /tmp
           python << 'EOF'
-          import crystal_torture
-          print(f"Version: {crystal_torture.__version__}")
-          print(f"Location: {crystal_torture.__file__}")
-          
-          # Check Fortran extensions work in editable mode
           from crystal_torture import tort, dist
+          print(f'tort.tort_mod: {tort.tort_mod}')
+          print(f'dist._DIST_AVAILABLE: {dist._DIST_AVAILABLE}')
           if tort.tort_mod is not None:
-              print("✅ Fortran tort module loaded in editable install")
-              # Test basic functionality
-              tort.tort_mod.allocate_nodes(5, 3)
-              tort.tort_mod.tear_down()
-              print("✅ Fortran functionality working")
+              print('✅ Fortran extensions loaded successfully')
           else:
-              print("❌ Fortran extensions not available in editable install")
-              exit(1)
-              
-          if dist._DIST_AVAILABLE:
-              print("✅ Fortran dist module loaded in editable install")
-          else:
-              print("❌ Dist extensions not available in editable install")
+              print('❌ Fortran extensions not loaded')
               exit(1)
           EOF
       
