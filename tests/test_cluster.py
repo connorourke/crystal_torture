@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import Mock
+from pathlib import Path
 from crystal_torture.pymatgen_interface import (
     nodes_from_structure,
     clusters_from_file,
@@ -7,6 +8,10 @@ from crystal_torture.pymatgen_interface import (
 )
 from crystal_torture import Cluster, Node, tort, Graph
 from ddt import ddt, data, unpack
+
+# Get the directory containing this test file
+TEST_DIR = Path(__file__).parent
+STRUCTURE_FILES_DIR = TEST_DIR / "STRUCTURE_FILES"
 
 
 @ddt
@@ -68,7 +73,7 @@ class ClusterTestCase(unittest.TestCase):
     def test_return_uc_indices(self):
 
         graph = graph_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_SPINEL.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_SPINEL.vasp"),
             rcut=4.0,
             elements={"Mg"},
         )
@@ -104,7 +109,7 @@ class ClusterTestCase(unittest.TestCase):
     @data("POSCAR_2_clusters.vasp")
     def test_torture_cluster(self, value):
         cluster = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/" + value, rcut=4.0, elements={"Li"}
+            filename=str(STRUCTURE_FILES_DIR / value), rcut=4.0, elements={"Li"}
         )
         clusterf = cluster.pop()
         clusterf.grow_cluster()
@@ -125,11 +130,11 @@ class ClusterTestCase(unittest.TestCase):
     def test_minimal_cluster(self, value):
 
         graph = graph_from_file(
-            filename="tests/STRUCTURE_FILES/" + value, rcut=4.0, elements={"Li"}
+            filename=str(STRUCTURE_FILES_DIR / value), rcut=4.0, elements={"Li"}
         )
 
         cluster = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/" + value, rcut=4.0, elements={"Li"}
+            filename=str(STRUCTURE_FILES_DIR / value), rcut=4.0, elements={"Li"}
         )
         clusterf = cluster.pop()
         clusterf.grow_cluster()
@@ -144,12 +149,12 @@ class ClusterTestCase(unittest.TestCase):
     @data("POSCAR_2_clusters.vasp")
     def test_py_equals_fort(self, value):
         graph_p = graph_from_file(
-            filename="tests/STRUCTURE_FILES/" + value, rcut=4.0, elements={"Li"}
+            filename=str(STRUCTURE_FILES_DIR / value), rcut=4.0, elements={"Li"}
         )
         graph_p.torture_py()
 
         graph_f = graph_from_file(
-            filename="tests/STRUCTURE_FILES/" + value, rcut=4.0, elements={"Li"}
+            filename=str(STRUCTURE_FILES_DIR / value), rcut=4.0, elements={"Li"}
         )
         graph_f.torture()
 

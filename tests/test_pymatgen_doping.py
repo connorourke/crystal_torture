@@ -1,6 +1,7 @@
 import unittest
 import copy
 from unittest.mock import Mock
+from pathlib import Path
 from crystal_torture import Node, Cluster, tort
 from crystal_torture.pymatgen_doping import (
     count_sites,
@@ -13,13 +14,17 @@ from crystal_torture.pymatgen_doping import (
 from pymatgen.core import Structure
 from ddt import ddt, data, unpack
 
+# Get the directory containing this test file
+TEST_DIR = Path(__file__).parent
+STRUCTURE_FILES_DIR = TEST_DIR / "STRUCTURE_FILES"
+
 
 @ddt
 class PymatgenDopingTestCase(unittest.TestCase):
     """Test simple doping routines"""
 
     def test_count_sites(self):
-        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_SPINEL.vasp")
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_SPINEL.vasp"))
         set_site_labels(structure, ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
 
         self.assertEqual(count_sites(structure, species={"Mg"}), 8)
@@ -37,7 +42,7 @@ class PymatgenDopingTestCase(unittest.TestCase):
 
     @data(3, 4, 5, 6)
     def test_doping(self, value):
-        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_SPINEL.vasp")
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_SPINEL.vasp"))
         set_site_labels(structure, ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
 
         for conc in [0.5]:
@@ -51,7 +56,7 @@ class PymatgenDopingTestCase(unittest.TestCase):
 
     @data(3, 4, 5, 6)
     def test_doping_by_no(self, value):
-        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_SPINEL.vasp")
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_SPINEL.vasp"))
         set_site_labels(structure, ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
 
         for no_dopants in [10, 20, 30, 40]:
@@ -66,7 +71,7 @@ class PymatgenDopingTestCase(unittest.TestCase):
             self.assertEqual(no_dopants, dopants_Al)
 
     def test_errors(self):
-        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_SPINEL.vasp")
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_SPINEL.vasp"))
         set_site_labels(structure, ["A"] * 8 + ["B"] * 16 + ["O"] * 32)
 
         with self.assertRaises(ValueError):

@@ -3,6 +3,7 @@ requires = [
     "meson-python>=0.12.0",
     "numpy>=1.19.0",
     "wheel",
+    "ninja",
 ]
 build-backend = "mesonpy"
 

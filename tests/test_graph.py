@@ -1,11 +1,16 @@
 import unittest
 import os
 from unittest.mock import Mock
+from pathlib import Path
 from pymatgen.core import Structure
 from crystal_torture import Cluster, Graph, Node, tort
 from crystal_torture.pymatgen_interface import graph_from_file, clusters_from_file
 from ddt import ddt, data, unpack
 import subprocess
+
+# Get the directory containing this test file
+TEST_DIR = Path(__file__).parent
+STRUCTURE_FILES_DIR = TEST_DIR / "STRUCTURE_FILES"
 
 
 @ddt
@@ -60,14 +65,14 @@ class GraphTestCase(unittest.TestCase):
 
     def test_graph_from_file(self):
         graph = graph_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
         tort.tort_mod.tear_down()
 
         clusters = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
@@ -79,15 +84,15 @@ class GraphTestCase(unittest.TestCase):
 
     def test_output_clusters(self):
         graph = graph_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
 
         graph.output_clusters(fmt="poscar", periodic=True)
-        subprocess.run("mv *CLUS* tests/STRUCTURE_FILES/", shell=True)
+        subprocess.run(f"mv *CLUS* {STRUCTURE_FILES_DIR}/", shell=True)
         clusters = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_CLUS_0.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_CLUS_0.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
@@ -99,15 +104,15 @@ class GraphTestCase(unittest.TestCase):
 
     def test_output_clusters_cif(self):
         graph = graph_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
 
         graph.output_clusters(fmt="cif")
-        subprocess.run("mv *CLUS* tests/STRUCTURE_FILES/", shell=True)
+        subprocess.run(f"mv *CLUS* {STRUCTURE_FILES_DIR}/", shell=True)
         clusters = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_CLUS_0.cif",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_CLUS_0.cif"),
             rcut=4.0,
             elements={"Li"},
         )
@@ -120,10 +125,10 @@ class GraphTestCase(unittest.TestCase):
     @data(0.195, 0.482, 0.727)
     def test_return_frac_perc(self, value):
 
-        filename = "tests/STRUCTURE_FILES/PERC/POSCAR_" + str(value) + ".vasp"
+        filename = str(STRUCTURE_FILES_DIR / "PERC" / f"POSCAR_{value}.vasp")
         graph = graph_from_file(filename=filename, rcut=4.0, elements={"Mg"})
         graph.output_clusters(fmt="poscar")
-        subprocess.run("mv *CLUS* tests/STRUCTURE_FILES/", shell=True)
+        subprocess.run(f"mv *CLUS* {STRUCTURE_FILES_DIR}/", shell=True)
         self.assertEqual(value, round(graph.return_frac_percolating(), 3))
 
     @data("POSCAR_2_clusters.vasp")

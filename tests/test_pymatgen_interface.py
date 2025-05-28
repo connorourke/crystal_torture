@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import Mock
+from pathlib import Path
 from crystal_torture import Node, Cluster, tort
 from crystal_torture.pymatgen_interface import (
     nodes_from_structure,
@@ -8,6 +9,10 @@ from crystal_torture.pymatgen_interface import (
     graph_from_structure,
 )
 from pymatgen.core import Structure
+
+# Get the directory containing this test file
+TEST_DIR = Path(__file__).parent
+STRUCTURE_FILES_DIR = TEST_DIR / "STRUCTURE_FILES"
 
 
 class PymatgenTestCase(unittest.TestCase):
@@ -49,7 +54,7 @@ class PymatgenTestCase(unittest.TestCase):
 
     def test_nodes_from_file(self):
 
-        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_UC.vasp")
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_UC.vasp"))
         nodes = nodes_from_structure(structure, 4.0, get_halo=False)
         mock_neigh_ind = set(
             [frozenset(node.neighbours_ind) for node in self.mock_nodes]
@@ -82,13 +87,13 @@ class PymatgenTestCase(unittest.TestCase):
     def test_clusters_from_file(self):
 
         clusters1 = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
         tort.tort_mod.tear_down()
         clusters2 = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=3.5,
             elements={"Li"},
         )
@@ -100,11 +105,11 @@ class PymatgenTestCase(unittest.TestCase):
     def test_cluster_from_structure(self):
 
         clusters1 = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
-        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp")
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"))
         clusters2 = clusters_from_structure(structure, rcut=4.0, elements={"Li"})
 
         neigh_set_1 = set(
@@ -118,11 +123,11 @@ class PymatgenTestCase(unittest.TestCase):
 
     def test_graph_from_structure(self):
         clusters1 = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
-        structure = Structure.from_file("tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp")
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"))
         graph = graph_from_structure(structure, rcut=4.0, elements={"Li"})
 
         neigh_set_1 = set(
@@ -137,14 +142,14 @@ class PymatgenTestCase(unittest.TestCase):
     def test_cluster_periodic(self):
 
         clusters1 = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
         tort.tort_mod.tear_down()
 
         clusters2 = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_2_clusters.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
             rcut=3.5,
             elements={"Li"},
         )
@@ -159,17 +164,17 @@ class PymatgenTestCase(unittest.TestCase):
     def test_periodic(self):
 
         clusters1 = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_periodic_1.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_periodic_1.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
         clusters2 = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_periodic_2.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_periodic_2.vasp"),
             rcut=4.0,
             elements={"Li"},
         )
         clusters3 = clusters_from_file(
-            filename="tests/STRUCTURE_FILES/POSCAR_periodic_3.vasp",
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_periodic_3.vasp"),
             rcut=4.0,
             elements={"Li"},
         )

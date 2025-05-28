@@ -53,7 +53,6 @@ try:
         _dist_lib.shift_index_.restype = None
         
         _DIST_AVAILABLE = True
-        print(f"Successfully loaded Fortran dist library: {lib_file.name}")
     else:
         _dist_lib = None
         _DIST_AVAILABLE = False

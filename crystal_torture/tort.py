@@ -64,7 +64,6 @@ try:
         _tort_lib.get_uc_tort_size.restype = ctypes.c_int
         
         _FORT_AVAILABLE = True
-        print(f"Successfully loaded Fortran library: {lib_file.name}")
     else:
         _tort_lib = None
         _FORT_AVAILABLE = False
