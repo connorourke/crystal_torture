@@ -4,7 +4,9 @@ import random
 from pymatgen.core import Structure, Molecule, PeriodicSite
 
 
-def count_sites(structure: Structure, species: set[str] | None = None, labels: set[str] | None = None) -> int:
+def count_sites(structure: Structure,
+        species: set[str] | None = None,
+        labels: set[str] | None = None) -> int:
     """Count sites in structure by species and/or labels.
     
     Given structure object and either specie string or label string, it counts and returns the 
@@ -39,7 +41,9 @@ def count_sites(structure: Structure, species: set[str] | None = None, labels: s
         raise ValueError("Need to supply either specie, or label to count_sites")
 
 
-def index_sites(structure: Structure, species: set[str] | None = None, labels: set[str] | None = None) -> list[int]:
+def index_sites(structure: Structure,
+        species: set[str] | None = None,
+        labels: set[str] | None = None) -> list[int]:
     """Return site indices occupied by specie or label (or both).
     
     Args:
@@ -67,7 +71,8 @@ def index_sites(structure: Structure, species: set[str] | None = None, labels: s
         raise ValueError("Need to supply either specie, or label to index_sites")
 
 
-def sort_structure(structure: Structure, order: list[str]) -> Structure:
+def sort_structure(structure: Structure,
+        order: list[str]) -> Structure:
     """Sort structure species so their indices sit side by side in given order.
     
     Given a pymatgen structure object sort the species so that their indices

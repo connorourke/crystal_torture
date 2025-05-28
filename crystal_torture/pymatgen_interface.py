@@ -11,7 +11,9 @@ import sys
 import time
 from pymatgen.core import Structure, Molecule, PeriodicSite
 from types import ModuleType
+import numpy.typing as npt
 
+# Module variables with proper type hints
 dist: ModuleType | None
 tort: ModuleType | None
 
@@ -26,17 +28,16 @@ except ImportError:
     tort = None
 
 
-def _python_dist(coord1, coord2, n):
-    """
-    Pure Python fallback for distance calculation when Fortran dist module is not available.
+def _python_dist(coord1: npt.NDArray[np.floating], coord2: npt.NDArray[np.floating], n: int) -> npt.NDArray[np.floating]:
+    """Pure Python fallback for distance calculation when Fortran dist module is not available.
     
     Args:
-        coord1: Array of coordinates
-        coord2: Array of coordinates  
-        n: Number of coordinates
+        coord1: Array of coordinates.
+        coord2: Array of coordinates.  
+        n: Number of coordinates.
         
     Returns:
-        Distance matrix
+        Distance matrix.
     """
     dist_matrix = np.zeros((n, n))
     for i in range(n):
@@ -49,16 +50,15 @@ def _python_dist(coord1, coord2, n):
     return dist_matrix
 
 
-def _python_shift_index(index_n, shift):
-    """
-    Pure Python fallback for index shifting when Fortran dist module is not available.
+def _python_shift_index(index_n: int, shift: list[int]) -> int:
+    """Pure Python fallback for index shifting when Fortran dist module is not available.
     
     Args:
-        index_n: Original index
-        shift: Shift vector [x, y, z]
+        index_n: Original index.
+        shift: Shift vector [x, y, z].
         
     Returns:
-        New shifted index
+        New shifted index.
     """
     new_x = (int(index_n // 9) % 3 + shift[0]) % 3
     new_y = (int(index_n // 3) % 3 + shift[1]) % 3  
@@ -68,25 +68,24 @@ def _python_shift_index(index_n, shift):
     return new_index
 
 
-def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
-    """
-    Takes a list of neighbour indices for sites in the original unit cell, 
-    and maps them on to all of the supercell sites.
+def map_index(
+    uc_neighbours: list[list[int]], 
+    uc_index: list[int], 
+    x_d: int, 
+    y_d: int, 
+    z_d: int
+) -> list[list[int]]:
+    """Take a list of neighbour indices for sites in the original unit cell and map them onto all supercell sites.
     
     Args:
-
-        - uc_neighbours(list(list(int))): list of lists containing neighbour indices for the nodes that are in the primitive cell
-        - uc_index(list(int)): list of indices corresponding to the primitive cell nodes
-        - x_d (int): x dimension of supercell
-        - y_d (int): y dimension of supercell
-        - z_d (int): z dimension of supercell
-
-
+        uc_neighbours: List of lists containing neighbour indices for the nodes that are in the primitive cell.
+        uc_index: List of indices corresponding to the primitive cell nodes.
+        x_d: X dimension of supercell.
+        y_d: Y dimension of supercell.
+        z_d: Z dimension of supercell.
     
     Returns:
-
-        - neigh ([[int]...[int]]): list of neighbour indices for all nodes
-
+        List of neighbour indices for all nodes.
     """
     if dist is None:
         shift_func = _python_shift_index
@@ -111,16 +110,12 @@ def map_index(uc_neighbours, uc_index, x_d, y_d, z_d):
     return neigh
 
 
-def get_all_neighbors_and_image(structure, r, include_index=False):
+def get_all_neighbors_and_image(structure: Structure, r: float, include_index: bool = False) -> list[list[tuple]]:
+    """Get neighbours for each atom in the unit cell, out to a distance r.
+    
+    Modified from pymatgen to return image (used for mapping to supercell), and to use the f2py wrapped
+    OpenMP dist subroutine to get the distances (smaller memory footprint and faster than numpy).
 
-    """
-    Modified from `pymatgen 
-    <http://pymatgen.org/_modules/pymatgen/core/structure.html#IStructure.get_all_neighbors>`_ 
-    to return image (used for mapping to supercell), and to use the f2py wrapped
-    OpenMP dist subroutine to get the distances (smaller memory footprint and faster
-    than numpy).
-
-    Get neighbours for each atom in the unit cell, out to a distance r
     Returns a list of list of neighbors for each site in structure.
     Use this method if you are planning on looping over all sites in the
     crystal. If you only want neighbors for a particular site, use the
@@ -128,23 +123,18 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
     However if you are looping over all sites in the crystal, this method
     is more efficient since it only performs one pass over a large enough
     supercell to contain all possible atoms out to a distance r.
-    The return type is a [(site, dist) ...] since most of the time,
-    subsequent processing requires the distance.
-
     
     Args:
-        - r (float): Radius of sphere.
-        - include_index (bool): Whether to include the non-supercell site
-        - in the returned data
+        structure: Pymatgen Structure object.
+        r: Radius of sphere.
+        include_index: Whether to include the non-supercell site in the returned data.
 
     Returns:
-        - A list of a list of nearest neighbors for each site, i.e., 
+        A list of a list of nearest neighbors for each site, i.e., 
         [[(site, dist, index, image) ...], ..]. Index only supplied if include_index = True.
         The index is the index of the site in the original (non-supercell)
         structure. This is needed for ewaldmatrix by keeping track of which
         sites contribute to the ewald sum.
-
-
     """
     # Choose distance calculation function based on availability
     if dist is None:
@@ -185,22 +175,17 @@ def get_all_neighbors_and_image(structure, r, include_index=False):
     return neighbors
 
 
-def create_halo(structure, neighbours):
-    """
-    Takes a pymatgen structure object, sets up a halo by making a 3x3x3 supercell,
+def create_halo(structure: Structure, neighbours: list[list[int]]) -> tuple[Structure, list[list[int]]]:
+    """Take a pymatgen structure object and set up a halo by making a 3x3x3 supercell.
     
-
     Args:
-
-        - structure (Structure): pymatgen Structure object
-        - neighbours  [[(site, dist, index, image) ...], ..]: list of neighbours for sites in structure
+        structure: Pymatgen Structure object.
+        neighbours: List of neighbours for sites in structure.
 
     Returns:
-
-        - structure (Structure): 3x3x3x supercell pymatgen Structure object
-        - neighbours  [[(site, dist, index, image) ...], ..]: new list of neighbours for sites in supercell structure
-
-
+        Tuple containing:
+            - structure: 3x3x3 supercell pymatgen Structure object.
+            - neighbours: New list of neighbours for sites in supercell structure.
     """
     if dist is None:
         shift_func = _python_shift_index
@@ -225,19 +210,16 @@ def create_halo(structure, neighbours):
     return structure, neighbours
 
 
-def nodes_from_structure(structure, rcut, get_halo=False):
-    """
-    Takes a pymatgen structure object and converts to Nodes for interogation.
+def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = False) -> set[Node]:
+    """Take a pymatgen structure object and convert to Nodes for interrogation.
 
     Args:
-
-        - structure (Structure): pymatgen Structure object
-        - rcut (float): cut-off radius for crystal site neighbour set-up
-        - halo (bool): whether to set up halo nodes (i.e. 3x3x3 supercell)
+        structure: Pymatgen Structure object.
+        rcut: Cut-off radius for crystal site neighbour set-up.
+        get_halo: Whether to set up halo nodes (i.e. 3x3x3 supercell).
 
     Returns:
-        - nodes (set(Nodes)): set of Node objects representing structure sites
-  
+        Set of Node objects representing structure sites.
     """
     structure.add_site_property(
         "UC_index", [str(i) for i in range(len(structure.sites))]
@@ -282,25 +264,15 @@ def nodes_from_structure(structure, rcut, get_halo=False):
     return set(nodes)
 
 
-def set_cluster_periodic(cluster):
-    """
-    Sets the periodicty of the cluster by counting through the number of 
-    labelled UC nodes it contains
+def set_cluster_periodic(cluster: Cluster) -> None:
+    """Set the periodicity of the cluster by counting through the number of labelled UC nodes it contains.
 
     Args:
-
-        - None
-
-    Returns:
-
-       - None
+        cluster: Cluster object to set periodicity for.
 
     Sets:
-
-       - cluster.periodic (int): periodicity of the cluster (1=1D,2=2D,3=3D)
-
+        cluster.periodic: Periodicity of the cluster (1=1D, 2=2D, 3=3D).
     """
-
     node = cluster.nodes.pop()
     cluster.nodes.add(node)
 
@@ -317,19 +289,20 @@ def set_cluster_periodic(cluster):
         cluster.periodic = 0
 
 
-def set_fort_nodes(nodes):
-    """
-    Sets up a copy of the nodes and the neighbour indices in the tort.f90 Fortran module
-    to allow access if using the Fortran tortuosity routines.
+def set_fort_nodes(nodes: set[Node]) -> None:
+    """Set up a copy of the nodes and the neighbour indices in the tort.f90 Fortran module.
+    
+    This allows access if using the Fortran tortuosity routines.
 
     Args:
-       - None
-    Returns:
-       - None
+       nodes: Set of Node objects to set up in Fortran module.
+       
     Sets:
-       - tort.tort_mod.nodes(:) : allocates space to hold node indices for full graph
-       - tort.tort_mod.uc_tort(:) : allocates space to hold unit cell node tortuosity for full graph
-  
+       tort.tort_mod.nodes: Allocates space to hold node indices for full graph.
+       tort.tort_mod.uc_tort: Allocates space to hold unit cell node tortuosity for full graph.
+       
+    Raises:
+        ImportError: If Fortran extensions are not available.
     """
     if tort is None:
         raise ImportError("Fortran extensions not available. Cannot set up Fortran nodes.")
@@ -345,21 +318,21 @@ def set_fort_nodes(nodes):
             [ind for ind in node.neighbours_ind],
         )
 
-def clusters_from_file(filename, rcut, elements):
-    """
-    Take a pymatgen compatible file, and converts it to a cluster object
+
+def clusters_from_file(filename: str, rcut: float, elements: set[str]) -> set[Cluster]:
+    """Take a pymatgen compatible file and convert it to a cluster object.
 
     Args:
-
-        - filename (str): name of file to set up graph from
-        - rcut (float):   cut-off radii for node-node connections in forming clusters
-        - elements ([str,str,.....]): list of elements to include in setting up graph
+        filename: Name of file to set up graph from.
+        rcut: Cut-off radii for node-node connections in forming clusters.
+        elements: Set of elements to include in setting up graph.
 
     Returns:
-        - clusters ({clusters}): set of clusters 
-
+        Set of clusters.
+        
+    Raises:
+        ValueError: If the element set is not a subset of the elements in the file.
     """
-
     structure = Structure.from_file(filename)
     symbols = set([species for species in structure.symbol_set])
     if set(elements).issubset(symbols):
@@ -392,22 +365,20 @@ def clusters_from_file(filename, rcut, elements):
         )
 
 
-def clusters_from_structure(structure, rcut, elements):
-    """
-    Take a pymatgen structure, and converts it to a graph object
+def clusters_from_structure(structure: Structure, rcut: float, elements: set[str]) -> set[Cluster]:
+    """Take a pymatgen structure and convert it to a graph object.
 
     Args:
-
-        - structure (Structure): pymatgen structure object to set up graph from
-        - rcut (float):   cut-off radii for node-node connections in forming clusters
-        - elements ({str,str,.....}): set of element strings to include in setting up graph
+        structure: Pymatgen structure object to set up graph from.
+        rcut: Cut-off radii for node-node connections in forming clusters.
+        elements: Set of element strings to include in setting up graph.
 
     Returns:
-
-        - clusters ({clusters}): set of clusters 
-
+        Set of clusters.
+        
+    Raises:
+        ValueError: If the element set is not a subset of the elements in the structure.
     """
-
     symbols = set([species for species in structure.symbol_set])
 
     if elements.issubset(structure.symbol_set):
@@ -441,26 +412,21 @@ def clusters_from_structure(structure, rcut, elements):
         )
 
 
-def graph_from_structure(structure, rcut, elements):
-    """
-    Takes a pymatgen compatible file, an converts it to a graph object
+def graph_from_structure(structure: Structure, rcut: float, elements: set[str]) -> Graph:
+    """Take a pymatgen compatible file and convert it to a graph object.
 
     Args:
-
-        - structure (Structure): pymatgen Structure object to set up graph from
-        - rcut (float): cut-off radius node-node connections in forming clusters
-        - elements ([str,str,.....]): list of elements to include in setting up graph
+        structure: Pymatgen Structure object to set up graph from.
+        rcut: Cut-off radius node-node connections in forming clusters.
+        elements: Set of elements to include in setting up graph.
 
     Returns:
-        - graph (Graph): graph object for structure
-  
+        Graph object for structure.
     """
-    # print(elements)
     clusters = clusters_from_structure(
         structure=structure, rcut=rcut, elements=elements
     )
     all_elements = set([species for species in structure.symbol_set])
-    # print(all_elements)
     remove_elements = [x for x in all_elements if x not in elements]
     structure.remove_species(remove_elements)
     graph = Graph(clusters=clusters, structure=structure)
@@ -468,19 +434,16 @@ def graph_from_structure(structure, rcut, elements):
     return graph
 
 
-def graph_from_file(filename, rcut, elements):
-    """
-    Takes a pymatgen compatible file, an converts it to a graph object
+def graph_from_file(filename: str, rcut: float, elements: set[str]) -> Graph:
+    """Take a pymatgen compatible file and convert it to a graph object.
 
     Args:
-
-        - filename (str): name of file to set up graph from
-        - rcut (float): cut-off radius node-node connections in forming clusters
-        - elements ([str,str,.....]): list of elements to include in setting up graph
+        filename: Name of file to set up graph from.
+        rcut: Cut-off radius node-node connections in forming clusters.
+        elements: Set of elements to include in setting up graph.
 
     Returns:
-        - graph (Graph): graph object for structure
-
+        Graph object for structure.
     """
     clusters = clusters_from_file(filename=filename, rcut=rcut, elements=elements)
     structure = Structure.from_file(filename)

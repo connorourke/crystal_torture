@@ -1,457 +1,188 @@
-"""Functions for setting up a node, cluster and graph using pymatgen."""
+import unittest
+from unittest.mock import Mock
+from pathlib import Path
+from crystal_torture import Node, Cluster, tort
+from crystal_torture.pymatgen_interface import (
+    nodes_from_structure,
+    clusters_from_file,
+    clusters_from_structure,
+    graph_from_structure,
+)
+from pymatgen.core import Structure
 
-from crystal_torture.node import Node
-from crystal_torture.cluster import Cluster
-from crystal_torture.graph import Graph
-import numpy as np
-import itertools
-import math
-import copy
-import sys
-import time
-from pymatgen.core import Structure, Molecule, PeriodicSite
-from types import ModuleType
-import numpy.typing as npt
-
-# Module variables with proper type hints
-dist: ModuleType | None
-tort: ModuleType | None
-
-try:
-    from . import dist
-except ImportError:
-    dist = None
-
-try:
-    from . import tort
-except ImportError:
-    tort = None
+# Get the directory containing this test file
+TEST_DIR = Path(__file__).parent
+STRUCTURE_FILES_DIR = TEST_DIR / "STRUCTURE_FILES"
 
 
-def _python_dist(coord1: npt.NDArray[np.floating], coord2: npt.NDArray[np.floating], n: int) -> npt.NDArray[np.floating]:
-    """Pure Python fallback for distance calculation when Fortran dist module is not available.
-    
-    Args:
-        coord1: Array of coordinates.
-        coord2: Array of coordinates.  
-        n: Number of coordinates.
-        
-    Returns:
-        Distance matrix.
-    """
-    dist_matrix = np.zeros((n, n))
-    for i in range(n):
-        for j in range(n):
-            dist_matrix[i, j] = np.sqrt(
-                (coord1[i, 0] - coord2[j, 0])**2 + 
-                (coord1[i, 1] - coord2[j, 1])**2 + 
-                (coord1[i, 2] - coord2[j, 2])**2
+class PymatgenTestCase(unittest.TestCase):
+    """ Test for interface with pymatgen"""
+
+    def setUp(self):
+        self.labels = ["Li"] * 8
+        self.elements = ["Li"] * 8
+        self.node_ids = list(range(9))
+        self.neighbours_ind = [
+            set([2, 3, 6, 7]),
+            set([2, 3, 6, 7]),
+            set([0, 1, 4, 5]),
+            set([0, 1, 4, 5]),
+            set([2, 3, 6, 7]),
+            set([2, 3, 6, 7]),
+            set([0, 1, 4, 5]),
+            set([0, 1, 4, 5]),
+        ]
+        self.mock_nodes = [
+            Mock(
+                spec=Node,
+                index=i,
+                element=e,
+                labels=l,
+                neighbours_ind=n,
+                neigbours=None,
             )
-    return dist_matrix
-
-
-def _python_shift_index(index_n: int, shift: list[int]) -> int:
-    """Pure Python fallback for index shifting when Fortran dist module is not available.
-    
-    Args:
-        index_n: Original index.
-        shift: Shift vector [x, y, z].
-        
-    Returns:
-        New shifted index.
-    """
-    new_x = (int(index_n // 9) % 3 + shift[0]) % 3
-    new_y = (int(index_n // 3) % 3 + shift[1]) % 3  
-    new_z = (index_n % 3 + shift[2]) % 3
-    
-    new_index = int(27 * int(index_n // 27) + (new_x % 3) * 9 + (new_y % 3) * 3 + (new_z % 3))
-    return new_index
-
-
-def map_index(
-    uc_neighbours: list[list[int]], 
-    uc_index: list[int], 
-    x_d: int, 
-    y_d: int, 
-    z_d: int
-) -> list[list[int]]:
-    """Take a list of neighbour indices for sites in the original unit cell and map them onto all supercell sites.
-    
-    Args:
-        uc_neighbours: List of lists containing neighbour indices for the nodes that are in the primitive cell.
-        uc_index: List of indices corresponding to the primitive cell nodes.
-        x_d: X dimension of supercell.
-        y_d: Y dimension of supercell.
-        z_d: Z dimension of supercell.
-    
-    Returns:
-        List of neighbour indices for all nodes.
-    """
-    if dist is None:
-        shift_func = _python_shift_index
-    else:
-        shift_func = dist.shift_index
-
-    no_atoms = len(uc_index)
-    count = -1
-    neigh = []
-    append = neigh.append
-    for i, index in enumerate(uc_index):
-        for x in range(0, x_d, 1):
-            for y in range(0, y_d, 1):
-                for z in range(0, z_d, 1):
-                    count += 1
-                    append(
-                        [
-                            shift_func(neighbour, [x, y, z])
-                            for neighbour in uc_neighbours[i]
-                        ]
-                    )
-    return neigh
-
-
-def get_all_neighbors_and_image(structure: Structure, r: float, include_index: bool = False) -> list[list[tuple]]:
-    """Get neighbours for each atom in the unit cell, out to a distance r.
-    
-    Modified from pymatgen to return image (used for mapping to supercell), and to use the f2py wrapped
-    OpenMP dist subroutine to get the distances (smaller memory footprint and faster than numpy).
-
-    Returns a list of list of neighbors for each site in structure.
-    Use this method if you are planning on looping over all sites in the
-    crystal. If you only want neighbors for a particular site, use the
-    method get_neighbors as it may not have to build such a large supercell
-    However if you are looping over all sites in the crystal, this method
-    is more efficient since it only performs one pass over a large enough
-    supercell to contain all possible atoms out to a distance r.
-    
-    Args:
-        structure: Pymatgen Structure object.
-        r: Radius of sphere.
-        include_index: Whether to include the non-supercell site in the returned data.
-
-    Returns:
-        A list of a list of nearest neighbors for each site, i.e., 
-        [[(site, dist, index, image) ...], ..]. Index only supplied if include_index = True.
-        The index is the index of the site in the original (non-supercell)
-        structure. This is needed for ewaldmatrix by keeping track of which
-        sites contribute to the ewald sum.
-    """
-    # Choose distance calculation function based on availability
-    if dist is None:
-        dist_func = _python_dist
-    else:
-        dist_func = dist.dist
-    
-    recp_len = np.array(structure.lattice.reciprocal_lattice.abc)
-    maxr = np.ceil((r + 0.15) * recp_len / (2 * math.pi))
-    nmin = np.floor(np.min(structure.frac_coords, axis=0)) - maxr
-    nmax = np.ceil(np.max(structure.frac_coords, axis=0)) + maxr
-
-    all_ranges = [np.arange(x, y) for x, y in zip(nmin, nmax)]
-
-    latt = structure._lattice
-    neighbors = [list() for i in range(len(structure._sites))]
-    all_fcoords = np.mod(structure.frac_coords, 1)
-    coords_in_cell = latt.get_cartesian_coords(all_fcoords)
-    site_coords = structure.cart_coords
-
-    indices = np.arange(len(structure))
-    for image in itertools.product(*all_ranges):
-        coords = latt.get_cartesian_coords(image) + coords_in_cell
-        all_dists = dist_func(coords, site_coords, len(coords))
-        all_within_r = np.bitwise_and(all_dists <= r, all_dists > 1e-8)
-
-        for (j, d, within_r) in zip(indices, all_dists, all_within_r):
-            nnsite = PeriodicSite(
-                structure[j].specie,
-                coords[j],
-                latt,
-                properties=structure[j].properties,
-                coords_are_cartesian=True,
+            for i, e, l, n in zip(
+                self.node_ids, self.elements, self.labels, self.neighbours_ind
             )
-            for i in indices[within_r]:
-                item = (nnsite, d[i], j, image) if include_index else (nnsite, d[i])
-                neighbors[i].append(item)
-    return neighbors
-
-
-def create_halo(structure: Structure, neighbours: list[list[int]]) -> tuple[Structure, list[list[int]]]:
-    """Take a pymatgen structure object and set up a halo by making a 3x3x3 supercell.
-    
-    Args:
-        structure: Pymatgen Structure object.
-        neighbours: List of neighbours for sites in structure.
-
-    Returns:
-        Tuple containing:
-            - structure: 3x3x3 supercell pymatgen Structure object.
-            - neighbours: New list of neighbours for sites in supercell structure.
-    """
-    if dist is None:
-        shift_func = _python_shift_index
-    else:
-        shift_func = dist.shift_index
-        
-    x = 3
-    y = 3
-    z = 3
-
-    no_sites = len(structure.sites)
-    for i in range(no_sites):
-        neighbours[i] = [
-            shift_func((27 * neighbour[2]), neighbour[3])
-            for neighbour in neighbours[i]
         ]
 
-    uc_index = [((site * 27)) for site in range(len(structure.sites))]
-    structure.make_supercell([x, y, z])
-    neighbours = map_index(neighbours, uc_index, x, y, z)
+        for node in self.mock_nodes:
+            node.neighbours = [self.mock_nodes[n] for n in node.neighbours_ind]
+            node.neighbours = set(node.neighbours)
+        self.mock_nodes = set(self.mock_nodes)
+        self.cluster = Cluster(set(self.mock_nodes))
 
-    return structure, neighbours
+    def test_nodes_from_file(self):
 
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_UC.vasp"))
+        nodes = nodes_from_structure(structure, 4.0, get_halo=False)
+        mock_neigh_ind = set(
+            [frozenset(node.neighbours_ind) for node in self.mock_nodes]
+        )
+        neigh_ind = set([frozenset(node.neighbours_ind) for node in nodes])
 
-def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = False) -> set[Node]:
-    """Take a pymatgen structure object and convert to Nodes for interrogation.
+        self.assertEqual(mock_neigh_ind, neigh_ind)
+        self.assertEqual(
+            set([node.index for node in self.mock_nodes]),
+            set([node.index for node in nodes]),
+        )
+        self.assertEqual(
+            set([node.element for node in self.mock_nodes]),
+            set([node.element for node in nodes]),
+        )
 
-    Args:
-        structure: Pymatgen Structure object.
-        rcut: Cut-off radius for crystal site neighbour set-up.
-        get_halo: Whether to set up halo nodes (i.e. 3x3x3 supercell).
+        node = set()
+        node.add(nodes.pop())
+        cluster1 = Cluster(node)
+        cluster1.grow_cluster()
+        self.assertEqual(
+            set([node.index for node in self.cluster.nodes]),
+            set([node.index for node in cluster1.nodes]),
+        )
+        self.assertEqual(
+            set([node.element for node in self.cluster.nodes]),
+            set([node.element for node in cluster1.nodes]),
+        )
 
-    Returns:
-        Set of Node objects representing structure sites.
-    """
-    structure.add_site_property(
-        "UC_index", [str(i) for i in range(len(structure.sites))]
-    )
-    neighbours = get_all_neighbors_and_image(structure, rcut, include_index=True)
-    nodes = []
+    def test_clusters_from_file(self):
 
-    no_nodes = len(structure.sites)
-    if get_halo == True:
-        structure, neighbours = create_halo(structure, neighbours)
-        uc_index = set([((index * 27) + 13) for index in range(no_nodes)])
-    else:
-        uc_index = set([range(no_nodes)])
-        neighbours_temp = []
-        for index, neigh in enumerate(neighbours):
-            neighbours_temp.append([neigh_ind[2] for neigh_ind in neigh])
-        neighbours = neighbours_temp
+        clusters1 = clusters_from_file(
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
+            rcut=4.0,
+            elements={"Li"},
+        )
+        tort.tort_mod.tear_down()
+        clusters2 = clusters_from_file(
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
+            rcut=3.5,
+            elements={"Li"},
+        )
+        tort.tort_mod.tear_down()
 
-    append = nodes.append
+        self.assertEqual(len(clusters1), 1)
+        self.assertEqual(len(clusters2), 2)
 
-    for index, site in enumerate(structure.sites):
+    def test_cluster_from_structure(self):
 
-        if index in uc_index:
-            halo_node = False
+        clusters1 = clusters_from_file(
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
+            rcut=4.0,
+            elements={"Li"},
+        )
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"))
+        clusters2 = clusters_from_structure(structure, rcut=4.0, elements={"Li"})
+
+        neigh_set_1 = set(
+            [frozenset(node.neighbours_ind) for node in clusters1.pop().nodes]
+        )
+        neigh_set_2 = set(
+            [frozenset(node.neighbours_ind) for node in clusters2.pop().nodes]
+        )
+
+        self.assertEqual(neigh_set_1, neigh_set_2)
+
+    def test_graph_from_structure(self):
+        clusters1 = clusters_from_file(
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
+            rcut=4.0,
+            elements={"Li"},
+        )
+        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"))
+        graph = graph_from_structure(structure, rcut=4.0, elements={"Li"})
+
+        neigh_set_1 = set(
+            [frozenset(node.neighbours_ind) for node in clusters1.pop().nodes]
+        )
+        neigh_set_2 = set(
+            [frozenset(node.neighbours_ind) for node in graph.clusters.pop().nodes]
+        )
+
+        self.assertEqual(neigh_set_1, neigh_set_2)
+
+    def test_cluster_periodic(self):
+
+        clusters1 = clusters_from_file(
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
+            rcut=4.0,
+            elements={"Li"},
+        )
+        tort.tort_mod.tear_down()
+
+        clusters2 = clusters_from_file(
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
+            rcut=3.5,
+            elements={"Li"},
+        )
+        tort.tort_mod.tear_down()
+
+        self.assertEqual(clusters1.pop().periodic, 3)
+        if clusters2.pop().periodic == 3:
+            self.assertEqual(clusters2.pop().periodic, 0)
         else:
-            halo_node = True
-        node_neighbours_ind = set(neighbours[index])
-        append(
-            Node(
-                index=index,
-                element=site.species_string,
-                labels={"UC_index": site.properties["UC_index"], "Halo": halo_node},
-                neighbours_ind=node_neighbours_ind,
-            )
+            self.assertEqual(clusters2.pop().periodic, 3)
+
+    def test_periodic(self):
+
+        clusters1 = clusters_from_file(
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_periodic_1.vasp"),
+            rcut=4.0,
+            elements={"Li"},
+        )
+        clusters2 = clusters_from_file(
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_periodic_2.vasp"),
+            rcut=4.0,
+            elements={"Li"},
+        )
+        clusters3 = clusters_from_file(
+            filename=str(STRUCTURE_FILES_DIR / "POSCAR_periodic_3.vasp"),
+            rcut=4.0,
+            elements={"Li"},
         )
 
-    for node in nodes:
-        node.neighbours = set()
-        for neighbour_ind in node.neighbours_ind:
-            node.neighbours.add(nodes[neighbour_ind])
-
-    return set(nodes)
+        self.assertEqual(clusters1.pop().periodic, 1)
+        self.assertEqual(clusters2.pop().periodic, 2)
+        self.assertEqual(clusters3.pop().periodic, 3)
 
 
-def set_cluster_periodic(cluster: Cluster) -> None:
-    """Set the periodicity of the cluster by counting through the number of labelled UC nodes it contains.
-
-    Args:
-        cluster: Cluster object to set periodicity for.
-
-    Sets:
-        cluster.periodic: Periodicity of the cluster (1=1D, 2=2D, 3=3D).
-    """
-    node = cluster.nodes.pop()
-    cluster.nodes.add(node)
-
-    key = node.labels["UC_index"]
-    no_images = len(cluster.return_key_nodes("UC_index", key))
-
-    if no_images == 27:
-        cluster.periodic = 3
-    elif no_images == 9:
-        cluster.periodic = 2
-    elif no_images == 3:
-        cluster.periodic = 1
-    else:
-        cluster.periodic = 0
-
-
-def set_fort_nodes(nodes: set[Node]) -> None:
-    """Set up a copy of the nodes and the neighbour indices in the tort.f90 Fortran module.
-    
-    This allows access if using the Fortran tortuosity routines.
-
-    Args:
-       nodes: Set of Node objects to set up in Fortran module.
-       
-    Sets:
-       tort.tort_mod.nodes: Allocates space to hold node indices for full graph.
-       tort.tort_mod.uc_tort: Allocates space to hold unit cell node tortuosity for full graph.
-       
-    Raises:
-        ImportError: If Fortran extensions are not available.
-    """
-    if tort is None:
-        raise ImportError("Fortran extensions not available. Cannot set up Fortran nodes.")
-    
-    tort.tort_mod.allocate_nodes(
-        len(nodes), len([node for node in nodes if node.labels["Halo"] == False])
-    )
-    for node in nodes:
-        tort.tort_mod.set_neighbours(
-            node.index,
-            int(node.labels["UC_index"]),
-            len(node.neighbours_ind),
-            [ind for ind in node.neighbours_ind],
-        )
-
-
-def clusters_from_file(filename: str, rcut: float, elements: set[str]) -> set[Cluster]:
-    """Take a pymatgen compatible file and convert it to a cluster object.
-
-    Args:
-        filename: Name of file to set up graph from.
-        rcut: Cut-off radii for node-node connections in forming clusters.
-        elements: Set of elements to include in setting up graph.
-
-    Returns:
-        Set of clusters.
-        
-    Raises:
-        ValueError: If the element set is not a subset of the elements in the file.
-    """
-    structure = Structure.from_file(filename)
-    symbols = set([species for species in structure.symbol_set])
-    if set(elements).issubset(symbols):
-
-        all_elements = set([species for species in structure.symbol_set])
-        remove_elements = [x for x in all_elements if x not in elements]
-
-        structure.remove_species(remove_elements)
-        folded_structure = Structure.from_sites(structure.sites, to_unit_cell=True)
-        nodes = nodes_from_structure(folded_structure, rcut, get_halo=True)
-        set_fort_nodes(nodes)
-
-        clusters = set()
-
-        uc_nodes = set([node for node in nodes if node.labels["Halo"] == False])
-
-        while uc_nodes:
-            node = uc_nodes.pop()
-            if node.labels["Halo"] == False:
-                cluster = Cluster({node})
-                cluster.grow_cluster()
-                uc_nodes.difference_update(cluster.nodes)
-                clusters.add(cluster)
-                set_cluster_periodic(cluster)
-
-        return clusters
-    else:
-        raise ValueError(
-            "The element set fed to 'clusters_from_file' is not a subset of the elements in the file"
-        )
-
-
-def clusters_from_structure(structure: Structure, rcut: float, elements: set[str]) -> set[Cluster]:
-    """Take a pymatgen structure and convert it to a graph object.
-
-    Args:
-        structure: Pymatgen structure object to set up graph from.
-        rcut: Cut-off radii for node-node connections in forming clusters.
-        elements: Set of element strings to include in setting up graph.
-
-    Returns:
-        Set of clusters.
-        
-    Raises:
-        ValueError: If the element set is not a subset of the elements in the structure.
-    """
-    symbols = set([species for species in structure.symbol_set])
-
-    if elements.issubset(structure.symbol_set):
-
-        all_elements = set([species for species in structure.symbol_set])
-        remove_elements = [x for x in all_elements if x not in elements]
-
-        structure.remove_species(remove_elements)
-        folded_structure = Structure.from_sites(structure.sites, to_unit_cell=True)
-
-        nodes = nodes_from_structure(folded_structure, rcut, get_halo=True)
-        set_fort_nodes(nodes)
-
-        clusters = set()
-
-        uc_nodes = set([node for node in nodes if node.labels["Halo"] == False])
-
-        while uc_nodes:
-            node = uc_nodes.pop()
-            if node.labels["Halo"] == False:
-                cluster = Cluster({node})
-                cluster.grow_cluster()
-                uc_nodes.difference_update(cluster.nodes)
-                clusters.add(cluster)
-                set_cluster_periodic(cluster)
-
-        return clusters
-    else:
-        raise ValueError(
-            "The element set fed to 'clusters_from_file' is not a subset of the elements in the file"
-        )
-
-
-def graph_from_structure(structure: Structure, rcut: float, elements: set[str]) -> Graph:
-    """Take a pymatgen compatible file and convert it to a graph object.
-
-    Args:
-        structure: Pymatgen Structure object to set up graph from.
-        rcut: Cut-off radius node-node connections in forming clusters.
-        elements: Set of elements to include in setting up graph.
-
-    Returns:
-        Graph object for structure.
-    """
-    clusters = clusters_from_structure(
-        structure=structure, rcut=rcut, elements=elements
-    )
-    all_elements = set([species for species in structure.symbol_set])
-    remove_elements = [x for x in all_elements if x not in elements]
-    structure.remove_species(remove_elements)
-    graph = Graph(clusters=clusters, structure=structure)
-
-    return graph
-
-
-def graph_from_file(filename: str, rcut: float, elements: set[str]) -> Graph:
-    """Take a pymatgen compatible file and convert it to a graph object.
-
-    Args:
-        filename: Name of file to set up graph from.
-        rcut: Cut-off radius node-node connections in forming clusters.
-        elements: Set of elements to include in setting up graph.
-
-    Returns:
-        Graph object for structure.
-    """
-    clusters = clusters_from_file(filename=filename, rcut=rcut, elements=elements)
-    structure = Structure.from_file(filename)
-
-    all_elements = set([species for species in structure.symbol_set])
-    remove_elements = [x for x in all_elements if x not in elements]
-
-    structure.remove_species(remove_elements)
-    graph = Graph(clusters=clusters, structure=structure)
-
-    return graph
+if __name__ == "__main__":
+    unittest.main()
