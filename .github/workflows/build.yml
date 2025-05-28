@@ -7,10 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -18,10 +19,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
       
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y gfortran
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran build-essential
       
       - name: Install package and dev dependencies
-        run: pip install ."[dev]" --use-pep517 --verbose
+        run: |
+          pip install ."[dev]" --use-pep517 --verbose
       
       - name: Verify Fortran extensions loaded
         run: |
@@ -37,8 +41,28 @@ jobs:
               exit(1)
           EOF
       
-      - name: Test
+      - name: Run tests with coverage
         run: |
           cd /tmp
           cp -r /home/runner/work/crystal_torture/crystal_torture/tests .
-          python -m pytest tests/ -v
+          cp /home/runner/work/crystal_torture/crystal_torture/.coveragerc .
+          pytest --cov-config=.coveragerc --cov=crystal_torture --cov-report=lcov tests/ -v
+      
+      - name: Upload coverage to Coveralls (parallel)
+        uses: coverallsapp/github-action@v2
+        with:
+          file: /tmp/coverage.lcov
+          format: lcov
+          parallel: true
+          flag-name: python-${{ matrix.python-version }}
+
+  finish-coverage:
+    needs: test
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close parallel coverage reports
+        uses: coverallsapp/github-action@v2
+        with:
+          parallel-finished: true
+          carryforward: "python-3.10,python-3.11,python-3.12,python-3.13"
