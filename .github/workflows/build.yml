@@ -283,40 +283,43 @@ jobs:
           
           python search_extensions.py
 
-      - name: Test pip install without isolation
+      - name: Test pip install without build isolation
         run: |
           echo "=== Testing pip install without build isolation ==="
           pip uninstall crystal-torture -y || echo "Package not installed"
           rm -rf build dist *.egg-info
-          
+
           echo "--- Installing without build isolation ---"
           pip install --no-build-isolation . -v
-          
+
           echo "--- Testing after non-isolated install ---"
+          # CRITICAL: Move outside source directory to import installed package
+          cd /tmp
+
           cat > test_non_isolated.py << 'EOF'
           try:
               import crystal_torture
               print(f'✅ Package imported: {crystal_torture.__version__}')
-              
+
               from crystal_torture import tort, dist
               print('✅ Modules imported')
-              
+
               if tort.tort_mod is not None:
                   print('✅ tort.tort_mod available')
               else:
                   print('❌ tort.tort_mod is None')
-                  
+
               if dist._DIST_AVAILABLE:
                   print('✅ dist module available')
               else:
                   print('❌ dist module not available')
-                  
+
           except Exception as e:
               print(f'❌ Import failed: {e}')
               import traceback
               traceback.print_exc()
           EOF
-          
+
           python test_non_isolated.py
 
       - name: Final diagnostics and summary
