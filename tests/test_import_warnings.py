@@ -27,19 +27,21 @@ class TestImportWarnings(unittest.TestCase):
 			self.assertEqual(len(warning_list), 0,
 						   f"Imports should be silent, got warnings: {[str(w.message) for w in warning_list]}")
 	
-	@patch('pathlib.Path.glob', return_value=[])
-	def test_error_only_when_using_fortran_functionality(self, mock_glob):
+	@patch('crystal_torture.cluster.tort.tort_mod', None)
+	def test_error_only_when_using_fortran_functionality(self):
 		"""Test that errors only appear when trying to use unavailable Fortran functionality."""
 		from crystal_torture.cluster import Cluster
 		from crystal_torture.node import Node
 		
-		# Create minimal cluster
-		node = Node(0, "Li", {"UC_index": "0", "Halo": False}, [])
+		# Create minimal cluster - doesn't need to be fully functional
+		node = Node(0, "Li", {"UC_index": "0", "Halo": False}, set())
 		cluster = Cluster({node})
 		
 		# Should raise ImportError when trying to use Fortran functionality
-		with self.assertRaises(ImportError):
+		with self.assertRaises(ImportError) as context:
 			cluster.torture_fort()
+		
+		self.assertIn("Fortran extensions not available", str(context.exception))
 
 
 if __name__ == "__main__":

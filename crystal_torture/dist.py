@@ -3,6 +3,9 @@ import ctypes
 import numpy as np
 from pathlib import Path
 
+_dist_lib: ctypes.CDLL | None
+_DIST_AVAILABLE: bool
+
 # Try to load the compiled Fortran library using ctypes
 try:
     # Find the library file

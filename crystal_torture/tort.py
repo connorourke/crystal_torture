@@ -10,6 +10,9 @@ import ctypes
 import ctypes.util
 from pathlib import Path
 
+_tort_lib: ctypes.CDLL | None
+_FORT_AVAILABLE: bool
+
 # Try to load the compiled Fortran library using ctypes
 try:
     # Find the library file
@@ -153,6 +156,7 @@ class Tort_Mod:
 
 
 # Create the module instance
+tort_mod: 'Tort_Mod | None'
 if _FORT_AVAILABLE:
     tort_mod = Tort_Mod()
 else:

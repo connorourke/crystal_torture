@@ -1,3 +1,5 @@
+"""Functions for setting up a node, cluster and graph using pymatgen."""
+
 from crystal_torture.node import Node
 from crystal_torture.cluster import Cluster
 from crystal_torture.graph import Graph
@@ -8,24 +10,20 @@ import copy
 import sys
 import time
 from pymatgen.core import Structure, Molecule, PeriodicSite
+from types import ModuleType
+
+dist: ModuleType | None
+tort: ModuleType | None
 
 try:
     from . import dist
 except ImportError:
     dist = None
-    import warnings
-    warnings.warn("Fortran dist module not available. Some functions will not work.",
-                  UserWarning)
 
 try:
     from . import tort
 except ImportError:
     tort = None
-    import warnings
-    warnings.warn("Fortran tort module not available. Some functions will not work.",
-                  UserWarning)
-
-"Functions for setting up a node, cluster and graph using pymatgen"
 
 
 def _python_dist(coord1, coord2, n):
