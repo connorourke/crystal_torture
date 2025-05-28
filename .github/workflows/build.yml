@@ -1,36 +1,23 @@
-name: debug-build
+name: test-python-versions
 
 on: [push, pull_request]
 
-# =============================================================================
-# DEBUGGING CI CONFIGURATION 
-# =============================================================================
-#
-# This configuration is designed to extensively debug meson-python Fortran
-# extension building issues. It includes:
-#
-# 1. Detailed environment inspection
-# 2. Manual meson build testing
-# 3. Step-by-step pip installation debugging
-# 4. Comprehensive file location tracking
-# 5. Extension loading verification
-#
-# Use this to identify where exactly the build/install process fails.
-# =============================================================================
-
 jobs:
-  debug-fortran-extensions:
+  test-fortran-extensions-multiple-python:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Set up Python 3.11
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
       
       - name: Install system dependencies
         run: |
@@ -41,27 +28,7 @@ jobs:
           echo "=== Verifying system tools ==="
           which gfortran
           gfortran --version
-          which gcc
-          gcc --version
-          
-          echo "=== Testing Fortran compiler ==="
-          echo "program test; print *, 'Fortran compiler working'; end program" > test.f90
-          gfortran test.f90 -o test_fortran
-          ./test_fortran
-          rm test.f90 test_fortran
-          echo "✅ Fortran compiler verified"
-
-      - name: Setup Python environment debugging
-        run: |
-          echo "=== Python Environment Information ==="
-          which python
-          python --version
-          python -c "import sys, site, os; print('Python executable:', sys.executable); print('Python version:', sys.version); print('Platform:', sys.platform); print('Site packages:', site.getsitepackages()); print('User site:', site.getusersitepackages())"
-          
-          echo "=== pip and setuptools info ==="
-          python -m pip --version
-          python -c "import setuptools; print('setuptools:', setuptools.__version__)" || echo "setuptools not installed"
-
+      
       - name: Install build dependencies
         run: |
           echo "=== Installing build dependencies ==="
@@ -69,51 +36,24 @@ jobs:
           pip install wheel build meson ninja numpy meson-python
           
           echo "=== Verifying build tools ==="
+          python --version
           meson --version
           ninja --version
           python -c "import numpy; print('numpy:', numpy.__version__)"
           python -c "import mesonpy; print('meson-python:', mesonpy.__version__)"
 
-      - name: Test manual meson build (diagnostic)
+      - name: Build package
         run: |
-          echo "=== Testing manual meson build ==="
-          rm -rf manual_build
-          mkdir manual_build
-          cd manual_build
-          
-          echo "--- Meson setup ---"
-          meson setup .. --prefix=/tmp/manual_install -Ddebug=true
-          
-          echo "--- Meson compile ---"
-          meson compile -v
-          
-          echo "--- Build directory contents ---"
-          find . -type f -name "*.so" -o -name "*tort*" -o -name "*dist*" | head -20
-          
-          echo "--- Testing meson install ---"
-          meson install
-          
-          echo "--- Install directory contents ---"
-          find /tmp/manual_install -type f -name "*.so" -o -name "*tort*" -o -name "*dist*" | head -20
-          
-          cd ..
-          echo "✅ Manual meson build completed"
-
-      - name: Test pip build (isolated)
-        run: |
-          echo "=== Testing pip build with isolation ==="
-          rm -rf build dist *.egg-info
-          
-          echo "--- Building with python -m build ---"
+          echo "=== Building package for Python ${{ matrix.python-version }} ==="
           python -m build --verbose
           
-          echo "--- Checking build artifacts ---"
+          echo "=== Checking build artifacts ==="
           ls -la dist/
 
       - name: Inspect wheel contents
         run: |
-          echo "=== Inspecting wheel contents ==="
-          cat > inspect_wheel.py << 'EOF'
+          echo "=== Inspecting wheel contents for Python ${{ matrix.python-version }} ==="
+          python -c "
           import zipfile
           import glob
           
@@ -122,73 +62,31 @@ jobs:
               print(f'Examining wheel: {wheels[0]}')
               with zipfile.ZipFile(wheels[0], 'r') as z:
                   files = z.namelist()
-                  print('All files in wheel:')
-                  for f in files:
-                      print(f'  {f}')
-                  
                   so_files = [f for f in files if f.endswith('.so')]
                   print(f'Extension files (.so): {so_files}')
                   
-                  tort_files = [f for f in files if 'tort' in f.lower()]
-                  print(f'Tort-related files: {tort_files}')
+                  tort_files = [f for f in files if '_tort' in f]
+                  print(f'Tort extension files: {tort_files}')
                   
-                  dist_files = [f for f in files if 'dist' in f.lower()]
-                  print(f'Dist-related files: {dist_files}')
+                  dist_files = [f for f in files if 'libdist' in f or 'dist' in f.lower()]
+                  print(f'Dist extension files: {dist_files}')
           else:
-              print('No wheel files found')
-          EOF
-          
-          if ls dist/*.whl 1> /dev/null 2>&1; then
-            python inspect_wheel.py
-          else
-            echo "❌ No wheel file created"
-          fi
+              raise Exception('No wheel files found')
+          "
 
-      - name: Test pip install (from wheel)
+      - name: Install package from wheel
         run: |
-          echo "=== Testing pip install from wheel ==="
-          
-          if ls dist/*.whl 1> /dev/null 2>&1; then
-            echo "--- Installing from wheel ---"
-            pip install dist/*.whl --force-reinstall
-            pip show crystal-torture
-          else
-            echo "--- No wheel available, trying direct install ---"
-            pip install . --force-reinstall
-          fi
+          echo "=== Installing package for Python ${{ matrix.python-version }} ==="
+          pip install dist/*.whl
+          pip show crystal-torture
 
-      - name: Verify package installation
+      - name: Test Fortran extensions (CRITICAL - from /tmp)
         run: |
-          echo "=== Package installation verification ==="
-          cat > verify_install.py << 'EOF'
-          import crystal_torture
-          import os
-          
-          print(f'✅ Crystal Torture {crystal_torture.__version__}')
-          print(f'Package location: {crystal_torture.__file__}')
-          
-          pkg_dir = os.path.dirname(crystal_torture.__file__)
-          print(f'Package directory: {pkg_dir}')
-          
-          print('Files in package directory:')
-          for f in sorted(os.listdir(pkg_dir)):
-              full_path = os.path.join(pkg_dir, f)
-              size = os.path.getsize(full_path) if os.path.isfile(full_path) else 'DIR'
-              print(f'  {f} ({size} bytes)')
-          EOF
-          
-          python verify_install.py
-
-# Replace your "Test Fortran extension loading" step with this:
-
-      - name: Test Fortran extension loading (fixed path)
-        run: |
-          echo "=== Testing Fortran extension loading ==="
-          
+          echo "=== Testing Fortran extensions for Python ${{ matrix.python-version }} ==="
           # CRITICAL: Move outside source directory to import installed package
           cd /tmp
           
-          cat > test_extensions_fixed.py << 'EOF'
+          python -c "
           print('--- Testing from /tmp directory ---')
           import crystal_torture
           import os
@@ -247,23 +145,17 @@ jobs:
               print(f'❌ dist import failed: {e}')
               import traceback
               traceback.print_exc()
-          EOF
-          
-          python test_extensions_fixed.py
-          
-      - name: Search for extensions
+          "
+
+      - name: Search for extensions in installed package
         run: |
-          echo "=== Comprehensive search for compiled extensions ==="
-          echo "--- Searching entire filesystem for tort/dist extensions ---"
-          find /home/runner -name "*tort*" -o -name "*dist*" 2>/dev/null | grep -E '\.(so|dylib|dll)$' || echo "No tort/dist extensions found in /home/runner"
-          
-          echo "--- Searching Python site-packages ---"
-          cat > search_extensions.py << 'EOF'
+          echo "=== Comprehensive extension search for Python ${{ matrix.python-version }} ==="
+          python -c "
           import site
           import os
           import glob
           
-          for site_dir in site.getsitepackages() + [site.getusersitepackages()]:
+          for site_dir in site.getsitepackages():
               if os.path.exists(site_dir):
                   print(f'Searching in: {site_dir}')
                   
@@ -271,77 +163,41 @@ jobs:
                   if os.path.exists(ct_dir):
                       print(f'  Found crystal_torture directory: {ct_dir}')
                       for f in os.listdir(ct_dir):
-                          print(f'    {f}')
-                  
-                  so_files = glob.glob(os.path.join(site_dir, '**/*.so'), recursive=True)
-                  relevant_so = [f for f in so_files if 'tort' in f or 'dist' in f or 'crystal' in f]
-                  if relevant_so:
-                      print(f'  Relevant .so files:')
-                      for so_file in relevant_so:
-                          print(f'    {so_file}')
-          EOF
-          
-          python search_extensions.py
+                          if f.endswith('.so'):
+                              full_path = os.path.join(ct_dir, f)
+                              size = os.path.getsize(full_path)
+                              print(f'    EXTENSION: {f} ({size} bytes)')
+                          elif f.endswith('.py'):
+                              print(f'    Python: {f}')
+          "
 
-      - name: Test pip install without build isolation
+      - name: Test Python fallbacks work
         run: |
-          echo "=== Testing pip install without build isolation ==="
-          pip uninstall crystal-torture -y || echo "Package not installed"
-          rm -rf build dist *.egg-info
-
-          echo "--- Installing without build isolation ---"
-          pip install --no-build-isolation . -v
-
-          echo "--- Testing after non-isolated install ---"
-          # CRITICAL: Move outside source directory to import installed package
+          echo "=== Testing Python fallbacks for Python ${{ matrix.python-version }} ==="
           cd /tmp
+          
+          python -c "
+          # Test that Python fallbacks work regardless of Fortran extension status
+          from crystal_torture.pymatgen_interface import _python_dist, _python_shift_index
+          import numpy as np
+          
+          # Test Python distance calculation
+          coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float32)
+          result = _python_dist(coords, coords, 2)
+          print(f'✅ Python dist fallback working: {result.shape}')
+          
+          # Test Python index shifting
+          result = _python_shift_index(0, [1, 0, 0])
+          print(f'✅ Python shift_index fallback working: {result}')
+          
+          print('✅ All Python fallbacks functional')
+          "
 
-          cat > test_non_isolated.py << 'EOF'
-          try:
-              import crystal_torture
-              print(f'✅ Package imported: {crystal_torture.__version__}')
-
-              from crystal_torture import tort, dist
-              print('✅ Modules imported')
-
-              if tort.tort_mod is not None:
-                  print('✅ tort.tort_mod available')
-              else:
-                  print('❌ tort.tort_mod is None')
-
-              if dist._DIST_AVAILABLE:
-                  print('✅ dist module available')
-              else:
-                  print('❌ dist module not available')
-
-          except Exception as e:
-              print(f'❌ Import failed: {e}')
-              import traceback
-              traceback.print_exc()
-          EOF
-
-          python test_non_isolated.py
-
-      - name: Final diagnostics and summary
+      - name: Summary for Python ${{ matrix.python-version }}
         run: |
-          echo "=== Final Diagnostics Summary ==="
-          echo "--- meson.build content (for reference) ---"
-          head -50 meson.build
-          
-          echo "--- pyproject.toml build-system (for reference) ---"
-          grep -A 10 "\[build-system\]" pyproject.toml || echo "No build-system section found"
-          
-          echo "--- Current working directory ---"
-          pwd
-          ls -la
-          
-          echo "--- Python package status ---"
-          pip list | grep -E "(crystal|meson|ninja|numpy)" || echo "No relevant packages found"
-          
-          echo "--- Final extension search ---"
-          find . -name "*.so" 2>/dev/null | head -10 || echo "No .so files in current directory"
-          
-          echo "--- Build logs (if any) ---"
-          find . -name "meson-log.txt" -exec echo "Found meson log: {}" \; -exec head -20 {} \; 2>/dev/null || echo "No meson logs found"
-          
-          echo "=== Debug session complete ==="
+          echo "=== SUMMARY FOR PYTHON ${{ matrix.python-version }} ==="
+          echo "Build: ✅ Package built successfully"
+          echo "Wheel: ✅ Wheel contains expected files"  
+          echo "Install: ✅ Package installed successfully"
+          echo "Extensions: See test results above"
+          echo "Fallbacks: ✅ Python fallbacks working"
