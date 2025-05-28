@@ -2,6 +2,7 @@
 import ctypes
 import numpy as np
 from pathlib import Path
+import numpy.typing as npt
 
 _dist_lib: ctypes.CDLL | None
 _DIST_AVAILABLE: bool
@@ -64,8 +65,10 @@ except Exception:
     _DIST_AVAILABLE = False
 
 
-def dist(coord1, coord2, n):
+def dist(coord1: npt.ArrayLike, coord2: npt.ArrayLike, n: int) -> npt.NDArray[np.floating]:
     """Compute distance matrix between two sets of coordinates.
+    
+    Uses Fortran implementation if available, otherwise falls back to Python implementation.
     
     Args:
         coord1: Array of coordinates (n x 3).
@@ -79,6 +82,9 @@ def dist(coord1, coord2, n):
         # Fallback to Python implementation
         from .pymatgen_interface import _python_dist
         return _python_dist(coord1, coord2, n)
+    
+    if _dist_lib is None:
+        raise RuntimeError("Distance library not available")
     
     # Convert to numpy arrays and ensure correct dtype and layout
     coord1 = np.asarray(coord1, dtype=np.float32, order='F')
@@ -99,7 +105,7 @@ def dist(coord1, coord2, n):
     return dist_matrix.astype(np.float64)
 
 
-def shift_index(index_n, shift):
+def shift_index(index_n: int, shift: list[int]) -> int:
     """Shift the index of a site in the unit cell to the corresponding index in the 3x3x3 halo supercell.
     
     Used when getting neighbour list for supercell from unit cell neighbour list.
@@ -115,6 +121,9 @@ def shift_index(index_n, shift):
         # Fallback to Python implementation
         from .pymatgen_interface import _python_shift_index
         return _python_shift_index(index_n, shift)
+    
+    if _dist_lib is None:
+        raise RuntimeError("Distance library not available")
     
     # Convert inputs to ctypes - ensure integers
     index_n_c = ctypes.c_int(int(index_n))  # Convert to int first

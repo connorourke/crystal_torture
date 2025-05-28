@@ -4,19 +4,19 @@ import random
 from pymatgen.core import Structure, Molecule, PeriodicSite
 
 
-def count_sites(structure, species=None, labels=None):
+def count_sites(structure: Structure, species: set[str] | None = None, labels: set[str] | None = None) -> int:
     """Count sites in structure by species and/or labels.
     
     Given structure object and either specie string or label string, it counts and returns the 
     number of sites with that species or label (or both) in the structure.
 
     Args:
-        structure (Structure): Pymatgen structure object.
-        species (set[str], optional): Site species to count.
-        labels (set[str], optional): Site labels to count.
+        structure: Pymatgen structure object.
+        species: Site species to count.
+        labels: Site labels to count.
 
     Returns:
-        int: Number of sites occupied by species or label (or both) in structure.
+        Number of sites occupied by species or label (or both) in structure.
         
     Raises:
         ValueError: If neither species nor labels are provided.
@@ -39,16 +39,16 @@ def count_sites(structure, species=None, labels=None):
         raise ValueError("Need to supply either specie, or label to count_sites")
 
 
-def index_sites(structure, species=None, labels=None):
+def index_sites(structure: Structure, species: set[str] | None = None, labels: set[str] | None = None) -> list[int]:
     """Return site indices occupied by specie or label (or both).
     
     Args:
-        structure (Structure): Pymatgen structure object.
-        species (set[str], optional): Site species to find.
-        labels (set[str], optional): Site labels to find.
+        structure: Pymatgen structure object.
+        species: Site species to find.
+        labels: Site labels to find.
 
     Returns:
-        list[int]: List with site indices occupied by species or label (or both) in structure.
+        List with site indices occupied by species or label (or both) in structure.
         
     Raises:
         ValueError: If neither species nor labels are provided.
@@ -67,7 +67,7 @@ def index_sites(structure, species=None, labels=None):
         raise ValueError("Need to supply either specie, or label to index_sites")
 
 
-def sort_structure(structure, order):
+def sort_structure(structure: Structure, order: list[str]) -> Structure:
     """Sort structure species so their indices sit side by side in given order.
     
     Given a pymatgen structure object sort the species so that their indices
@@ -75,11 +75,11 @@ def sort_structure(structure, order):
     be written in a readable way after doping.
 
     Args:
-        structure (Structure): Pymatgen structure object.
-        order (list[str]): List of species str in order to sort.
+        structure: Pymatgen structure object.
+        order: List of species str in order to sort.
 
     Returns:
-        Structure: Ordered pymatgen Structure object.
+        Ordered pymatgen Structure object.
         
     Raises:
         ValueError: If order elements don't match structure elements.
@@ -110,32 +110,36 @@ def sort_structure(structure, order):
 
 
 def dope_structure(
-    structure, conc, species_to_rem, species_to_insert, label_to_remove=None
-):
+    structure: Structure, 
+    conc: float, 
+    species_to_rem: str, 
+    species_to_insert: list[str], 
+    label_to_remove: str | None = None
+) -> Structure:
     """Dope a pymatgen structure object to a particular concentration.
     
     Removes conc * no(species_to_remove) from structure and inserts species to insert in 
     their place. Does so at random (excepting when label_to_remove is passed).
 
     Args:
-        structure (Structure): Pymatgen structure object.
-        conc (float): Fractional percentage of sites to remove.
-        species_to_rem (str): The species to remove from structure.
-        species_to_insert (list[str]): A list of species to equally distribute over sites that are removed.
-        label_to_remove (str, optional): Label of sites to select for removal.
+        structure: Pymatgen structure object.
+        conc: Fractional percentage of sites to remove.
+        species_to_rem: The species to remove from structure.
+        species_to_insert: A list of species to equally distribute over sites that are removed.
+        label_to_remove: Label of sites to select for removal.
         
     Returns:
-        Structure: The doped structure.
+        The doped structure.
         
     Raises:
         ValueError: If species_to_rem is not in structure.
     """
     if {species_to_rem}.issubset(structure.symbol_set):
         no_sites = count_sites(
-            structure, species=species_to_rem, labels=label_to_remove
+            structure, species={species_to_rem}, labels={label_to_remove} if label_to_remove else None
         )
         site_indices = index_sites(
-            structure, species=species_to_rem, labels=label_to_remove
+            structure, species={species_to_rem}, labels={label_to_remove} if label_to_remove else None
         )
         no_dopants = int(round(conc * no_sites) / len(species_to_insert))
         random.shuffle(site_indices)
@@ -151,32 +155,36 @@ def dope_structure(
 
 
 def dope_structure_by_no(
-    structure, no_dopants, species_to_rem, species_to_insert, label_to_remove=None
-):
+    structure: Structure, 
+    no_dopants: int, 
+    species_to_rem: str, 
+    species_to_insert: list[str], 
+    label_to_remove: str | None = None
+) -> Structure:
     """Dope a pymatgen structure object by swapping a specific number of sites.
     
     Removes no_dopants of species_to_remove from structure and inserts species to insert in 
     their place. Does so at random (excepting when label_to_remove is passed).
 
     Args:
-        structure (Structure): Pymatgen structure object.
-        no_dopants (int): Number of each type of dopant to insert.
-        species_to_rem (str): The species to remove from structure.
-        species_to_insert (list[str]): A list of species to equally distribute over sites that are removed.
-        label_to_remove (str, optional): Label of sites to select for removal.
+        structure: Pymatgen structure object.
+        no_dopants: Number of each type of dopant to insert.
+        species_to_rem: The species to remove from structure.
+        species_to_insert: A list of species to equally distribute over sites that are removed.
+        label_to_remove: Label of sites to select for removal.
         
     Returns:
-        Structure: The doped structure.
+        The doped structure.
         
     Raises:
         ValueError: If species_to_rem is not in structure.
     """
     if {species_to_rem}.issubset(structure.symbol_set):
         no_sites = count_sites(
-            structure, species=species_to_rem, labels=label_to_remove
+            structure, species={species_to_rem}, labels={label_to_remove} if label_to_remove else None
         )
         site_indices = index_sites(
-            structure, species=species_to_rem, labels=label_to_remove
+            structure, species={species_to_rem}, labels={label_to_remove} if label_to_remove else None
         )
         random.shuffle(site_indices)
 
@@ -192,12 +200,12 @@ def dope_structure_by_no(
         raise ValueError("dope_struture_by_no: species_to_rem is not in structure")
 
 
-def set_site_labels(structure, labels):
+def set_site_labels(structure: Structure, labels: list[str]) -> None:
     """Set site labels using the built-in label property.
     
     Args:
-        structure (Structure): Pymatgen structure object.
-        labels (list[str]): List of labels to assign to sites.
+        structure: Pymatgen structure object.
+        labels: List of labels to assign to sites.
         
     Raises:
         ValueError: If number of labels doesn't match number of sites.

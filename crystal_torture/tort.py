@@ -78,7 +78,7 @@ except Exception:
 class Tort_Mod:
     """Module tort_mod - ctypes wrapper for Fortran functions."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialise the Tort_Mod wrapper.
         
         Raises:
@@ -86,23 +86,27 @@ class Tort_Mod:
         """
         if not _FORT_AVAILABLE:
             raise ImportError("Fortran extensions not available. Use torture_py() instead.")
-        self._uc_tort_data = None
+        self._uc_tort_data: list[int] | None = None
     
-    def allocate_nodes(self, n, n2):
+    def allocate_nodes(self, n: int, n2: int) -> None:
         """Allocate space for nodes and unit cell node tortuosity.
         
         Args:
             n: Total number of nodes in graph.
             n2: Number of nodes in original unit cell.
         """
+        if _tort_lib is None:
+            raise RuntimeError("Fortran library not available")
         _tort_lib.allocate_nodes(n, n2)
     
-    def tear_down(self):
+    def tear_down(self) -> None:
         """Free up space used to store nodes, tortuosity and neighbours."""
+        if _tort_lib is None:
+            raise RuntimeError("Fortran library not available")
         _tort_lib.tear_down()
         self._uc_tort_data = None
     
-    def set_neighbours(self, ind, uc_ind, n, neigh):
+    def set_neighbours(self, ind: int, uc_ind: int, n: int, neigh: list[int]) -> None:
         """Set the neighbour list and unit cell index for graph nodes.
         
         Args:
@@ -111,11 +115,13 @@ class Tort_Mod:
             n: Number of neighbours for the node.
             neigh: List containing neighbour indices for node.
         """
+        if _tort_lib is None:
+            raise RuntimeError("Fortran library not available")
         # Convert Python list to ctypes array
         neigh_array = (ctypes.c_int * len(neigh))(*neigh)
         _tort_lib.set_neighbours(ind, uc_ind, n, neigh_array)
     
-    def torture(self, n, uc_nodes):
+    def torture(self, n: int, uc_nodes: list[int]) -> None:
         """Perform tortuosity analysis on cluster using BFS & OpenMP.
         
         The nodes in the cluster are tortured in parallel until all nodes in 
@@ -126,20 +132,22 @@ class Tort_Mod:
             n: Number of nodes in original unit cell.
             uc_nodes: List containing the indices of unit cell nodes in cluster.
         """
+        if _tort_lib is None:
+            raise RuntimeError("Fortran library not available")
         # Convert Python list to ctypes array
         uc_nodes_array = (ctypes.c_int * len(uc_nodes))(*uc_nodes)
         _tort_lib.torture(n, uc_nodes_array)
     
     @property
-    def uc_tort(self):
+    def uc_tort(self) -> list[int]:
         """Access to uc_tort array data.
         
         Returns:
-            List of tortuosity values for unit cell nodes, or None if Fortran
+            List of tortuosity values for unit cell nodes, or empty list if Fortran
             extensions are not available.
         """
-        if not _FORT_AVAILABLE:
-            return None
+        if _tort_lib is None:
+            return []
             
         # Get the size of the array
         size = _tort_lib.get_uc_tort_size()
