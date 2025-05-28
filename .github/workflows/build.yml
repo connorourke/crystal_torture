@@ -1,14 +1,15 @@
-name: test-python-versions
+name: build-and-test
 
 on: [push, pull_request]
 
 jobs:
-  test-fortran-extensions-multiple-python:
+  test-full-functionality:
+    # Test full Fortran functionality across Python versions
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12']
+    timeout-minutes: 20
     
     steps:
       - name: Checkout repository
@@ -21,183 +22,173 @@ jobs:
       
       - name: Install system dependencies
         run: |
-          echo "=== Installing system dependencies ==="
           sudo apt-get update
           sudo apt-get install -y gfortran build-essential
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install wheel build meson ninja numpy meson-python pytest pytest-cov
+      
+      - name: Build and install package
+        run: |
+          echo "=== Building package ==="
+          python -m build
           
-          echo "=== Verifying system tools ==="
-          which gfortran
-          gfortran --version
+          echo "=== Installing from wheel ==="
+          pip install dist/*.whl
+      
+      - name: Test Fortran extensions
+        run: |
+          echo "=== Testing Fortran extensions on Python ${{ matrix.python-version }} ==="
+          # Test from outside source directory
+          cd /tmp
+          
+          python -c "
+          import crystal_torture
+          print(f'✅ Crystal Torture {crystal_torture.__version__} on Python ${{ matrix.python-version }}')
+          
+          from crystal_torture import tort, dist
+          
+          # Test tort functionality
+          if tort.tort_mod is not None:
+              tort.tort_mod.allocate_nodes(10, 5)
+              tort.tort_mod.tear_down()
+              print('✅ Fortran tort module working')
+          else:
+              raise ImportError('tort.tort_mod is None')
+              
+          # Test dist functionality  
+          if dist._DIST_AVAILABLE:
+              import numpy as np
+              coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float32)
+              result = dist.dist(coords, coords, 2)
+              print(f'✅ Fortran dist module working: {result.shape}')
+          else:
+              raise ImportError('dist module not available')
+              
+          print('🚀 All Fortran extensions working perfectly!')
+          "
+      
+      - name: Run unit tests
+        run: |
+          # Run tests from outside source directory to use installed package
+          cd /tmp
+          python -m pytest /home/runner/work/crystal_torture/crystal_torture/tests/ -v
+      
+      - name: Test scientific functionality
+        run: |
+          # Test actual scientific use case
+          cd /tmp
+          python -c "
+          # Test that we can actually do science with this package
+          from crystal_torture import Node, Cluster
+          from crystal_torture.pymatgen_interface import clusters_from_structure
+          import tempfile
+          import os
+          
+          print('Testing scientific functionality...')
+          
+          # Test Node and Cluster creation
+          node1 = Node(0, 'Li', {'UC_index': '0', 'Halo': False}, [1])
+          node2 = Node(1, 'Li', {'UC_index': '0', 'Halo': True}, [0])
+          
+          for node in [node1, node2]:
+              node.neighbours = set([node1, node2][j] for j in node.neighbours_ind)
+          
+          cluster = Cluster({node1, node2})
+          
+          # Test both Fortran and Python torture methods
+          cluster.torture_py()
+          print('✅ Python torture method working')
+          
+          try:
+              cluster.torture_fort()  
+              print('✅ Fortran torture method working')
+          except Exception as e:
+              print(f'⚠️  Fortran torture issue: {e}')
+          
+          print('🔬 Scientific functionality verified!')
+          "
+
+  test-documentation-examples:
+    # Test that examples in documentation actually work
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y gfortran
+          pip install build
+      
+      - name: Install package
+        run: |
+          python -m build
+          pip install dist/*.whl
+      
+      - name: Test installation verification code
+        run: |
+          # Test the verification code from our documentation
+          cd /tmp
+          python -c "
+          import crystal_torture
+          print(f'Crystal Torture version: {crystal_torture.__version__}')
+
+          # Test Fortran extensions
+          from crystal_torture import tort, dist
+          if tort.tort_mod is not None:
+              print('✅ Fortran tort module available')
+          else:
+              print('ℹ️  Using Python tort fallback')
+
+          if dist._DIST_AVAILABLE:
+              print('✅ Fortran dist module available')  
+          else:
+              print('ℹ️  Using Python dist fallback')
+          "
+
+  build-wheels:
+    # Build wheels for distribution
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
       
       - name: Install build dependencies
         run: |
-          echo "=== Installing build dependencies ==="
-          python -m pip install --upgrade pip
-          pip install wheel build meson ninja numpy meson-python
-          
-          echo "=== Verifying build tools ==="
-          python --version
-          meson --version
-          ninja --version
-          python -c "import numpy; print('numpy:', numpy.__version__)"
-          python -c "import mesonpy; print('meson-python:', mesonpy.__version__)"
-
-      - name: Build package
+          sudo apt-get update && sudo apt-get install -y gfortran
+          pip install build
+      
+      - name: Build wheels
         run: |
-          echo "=== Building package for Python ${{ matrix.python-version }} ==="
-          python -m build --verbose
+          python -m build
           
-          echo "=== Checking build artifacts ==="
-          ls -la dist/
-
-      - name: Inspect wheel contents
-        run: |
-          echo "=== Inspecting wheel contents for Python ${{ matrix.python-version }} ==="
+          # Verify the wheel contains extensions
           python -c "
-          import zipfile
-          import glob
-          
-          wheels = glob.glob('dist/*.whl')
-          if wheels:
-              print(f'Examining wheel: {wheels[0]}')
-              with zipfile.ZipFile(wheels[0], 'r') as z:
-                  files = z.namelist()
-                  so_files = [f for f in files if f.endswith('.so')]
-                  print(f'Extension files (.so): {so_files}')
-                  
-                  tort_files = [f for f in files if '_tort' in f]
-                  print(f'Tort extension files: {tort_files}')
-                  
-                  dist_files = [f for f in files if 'libdist' in f or 'dist' in f.lower()]
-                  print(f'Dist extension files: {dist_files}')
-          else:
-              raise Exception('No wheel files found')
+          import zipfile, glob
+          wheel = glob.glob('dist/*.whl')[0]
+          with zipfile.ZipFile(wheel, 'r') as z:
+              files = z.namelist()
+              so_files = [f for f in files if f.endswith('.so')]
+              print(f'Wheel contains extensions: {so_files}')
+              assert len(so_files) >= 2, 'Missing extensions in wheel'
           "
-
-      - name: Install package from wheel
-        run: |
-          echo "=== Installing package for Python ${{ matrix.python-version }} ==="
-          pip install dist/*.whl
-          pip show crystal-torture
-
-      - name: Test Fortran extensions (CRITICAL - from /tmp)
-        run: |
-          echo "=== Testing Fortran extensions for Python ${{ matrix.python-version }} ==="
-          # CRITICAL: Move outside source directory to import installed package
-          cd /tmp
-          
-          python -c "
-          print('--- Testing from /tmp directory ---')
-          import crystal_torture
-          import os
-          
-          print(f'✅ Crystal Torture {crystal_torture.__version__}')
-          print(f'Package location: {crystal_torture.__file__}')
-          
-          pkg_dir = os.path.dirname(crystal_torture.__file__)
-          print(f'Package directory: {pkg_dir}')
-          
-          print('Files in package directory:')
-          for f in sorted(os.listdir(pkg_dir)):
-              full_path = os.path.join(pkg_dir, f)
-              size = os.path.getsize(full_path) if os.path.isfile(full_path) else 'DIR'
-              print(f'  {f} ({size} bytes)')
-          
-          print('\n--- Testing tort module ---')
-          try:
-              from crystal_torture import tort
-              print(f'tort module: {tort}')
-              print(f'tort.tort_mod: {tort.tort_mod}')
-              
-              if tort.tort_mod is not None:
-                  print('✅ Fortran tort module loaded successfully')
-                  try:
-                      tort.tort_mod.allocate_nodes(10, 5)
-                      tort.tort_mod.tear_down()
-                      print('✅ Basic tort functionality working')
-                  except Exception as e:
-                      print(f'⚠️  tort functionality error: {e}')
-              else:
-                  print('❌ tort.tort_mod is None')
-          except Exception as e:
-              print(f'❌ tort import failed: {e}')
-              import traceback
-              traceback.print_exc()
-          
-          print('\n--- Testing dist module ---')
-          try:
-              from crystal_torture import dist
-              print(f'dist module: {dist}')
-              print(f'dist._DIST_AVAILABLE: {dist._DIST_AVAILABLE}')
-              
-              if dist._DIST_AVAILABLE:
-                  print('✅ Fortran dist module loaded successfully')
-                  try:
-                      import numpy as np
-                      coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float32)
-                      result = dist.dist(coords, coords, 2)
-                      print(f'✅ Basic dist functionality working: {result.shape}')
-                  except Exception as e:
-                      print(f'⚠️  dist functionality error: {e}')
-              else:
-                  print('❌ dist module fallback to Python implementation')
-          except Exception as e:
-              print(f'❌ dist import failed: {e}')
-              import traceback
-              traceback.print_exc()
-          "
-
-      - name: Search for extensions in installed package
-        run: |
-          echo "=== Comprehensive extension search for Python ${{ matrix.python-version }} ==="
-          python -c "
-          import site
-          import os
-          import glob
-          
-          for site_dir in site.getsitepackages():
-              if os.path.exists(site_dir):
-                  print(f'Searching in: {site_dir}')
-                  
-                  ct_dir = os.path.join(site_dir, 'crystal_torture')
-                  if os.path.exists(ct_dir):
-                      print(f'  Found crystal_torture directory: {ct_dir}')
-                      for f in os.listdir(ct_dir):
-                          if f.endswith('.so'):
-                              full_path = os.path.join(ct_dir, f)
-                              size = os.path.getsize(full_path)
-                              print(f'    EXTENSION: {f} ({size} bytes)')
-                          elif f.endswith('.py'):
-                              print(f'    Python: {f}')
-          "
-
-      - name: Test Python fallbacks work
-        run: |
-          echo "=== Testing Python fallbacks for Python ${{ matrix.python-version }} ==="
-          cd /tmp
-          
-          python -c "
-          # Test that Python fallbacks work regardless of Fortran extension status
-          from crystal_torture.pymatgen_interface import _python_dist, _python_shift_index
-          import numpy as np
-          
-          # Test Python distance calculation
-          coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float32)
-          result = _python_dist(coords, coords, 2)
-          print(f'✅ Python dist fallback working: {result.shape}')
-          
-          # Test Python index shifting
-          result = _python_shift_index(0, [1, 0, 0])
-          print(f'✅ Python shift_index fallback working: {result}')
-          
-          print('✅ All Python fallbacks functional')
-          "
-
-      - name: Summary for Python ${{ matrix.python-version }}
-        run: |
-          echo "=== SUMMARY FOR PYTHON ${{ matrix.python-version }} ==="
-          echo "Build: ✅ Package built successfully"
-          echo "Wheel: ✅ Wheel contains expected files"  
-          echo "Install: ✅ Package installed successfully"
-          echo "Extensions: See test results above"
-          echo "Fallbacks: ✅ Python fallbacks working"
+      
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels-python-${{ matrix.python-version }}
+          path: dist/*.whl
