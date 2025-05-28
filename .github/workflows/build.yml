@@ -26,35 +26,7 @@ jobs:
       - name: Install Python dependencies and package
         run: |
           python -m pip install --upgrade pip
-          
-          # Install with editable mode and dev dependencies  
-          pip install -e .[dev] -v
-          
-          # CI workaround: ensure extensions are available in source directory
-          # (meson-python sometimes doesn't copy them during editable installs in CI)
-          if [ -d "build" ] && [ ! -f crystal_torture/_tort*.so ]; then
-            echo "Copying built extensions to source directory..."
-            find build -name "*tort*.so" -o -name "*dist*.so" | while read ext; do
-              cp "$ext" crystal_torture/
-              echo "  ✓ Copied $(basename "$ext")"
-            done
-          fi
-      
-      - name: Verify installation
-        run: |
-          python -c "
-          import crystal_torture
-          print(f'✓ Crystal Torture {crystal_torture.__version__}')
-          
-          # Test Fortran extensions
-          from crystal_torture import tort, dist
-          print(f'✓ Fortran tort module: {bool(tort.tort_mod)}')
-          print(f'✓ Fortran dist module: {getattr(dist, \"_DIST_AVAILABLE\", False)}')
-          
-          # Test basic imports
-          from crystal_torture import Node, Cluster, Graph
-          print('✓ All imports successful')
-          "
+          pip install .[dev]
       
       - name: Run tests
         run: |
