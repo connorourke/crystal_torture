@@ -25,5 +25,5 @@ jobs:
       
       - name: Test
         run: |
-          cd /tmp  # Run from outside source directory
+          cd /tmp  # Essential: run from outside source to use installed package
           python -m pytest /home/runner/work/crystal_torture/crystal_torture/tests/ -v
