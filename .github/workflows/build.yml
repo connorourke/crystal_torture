@@ -60,10 +60,10 @@ jobs:
               cp builddir/libdist.cpython-311-x86_64-linux-gnu.so crystal_torture/
               echo "Extensions copied. Re-testing imports..."
               python -c "
-from crystal_torture import tort, dist
-print('After manual copy:')
-print('tort_mod:', tort.tort_mod if hasattr(tort, 'tort_mod') else 'None')
-print('dist available:', getattr(dist, '_DIST_AVAILABLE', False))
+              from crystal_torture import tort, dist
+              print('After manual copy:')
+              print('tort_mod:', tort.tort_mod if hasattr(tort, 'tort_mod') else 'None')
+              print('dist available:', getattr(dist, '_DIST_AVAILABLE', False))
               "
             fi
           fi
