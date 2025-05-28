@@ -1,0 +1,54 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "crystal-torture: A crystal tortuosity module"
+version: "1.2.0"
+date-released: "2025-01-01"  # Update this to actual release date
+url: "https://github.com/connorourke/crystal_torture"
+repository-code: "https://github.com/connorourke/crystal_torture"
+license: MIT
+authors:
+  - family-names: "O'Rourke"
+    given-names: "Conn"
+    orcid: "https://orcid.org/0000-0002-0703-8234"
+  - family-names: "Morgan"
+    given-names: "Benjamin"
+    orcid: "https://orcid.org/0000-0002-3056-8233"
+abstract: >-
+  crystal-torture is a Python, Fortran, and OpenMP module for the analysis of diffusion
+  networks in crystal structures. Ionic diffusion through crystalline solids depends not only on
+  the dynamics of ions within the crystal, but also the connectivity of the transport network.
+  Understanding how the connectivity of diffusion pathways in crystal structures is affected by
+  changes in chemistry is necessary for understanding how chemical modifications change ionic
+  conductivities, for example the doping of solid electrolytes. crystal-torture provides a
+  Python API for interrogating network connectivity and diffusion pathways in partially blocked
+  crystal structures. It can be used as a tool for materials scientists to quickly build up network
+  connectivity statistics to determine the viability of potential ionic conductors, and how
+  chemical modification affects network connectivity, before the use of more computationally
+  expensive approaches modelling the full dynamics.
+keywords:
+  - crystallography
+  - materials science
+  - tortuosity
+  - percolation
+  - fortran
+  - scientific computing
+  - ionic conductivity
+  - crystal structure analysis
+preferred-citation:
+  type: article
+  title: "crystal-torture: A crystal tortuosity module"
+  authors:
+    - family-names: "O'Rourke"
+      given-names: "Conn"
+    - family-names: "Morgan"
+      given-names: "Benjamin"
+  doi: "10.21105/joss.01306"
+  url: "http://dx.doi.org/10.21105/joss.01306"
+  journal: "Journal of Open Source Software"
+  volume: 4
+  issue: 38
+  start: 1306
+  end: 1306
+  year: 2019
+  month: 6
