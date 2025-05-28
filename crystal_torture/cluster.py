@@ -9,9 +9,6 @@ try:
     from . import tort
 except ImportError:
     tort = None
-    import warnings
-    warnings.warn("Fortran tort module not available. Only torture_py() method will work.", 
-                  UserWarning)
 
 
 class Cluster:
@@ -198,7 +195,7 @@ class Cluster:
         self.tortuosity (int): average tortuosity for cluster
         
         """
-        if tort is None:
+        if tort is None or tort.tort_mod is None:
             raise ImportError("Fortran extensions not available. Use torture_py() instead.")
         
         # Set up Fortran module with node data

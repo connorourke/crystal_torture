@@ -2,7 +2,6 @@
 import ctypes
 import numpy as np
 from pathlib import Path
-import warnings
 
 # Try to load the compiled Fortran library using ctypes
 try:
@@ -56,16 +55,10 @@ try:
     else:
         _dist_lib = None
         _DIST_AVAILABLE = False
-        # List what files were actually found for debugging
-        all_files = [f.name for f in package_dir.iterdir() if f.is_file()]
-        warnings.warn(f"Fortran dist module not available. Files in package: {all_files}",
-                      UserWarning)
         
-except Exception as e:
+except Exception:
     _dist_lib = None
     _DIST_AVAILABLE = False
-    warnings.warn(f"Fortran dist module not available ({e}). Some functions will not work.", 
-                  UserWarning)
 
 
 def dist(coord1, coord2, n):

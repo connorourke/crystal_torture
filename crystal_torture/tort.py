@@ -9,7 +9,6 @@ import logging
 import ctypes
 import ctypes.util
 from pathlib import Path
-import warnings
 
 # Try to load the compiled Fortran library using ctypes
 try:
@@ -67,16 +66,10 @@ try:
     else:
         _tort_lib = None
         _FORT_AVAILABLE = False
-        # List what files were actually found for debugging
-        all_files = [f.name for f in package_dir.iterdir() if f.is_file()]
-        warnings.warn(f"Fortran extensions not available. Files in package: {all_files}", 
-                      UserWarning)
         
-except Exception as e:
+except Exception:
     _tort_lib = None
     _FORT_AVAILABLE = False
-    warnings.warn(f"Fortran extensions not available ({e}). Only Python implementations will work.", 
-                  UserWarning)
 
 
 class Tort_Mod:
