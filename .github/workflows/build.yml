@@ -48,6 +48,24 @@ jobs:
             meson compile -C builddir || echo "Meson compile failed"
             echo "=== Contents after manual build ==="
             find builddir/ -name "*.so" -o -name "*tort*" -o -name "*dist*" || echo "No extensions found after manual build"
+            
+            echo "=== Testing manual meson install ==="
+            meson install -C builddir --dry-run --verbose || echo "Meson install dry-run failed"
+            
+            echo "=== Checking meson-python specific installation ==="
+            # Copy the extensions manually to see if that fixes the issue
+            if [ -f "builddir/_tort.cpython-311-x86_64-linux-gnu.so" ]; then
+              echo "Copying extensions manually..."
+              cp builddir/_tort.cpython-311-x86_64-linux-gnu.so crystal_torture/
+              cp builddir/libdist.cpython-311-x86_64-linux-gnu.so crystal_torture/
+              echo "Extensions copied. Re-testing imports..."
+              python -c "
+              from crystal_torture import tort, dist
+              print('After manual copy:')
+              print('tort_mod:', tort.tort_mod if hasattr(tort, 'tort_mod') else 'None')
+              print('dist available:', getattr(dist, '_DIST_AVAILABLE', False))
+              "
+            fi
           fi
       
       - name: Debug Fortran extensions
