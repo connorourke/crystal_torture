@@ -28,6 +28,49 @@ jobs:
           python -m pip install --upgrade pip
           pip install .[dev]
       
+      - name: Debug Fortran extensions
+        run: |
+          echo "=== Checking for built extensions ==="
+          find . -name "*.so" -o -name "*.dylib" | head -20
+          
+          echo "=== Checking build directory ==="
+          ls -la build*/ 2>/dev/null || echo "No build directories found"
+          find build*/ -name "*tort*" -o -name "*dist*" 2>/dev/null || echo "No tort/dist files in build"
+          
+          echo "=== Checking installed package location ==="
+          python -c "
+          import crystal_torture
+          from pathlib import Path
+          pkg_dir = Path(crystal_torture.__file__).parent
+          print(f'Package installed at: {pkg_dir}')
+          print('Files in installed package:')
+          try:
+            for f in sorted(pkg_dir.iterdir()):
+              if f.is_file():
+                size = f.stat().st_size
+                print(f'  {f.name} ({size} bytes)')
+          except Exception as e:
+            print(f'Error listing files: {e}')
+          
+          # Check what ctypes is looking for
+          print('\\n=== Testing ctypes loading ===')
+          try:
+            from crystal_torture import tort
+            print(f'tort module: {tort}')
+            if hasattr(tort, 'tort_mod'):
+              print(f'tort_mod: {tort.tort_mod}')
+          except Exception as e:
+            print(f'tort import error: {e}')
+            
+          try:
+            from crystal_torture import dist
+            print(f'dist module: {dist}')  
+            if hasattr(dist, '_DIST_AVAILABLE'):
+              print(f'_DIST_AVAILABLE: {dist._DIST_AVAILABLE}')
+          except Exception as e:
+            print(f'dist import error: {e}')
+          "
+      
       - name: Run tests
         run: |
           pytest --cov-config=.coveragerc --cov=crystal_torture --cov-report=lcov tests/
