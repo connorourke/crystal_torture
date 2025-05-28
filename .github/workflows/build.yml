@@ -20,10 +20,16 @@ jobs:
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y gfortran
       
-      - name: Install package and dev dependencies
-        run: pip install ."[dev]"
+      - name: Install build dependencies and dev tools
+        run: pip install build pytest pytest-cov coverage ddt
+      
+      - name: Build and install package
+        run: |
+          python -m build
+          pip install dist/*.whl
       
       - name: Test
         run: |
-          cd /tmp  # Essential: run from outside source to use installed package
-          python -m pytest /home/runner/work/crystal_torture/crystal_torture/tests/ -v
+          cd /tmp
+          cp -r /home/runner/work/crystal_torture/crystal_torture/tests .
+          python -m pytest tests/ -v
