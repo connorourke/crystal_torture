@@ -22,11 +22,33 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gfortran
+          
+          # Verify Fortran compiler is working
+          echo "=== Fortran compiler test ==="
+          gfortran --version
+          echo "program test; print *, 'Hello Fortran'; end program" > test.f90
+          gfortran test.f90 -o test_fortran
+          ./test_fortran
+          rm test.f90 test_fortran
 
       - name: Install Python dependencies and package
         run: |
           python -m pip install --upgrade pip
-          pip install .[dev]
+          
+          # Install with verbose output to see what meson-python is doing
+          echo "=== Installing with verbose meson output ==="
+          pip install .[dev] -v
+          
+          # Also try a manual meson build to see what happens
+          echo "=== Manual meson build test ==="
+          meson setup builddir --wipe || echo "Meson setup failed"
+          if [ -d "builddir" ]; then
+            echo "Meson build directory created successfully"
+            ls -la builddir/
+            meson compile -C builddir || echo "Meson compile failed"
+            echo "=== Contents after manual build ==="
+            find builddir/ -name "*.so" -o -name "*tort*" -o -name "*dist*" || echo "No extensions found after manual build"
+          fi
       
       - name: Debug Fortran extensions
         run: |
