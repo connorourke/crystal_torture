@@ -179,33 +179,50 @@ jobs:
           
           python verify_install.py
 
-      - name: Test Fortran extension loading
+# Replace your "Test Fortran extension loading" step with this:
+
+      - name: Test Fortran extension loading (fixed path)
         run: |
           echo "=== Testing Fortran extension loading ==="
-          cat > test_extensions.py << 'EOF'
-          print('--- Testing tort module ---')
+          
+          # CRITICAL: Move outside source directory to import installed package
+          cd /tmp
+          
+          cat > test_extensions_fixed.py << 'EOF'
+          print('--- Testing from /tmp directory ---')
+          import crystal_torture
+          import os
+          
+          print(f'✅ Crystal Torture {crystal_torture.__version__}')
+          print(f'Package location: {crystal_torture.__file__}')
+          
+          pkg_dir = os.path.dirname(crystal_torture.__file__)
+          print(f'Package directory: {pkg_dir}')
+          
+          print('Files in package directory:')
+          for f in sorted(os.listdir(pkg_dir)):
+              full_path = os.path.join(pkg_dir, f)
+              size = os.path.getsize(full_path) if os.path.isfile(full_path) else 'DIR'
+              print(f'  {f} ({size} bytes)')
+          
+          print('\n--- Testing tort module ---')
           try:
               from crystal_torture import tort
               print(f'tort module: {tort}')
+              print(f'tort.tort_mod: {tort.tort_mod}')
               
-              if tort is not None and hasattr(tort, 'tort_mod'):
-                  print(f'tort.tort_mod: {tort.tort_mod}')
-                  if tort.tort_mod is not None:
-                      print('✅ Fortran tort module loaded successfully')
-                      try:
-                          tort.tort_mod.allocate_nodes(10, 5)
-                          tort.tort_mod.tear_down()
-                          print('✅ Basic tort functionality working')
-                      except Exception as e:
-                          print(f'⚠️  tort functionality error: {e}')
-                  else:
-                      print('❌ tort.tort_mod is None')
+              if tort.tort_mod is not None:
+                  print('✅ Fortran tort module loaded successfully')
+                  try:
+                      tort.tort_mod.allocate_nodes(10, 5)
+                      tort.tort_mod.tear_down()
+                      print('✅ Basic tort functionality working')
+                  except Exception as e:
+                      print(f'⚠️  tort functionality error: {e}')
               else:
-                  print('❌ tort module not properly loaded')
-                  
+                  print('❌ tort.tort_mod is None')
           except Exception as e:
               print(f'❌ tort import failed: {e}')
-              print('--- Debugging tort import failure ---')
               import traceback
               traceback.print_exc()
           
@@ -213,33 +230,27 @@ jobs:
           try:
               from crystal_torture import dist
               print(f'dist module: {dist}')
+              print(f'dist._DIST_AVAILABLE: {dist._DIST_AVAILABLE}')
               
-              if hasattr(dist, '_DIST_AVAILABLE'):
-                  print(f'dist._DIST_AVAILABLE: {dist._DIST_AVAILABLE}')
-                  
-                  if dist._DIST_AVAILABLE:
-                      print('✅ Fortran dist module loaded successfully')
-                      try:
-                          import numpy as np
-                          coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float32)
-                          result = dist.dist(coords, coords, 2)
-                          print(f'✅ Basic dist functionality working: {result.shape}')
-                      except Exception as e:
-                          print(f'⚠️  dist functionality error: {e}')
-                  else:
-                      print('❌ dist module fallback to Python implementation')
+              if dist._DIST_AVAILABLE:
+                  print('✅ Fortran dist module loaded successfully')
+                  try:
+                      import numpy as np
+                      coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float32)
+                      result = dist.dist(coords, coords, 2)
+                      print(f'✅ Basic dist functionality working: {result.shape}')
+                  except Exception as e:
+                      print(f'⚠️  dist functionality error: {e}')
               else:
-                  print('❌ dist module not properly configured')
-                  
+                  print('❌ dist module fallback to Python implementation')
           except Exception as e:
               print(f'❌ dist import failed: {e}')
-              print('--- Debugging dist import failure ---')
               import traceback
               traceback.print_exc()
           EOF
           
-          python test_extensions.py
-
+          python test_extensions_fixed.py
+          
       - name: Search for extensions
         run: |
           echo "=== Comprehensive search for compiled extensions ==="
