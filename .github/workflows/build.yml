@@ -26,7 +26,7 @@ jobs:
       - name: Test editable install (PEP 660)
         run: |
           echo "=== Testing editable install with PEP 660 ==="
-          pip install -e ."[dev]" --use-pep517 --verbose
+          pip install -e ."[dev]" --use-pep660 --verbose
           
           echo "=== Verify editable install works ==="
           cd /tmp
