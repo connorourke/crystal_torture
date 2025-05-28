@@ -50,7 +50,7 @@ jobs:
             find builddir/ -name "*.so" -o -name "*tort*" -o -name "*dist*" || echo "No extensions found after manual build"
             
             echo "=== Testing manual meson install ==="
-            meson install -C builddir --dry-run --verbose || echo "Meson install dry-run failed"
+            meson install -C builddir --dry-run || echo "Meson install dry-run failed"
             
             echo "=== Checking meson-python specific installation ==="
             # Copy the extensions manually to see if that fixes the issue
@@ -60,10 +60,10 @@ jobs:
               cp builddir/libdist.cpython-311-x86_64-linux-gnu.so crystal_torture/
               echo "Extensions copied. Re-testing imports..."
               python -c "
-              from crystal_torture import tort, dist
-              print('After manual copy:')
-              print('tort_mod:', tort.tort_mod if hasattr(tort, 'tort_mod') else 'None')
-              print('dist available:', getattr(dist, '_DIST_AVAILABLE', False))
+from crystal_torture import tort, dist
+print('After manual copy:')
+print('tort_mod:', tort.tort_mod if hasattr(tort, 'tort_mod') else 'None')
+print('dist available:', getattr(dist, '_DIST_AVAILABLE', False))
               "
             fi
           fi
