@@ -7,6 +7,7 @@ from queue import Queue
 from threading import Thread
 import numpy as np
 from types import ModuleType
+from typing import cast
 
 # Module variable with proper type hint
 tort: ModuleType | None
@@ -113,7 +114,7 @@ class Cluster:
         Returns:
             Set of unit-cell indices for nodes in cluster.
         """
-        uc_indices = set([node.labels["UC_index"] for node in self.nodes])
+        uc_indices = set([cast(str, node.labels["UC_index"]) for node in self.nodes])
         return uc_indices
 
     def return_index_node(self, index: int) -> Node:

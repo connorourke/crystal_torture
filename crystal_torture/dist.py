@@ -81,7 +81,10 @@ def dist(coord1: npt.ArrayLike, coord2: npt.ArrayLike, n: int) -> npt.NDArray[np
     if not _DIST_AVAILABLE:
         # Fallback to Python implementation
         from .pymatgen_interface import _python_dist
-        return _python_dist(coord1, coord2, n)
+        # Convert to numpy arrays for type safety
+        coord1_array = np.asarray(coord1, dtype=np.float64)
+        coord2_array = np.asarray(coord2, dtype=np.float64)
+        return _python_dist(coord1_array, coord2_array, n)
     
     if _dist_lib is None:
         raise RuntimeError("Distance library not available")

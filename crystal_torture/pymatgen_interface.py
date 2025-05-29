@@ -94,7 +94,7 @@ def map_index(
 
     no_atoms = len(uc_index)
     count = -1
-    neigh = []
+    neigh: list[list[int]] = []
     append = neigh.append
     for i, index in enumerate(uc_index):
         for x in range(0, x_d, 1):
@@ -150,7 +150,7 @@ def get_all_neighbors_and_image(structure: Structure, r: float, include_index: b
     all_ranges = [np.arange(x, y) for x, y in zip(nmin, nmax)]
 
     latt = structure._lattice
-    neighbors = [list() for i in range(len(structure._sites))]
+    neighbors: list[list[tuple]] = [list() for i in range(len(structure._sites))]
     all_fcoords = np.mod(structure.frac_coords, 1)
     coords_in_cell = latt.get_cartesian_coords(all_fcoords)
     site_coords = structure.cart_coords
@@ -175,13 +175,13 @@ def get_all_neighbors_and_image(structure: Structure, r: float, include_index: b
     return neighbors
 
 
-def create_halo(structure: Structure, neighbours: list[list[int]]) -> tuple[Structure, list[list[int]]]:
+def create_halo(structure: Structure, neighbours: list[list[tuple]]) -> tuple[Structure, list[list[int]]]:
     """Take a pymatgen structure object and set up a halo by making a 3x3x3 supercell.
     
     Args:
         structure: Pymatgen Structure object.
-        neighbours: List of neighbours for sites in structure.
-
+        neighbours: List of neighbours for sites in structure (from get_all_neighbors_and_image).
+    
     Returns:
         Tuple containing:
             - structure: 3x3x3 supercell pymatgen Structure object.
@@ -195,61 +195,51 @@ def create_halo(structure: Structure, neighbours: list[list[int]]) -> tuple[Stru
     x = 3
     y = 3
     z = 3
-
+    
     no_sites = len(structure.sites)
+    new_neighbours: list[list[int]] = []
     for i in range(no_sites):
-        neighbours[i] = [
+        new_neighbours.append([
             shift_func((27 * neighbour[2]), neighbour[3])
             for neighbour in neighbours[i]
-        ]
-
+        ])
+    
     uc_index = [((site * 27)) for site in range(len(structure.sites))]
     structure.make_supercell([x, y, z])
-    neighbours = map_index(neighbours, uc_index, x, y, z)
+    neighbours_mapped = map_index(new_neighbours, uc_index, x, y, z)
+    
+    return structure, neighbours_mapped
 
-    return structure, neighbours
 
-
-def nodes_from_structure(structure: Structure,
-    rcut: float,
-    get_halo: bool = False) -> set[Node]:
-    """Take a pymatgen structure object and convert to Nodes for interrogation.
-
-    Args:
-        structure: Pymatgen Structure object.
-        rcut: Cut-off radius for crystal site neighbour set-up.
-        get_halo: Whether to set up halo nodes (i.e. 3x3x3 supercell).
-
-    Returns:
-        Set of Node objects representing structure sites.
-    """
+def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = False) -> set[Node]:
+    """Take a pymatgen structure object and convert to Nodes for interrogation."""
     working_structure = deepcopy(structure)
     working_structure.add_site_property(
         "UC_index", [str(i) for i in range(len(working_structure.sites))]
     )
     neighbours = get_all_neighbors_and_image(working_structure, rcut, include_index=True)
-    nodes = []
-
+    nodes: list[Node] = []  # Type annotation added
+    
     no_nodes = len(working_structure.sites)
     if get_halo == True:
-        working_structure, neighbours = create_halo(working_structure, neighbours)
+        working_structure, neighbours_mapped = create_halo(working_structure, neighbours)
         uc_index = set([((index * 27) + 13) for index in range(no_nodes)])
     else:
-        uc_index = set([range(no_nodes)])
-        neighbours_temp = []
+        uc_index = set(range(no_nodes))  # Fixed: was set([range(no_nodes)])
+        neighbours_temp: list[list[int]] = []
         for index, neigh in enumerate(neighbours):
             neighbours_temp.append([neigh_ind[2] for neigh_ind in neigh])
-        neighbours = neighbours_temp
-
+        neighbours_mapped = neighbours_temp
+    
     append = nodes.append
-
+    
     for index, site in enumerate(working_structure.sites):
-
+    
         if index in uc_index:
             halo_node = False
         else:
             halo_node = True
-        node_neighbours_ind = set(neighbours[index])
+        node_neighbours_ind = set(neighbours_mapped[index])
         append(
             Node(
                 index=index,
@@ -258,12 +248,12 @@ def nodes_from_structure(structure: Structure,
                 neighbours_ind=node_neighbours_ind,
             )
         )
-
+    
     for node in nodes:
         node.neighbours = set()
         for neighbour_ind in node.neighbours_ind:
             node.neighbours.add(nodes[neighbour_ind])
-
+    
     return set(nodes)
 
 

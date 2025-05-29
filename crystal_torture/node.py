@@ -8,7 +8,7 @@ class Node:
         self, 
         index: int, 
         element: str, 
-        labels: dict[str | int, str], 
+        labels: dict[str | int, str | bool], 
         neighbours_ind: set[int], 
         neighbours: set['Node'] | None = None
     ) -> None:
