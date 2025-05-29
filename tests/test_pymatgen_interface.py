@@ -8,7 +8,8 @@ from crystal_torture.pymatgen_interface import (
     clusters_from_structure,
     graph_from_structure,
 )
-from pymatgen.core import Structure
+from pymatgen.core import Structure, Lattice
+from copy import deepcopy
 
 # Get the directory containing this test file
 TEST_DIR = Path(__file__).parent
@@ -182,6 +183,31 @@ class PymatgenTestCase(unittest.TestCase):
         self.assertEqual(clusters1.pop().periodic, 1)
         self.assertEqual(clusters2.pop().periodic, 2)
         self.assertEqual(clusters3.pop().periodic, 3)
+        
+    def test_nodes_from_structure_does_not_modify_input(self):
+        """
+        Test that nodes_from_structure does not modify the input structure.
+        """
+        
+        # Create simple test structure
+        lattice = Lattice.cubic(10.0)
+        coords = [[0.5, 0.5, 0.5]]
+        species = ["Li"]
+        original_structure = Structure(lattice, species, coords)
+        
+        # Make a copy before calling the function
+        structure_before = deepcopy(original_structure)
+        
+        # Call the function that should NOT modify the input
+        nodes = nodes_from_structure(original_structure, rcut=2.0, get_halo=True)
+        
+        # Assert that the input structure is unchanged
+        self.assertEqual(original_structure, structure_before,
+                        "nodes_from_structure modified the input structure")
+        
+        # The function should still work and return nodes
+        self.assertIsNotNone(nodes)
+        self.assertGreater(len(nodes), 0)
 
 
 if __name__ == "__main__":

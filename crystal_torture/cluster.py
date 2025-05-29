@@ -20,7 +20,8 @@ except ImportError:
 class Cluster:
     """Cluster class: group of connected nodes within graph."""
 
-    def __init__(self, nodes: set[Node]) -> None:
+    def __init__(self,
+        nodes: set[Node]) -> None:
         """Initialise a cluster.
 
         Args:

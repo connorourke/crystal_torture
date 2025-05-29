@@ -6,7 +6,7 @@ from crystal_torture.graph import Graph
 import numpy as np
 import itertools
 import math
-import copy
+from copy import deepcopy
 import sys
 import time
 from pymatgen.core import Structure, Molecule, PeriodicSite
@@ -210,7 +210,9 @@ def create_halo(structure: Structure, neighbours: list[list[int]]) -> tuple[Stru
     return structure, neighbours
 
 
-def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = False) -> set[Node]:
+def nodes_from_structure(structure: Structure,
+    rcut: float,
+    get_halo: bool = False) -> set[Node]:
     """Take a pymatgen structure object and convert to Nodes for interrogation.
 
     Args:
@@ -221,15 +223,16 @@ def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = Fal
     Returns:
         Set of Node objects representing structure sites.
     """
-    structure.add_site_property(
-        "UC_index", [str(i) for i in range(len(structure.sites))]
+    working_structure = deepcopy(structure)
+    working_structure.add_site_property(
+        "UC_index", [str(i) for i in range(len(working_structure.sites))]
     )
-    neighbours = get_all_neighbors_and_image(structure, rcut, include_index=True)
+    neighbours = get_all_neighbors_and_image(working_structure, rcut, include_index=True)
     nodes = []
 
-    no_nodes = len(structure.sites)
+    no_nodes = len(working_structure.sites)
     if get_halo == True:
-        structure, neighbours = create_halo(structure, neighbours)
+        working_structure, neighbours = create_halo(working_structure, neighbours)
         uc_index = set([((index * 27) + 13) for index in range(no_nodes)])
     else:
         uc_index = set([range(no_nodes)])
@@ -240,7 +243,7 @@ def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = Fal
 
     append = nodes.append
 
-    for index, site in enumerate(structure.sites):
+    for index, site in enumerate(working_structure.sites):
 
         if index in uc_index:
             halo_node = False
