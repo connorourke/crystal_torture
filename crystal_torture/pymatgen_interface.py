@@ -54,12 +54,18 @@ def _python_shift_index(index_n: int, shift: list[int]) -> int:
     """Pure Python fallback for index shifting when Fortran dist module is not available.
     
     Args:
-        index_n: Original index.
+        index_n: Original index (must be non-negative).
         shift: Shift vector [x, y, z].
         
     Returns:
         New shifted index.
+        
+    Raises:
+        ValueError: If index_n is negative.
     """
+    if index_n < 0:
+        raise ValueError(f"shift_index received negative index: {index_n}. This indicates an upstream bug.")
+        
     new_x = (int(index_n // 9) % 3 + shift[0]) % 3
     new_y = (int(index_n // 3) % 3 + shift[1]) % 3  
     new_z = (index_n % 3 + shift[2]) % 3

@@ -208,6 +208,41 @@ class PymatgenTestCase(unittest.TestCase):
         # The function should still work and return nodes
         self.assertIsNotNone(nodes)
         self.assertGreater(len(nodes), 0)
+        
+    def test_python_shift_index_negative_index(self):
+        """Test that Python fallback shift_index raises ValueError for negative indices."""
+        from crystal_torture.pymatgen_interface import _python_shift_index
+        
+        with self.assertRaises(ValueError):
+            _python_shift_index(-1, [0, 0, 0])
+        
+        with self.assertRaises(ValueError):
+            _python_shift_index(-10, [0, 0, 0])
+        
+        with self.assertRaises(ValueError):
+            _python_shift_index(-100, [1, 2, 3])
+    
+    def test_python_shift_index_large_index(self):
+        """Test Python fallback shift_index with index >= 27 works correctly for supercells."""
+        from crystal_torture.pymatgen_interface import _python_shift_index
+        
+        # Test second supercell (indices 27-53)
+        result = _python_shift_index(27, [0, 0, 0])
+        self.assertEqual(result, 27)
+        
+        # Test with shift in second supercell
+        result = _python_shift_index(27, [1, 0, 0])
+        self.assertEqual(result, 36)  # 27 + 9
+        
+        # Test a larger index
+        result = _python_shift_index(100, [0, 0, 0])
+        self.assertEqual(result, 100)
+        
+        # Test the actual pattern used in create_halo
+        for base in [0, 1, 5, 10]:
+            supercell_index = 27 * base
+            result = _python_shift_index(supercell_index, [0, 0, 0])
+            self.assertEqual(result, supercell_index)
 
 
 if __name__ == "__main__":

@@ -263,17 +263,38 @@ class TestDistModule(unittest.TestCase):
             pass  # Expected to fail with wrong dimensions
     
     def test_shift_index_negative_index(self):
-        """Test shift_index with negative index."""
-        with self.assertRaises((ValueError, RuntimeError)):
+        """Test that shift_index raises ValueError for negative indices."""
+        with self.assertRaises(ValueError):
             dist.shift_index(-1, [0, 0, 0])
+        
+        with self.assertRaises(ValueError):
+            dist.shift_index(-10, [0, 0, 0])
+        
+        with self.assertRaises(ValueError):
+            dist.shift_index(-100, [1, 2, 3])
     
     def test_shift_index_too_large_index(self):
-        """Test shift_index with index >= 27."""
-        with self.assertRaises((ValueError, RuntimeError)):
-            dist.shift_index(27, [0, 0, 0])
+        """Test shift_index with index >= 27 works correctly for supercells."""
+        # Large indices are valid - they represent atoms in larger supercells
+        # This is used in create_halo where it passes 27 * neighbour_index
         
-        with self.assertRaises((ValueError, RuntimeError)):
-            dist.shift_index(100, [0, 0, 0])
+        # Test second supercell (indices 27-53)
+        result = dist.shift_index(27, [0, 0, 0])
+        self.assertEqual(result, 27)
+        
+        # Test with shift in second supercell
+        result = dist.shift_index(27, [1, 0, 0])
+        self.assertEqual(result, 36)  # 27 + 9
+        
+        # Test a larger index
+        result = dist.shift_index(100, [0, 0, 0])
+        self.assertEqual(result, 100)
+        
+        # Test the actual pattern used in create_halo
+        for base in [0, 1, 5, 10]:
+            supercell_index = 27 * base
+            result = dist.shift_index(supercell_index, [0, 0, 0])
+            self.assertEqual(result, supercell_index)
     
     def test_shift_index_extreme_shift_values(self):
         """Test shift_index with very large shift values."""

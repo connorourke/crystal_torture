@@ -114,12 +114,18 @@ def shift_index(index_n: int, shift: list[int]) -> int:
     Used when getting neighbour list for supercell from unit cell neighbour list.
     
     Args:
-        index_n: Original index.
+        index_n: Original index (must be non-negative).
         shift: Shift vector [x, y, z].
         
     Returns:
         New shifted index for image site in supercell.
+        
+    Raises:
+        ValueError: If index_n is negative.
     """
+    if index_n < 0:
+        raise ValueError(f"shift_index received negative index: {index_n}. This indicates an upstream bug.")
+    
     if not _DIST_AVAILABLE:
         # Fallback to Python implementation
         from .pymatgen_interface import _python_shift_index
