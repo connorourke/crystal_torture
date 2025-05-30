@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from pathlib import Path
 from crystal_torture.pymatgen_interface import (
     nodes_from_structure,
@@ -8,6 +8,7 @@ from crystal_torture.pymatgen_interface import (
 )
 from crystal_torture import Cluster, Node, tort, Graph
 from ddt import ddt, data, unpack
+# from crystal_torture.cluster import Cluster
 
 # Get the directory containing this test file
 TEST_DIR = Path(__file__).parent
@@ -162,6 +163,22 @@ class ClusterTestCase(unittest.TestCase):
             [c.tortuosity for c in list(graph_p.clusters)],
             [c.tortuosity for c in list(graph_f.clusters)],
         )
+        
+    def test_torture_fort_without_allocation_raises_error(self):
+        """Test that torture_fort raises error when Fortran module not allocated."""
+        
+        node0 = Mock(index=0, labels={"UC_index": "0"}, neighbours_ind=[1])
+        node1 = Mock(index=1, labels={"UC_index": "0"}, neighbours_ind=[0])
+        
+        cluster = Cluster({node0, node1})
+        
+        # Ensure clean state
+        tort.tort_mod.tear_down()
+        
+        # Call the actual torture_fort method (bind it to our mock)
+        with patch('crystal_torture.tort.tort_mod.torture') as mock_torture:
+            with self.assertRaises(RuntimeError) as context:
+                cluster.torture_fort()
 
 
 if __name__ == "__main__":

@@ -175,7 +175,7 @@ class Cluster:
     def torture_fort(self) -> None:
         """Perform tortuosity analysis on nodes in cluster using BFS in Fortran90 and OpenMP.
         
-        Significantly faster than the python version above for large systems.
+        Significantly faster than the Python version above for large systems.
         Calculates the integer number of node-node steps it requires to get from a 
         node to its periodic image.
         
@@ -185,30 +185,23 @@ class Cluster:
         
         Raises:
             ImportError: If Fortran extensions are not available.
+            RuntimeError: If Fortran nodes have not been allocated.
         """
         if tort is None or tort.tort_mod is None:
             raise ImportError("Fortran extensions not available. Use torture_py() instead.")
         
-        # Set up Fortran module with node data
-        all_nodes = list(self.nodes)
+        # Check if nodes are allocated
+        if not tort.tort_mod._is_allocated:
+            raise RuntimeError("Fortran nodes must be allocated before calling torture_fort. "
+                            "Use graph_from_structure() or call set_fort_nodes() first.")
+        
+        # Get the UC node indices for this cluster
         uc_node_indices = [node.index for node in self.return_key_nodes(key="Halo", value=False)]
         
-        # Allocate Fortran arrays
-        tort.tort_mod.allocate_nodes(len(all_nodes), len(uc_node_indices))
-        
-        # Set up each node's data in Fortran module
-        for node in all_nodes:
-            neigh_indices = list(node.neighbours_ind)
-            tort.tort_mod.set_neighbours(
-                node.index,
-                int(node.labels["UC_index"]),
-                len(neigh_indices),
-                neigh_indices
-            )
-        
-        # Now run the torture algorithm
+        # Run the torture algorithm
         tort.tort_mod.torture(len(uc_node_indices), uc_node_indices)
         
+        # Get results
         for node in self.return_key_nodes(key="Halo", value=False):
             node.tortuosity = tort.tort_mod.uc_tort[int(node.labels["UC_index"])]
         

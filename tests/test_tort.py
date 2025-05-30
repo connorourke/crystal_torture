@@ -3,6 +3,7 @@ Unit tests for crystal_torture/tort.py module.
 """
 import unittest
 from crystal_torture import tort, Node, Cluster
+from crystal_torture.pymatgen_interface import set_fort_nodes
 
 
 class TestTortModule(unittest.TestCase):
@@ -101,6 +102,8 @@ class TestTortModule(unittest.TestCase):
         node0.neighbours = {node1}
         node1.neighbours = {node0}
         
+        set_fort_nodes({node0, node1})
+        
         # Test Python version
         cluster_py = Cluster({node0, node1})
         cluster_py.torture_py()
@@ -140,6 +143,8 @@ class TestTortModule(unittest.TestCase):
         nodes[1].neighbours = {nodes[0]}
         nodes[2].neighbours = {nodes[3]}
         nodes[3].neighbours = {nodes[2]}
+        
+        set_fort_nodes(set(nodes))
         
         # Test Python version
         cluster_py = Cluster(set(nodes))
@@ -203,6 +208,8 @@ class TestTortModule(unittest.TestCase):
         
         node0.neighbours = {node1}
         node1.neighbours = {node0}
+        
+        set_fort_nodes({node0, node1})
         
         cluster = Cluster({node0, node1})
         cluster.torture_fort()

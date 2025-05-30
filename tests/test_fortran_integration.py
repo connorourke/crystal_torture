@@ -14,6 +14,7 @@ import subprocess
 import sys
 import numpy as np
 from pathlib import Path
+from crystal_torture.pymatgen_interface import set_fort_nodes
 
 
 @pytest.fixture(autouse=True)
@@ -253,6 +254,9 @@ class TestIntegrationCorrectness:
 			node.neighbours = set([node0, node1][j] for j in node.neighbours_ind)
 		
 		cluster = Cluster({node0, node1})
+		
+		# Set up nodes in Fortran module first
+		set_fort_nodes({node0, node1})
 		
 		try:
 			cluster.torture_fort()
