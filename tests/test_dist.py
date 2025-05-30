@@ -228,6 +228,74 @@ class TestDistModule(unittest.TestCase):
         for result in [result_x, result_y, result_z]:
             self.assertNotEqual(result, corner)
 
+    # === ERROR CONDITIONS ===
+    
+    def test_dist_empty_arrays(self):
+        """Test dist function with empty arrays."""
+        coords = np.array([], dtype=np.float32).reshape(0, 3)
+        result = dist.dist(coords, coords, 0)
+        self.assertEqual(result.shape, (0, 0))
+    
+    def test_dist_mismatched_n_parameter(self):
+        """Test dist function with incorrect n parameter."""
+        coords = np.array([[0.0, 0.0, 0.0]], dtype=np.float32)
+        # n=2 but only 1 coordinate provided - should handle gracefully or error
+        try:
+            result = dist.dist(coords, coords, 2)
+            # If it doesn't crash, result should be reasonable
+            self.assertTrue(hasattr(result, 'shape'))
+        except (IndexError, ValueError, RuntimeError):
+            pass  # Expected to fail
+    
+    def test_dist_negative_n_parameter(self):
+        """Test dist function with negative n parameter."""
+        coords = np.array([[0.0, 0.0, 0.0]], dtype=np.float32)
+        with self.assertRaises((ValueError, RuntimeError)):
+            dist.dist(coords, coords, -1)
+    
+    def test_dist_wrong_coordinate_dimensions(self):
+        """Test dist function with wrong coordinate dimensions."""
+        # 2D coordinates instead of 3D
+        coords_2d = np.array([[0.0, 0.0]], dtype=np.float32)
+        try:
+            result = dist.dist(coords_2d, coords_2d, 1)
+        except (IndexError, ValueError, RuntimeError):
+            pass  # Expected to fail with wrong dimensions
+    
+    def test_shift_index_negative_index(self):
+        """Test shift_index with negative index."""
+        with self.assertRaises((ValueError, RuntimeError)):
+            dist.shift_index(-1, [0, 0, 0])
+    
+    def test_shift_index_too_large_index(self):
+        """Test shift_index with index >= 27."""
+        with self.assertRaises((ValueError, RuntimeError)):
+            dist.shift_index(27, [0, 0, 0])
+        
+        with self.assertRaises((ValueError, RuntimeError)):
+            dist.shift_index(100, [0, 0, 0])
+    
+    def test_shift_index_extreme_shift_values(self):
+        """Test shift_index with very large shift values."""
+        # Very large shifts should still work due to modulo arithmetic
+        result = dist.shift_index(13, [100, -50, 25])
+        self.assertIsInstance(result, int)
+        self.assertGreaterEqual(result, 0)
+        self.assertLess(result, 27)
+    
+    def test_shift_index_wrong_shift_length(self):
+        """Test shift_index with wrong number of shift values."""
+        try:
+            # Should expect exactly 3 shift values
+            dist.shift_index(13, [1, 0])  # Only 2 values
+        except (IndexError, ValueError, TypeError):
+            pass  # Expected to fail
+        
+        try:
+            dist.shift_index(13, [1, 0, 0, 1])  # 4 values
+        except (IndexError, ValueError, TypeError):
+            pass  # Expected to fail
+
 
 class TestDistAvailability(unittest.TestCase):
     """Test how dist module handles Fortran availability."""

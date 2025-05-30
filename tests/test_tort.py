@@ -16,6 +16,8 @@ class TestTortModule(unittest.TestCase):
             except:
                 pass  # Ignore cleanup errors
     
+    # === BASIC INTERFACE TESTS (Step 1) ===
+    
     @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
     def test_allocate_nodes_exists(self):
         """Test that allocate_nodes function exists and is callable."""
@@ -234,6 +236,127 @@ class TestTortModule(unittest.TestCase):
             expected_size = 2 * (2 + i)
             self.assertEqual(len(result), expected_size)
             tort.tort_mod.tear_down()
+
+    # === ERROR CONDITIONS & TDD TESTS ===
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_allocate_nodes_zero_values(self):
+        """Test allocate_nodes with zero values."""
+        # Should not crash - zero is valid input
+        tort.tort_mod.allocate_nodes(0, 0)
+        result = tort.tort_mod.uc_tort
+        self.assertEqual(len(result), 0)
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_set_neighbours_without_allocation_raises_error(self):
+        """Test that set_neighbours raises clear error without prior allocation."""
+        with self.assertRaises(RuntimeError) as context:
+            tort.tort_mod.set_neighbours(0, 0, 1, [1])
+        
+        # Error message should be helpful
+        self.assertIn("allocate_nodes", str(context.exception).lower())
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_torture_without_allocation_raises_error(self):
+        """Test that torture raises clear error without prior allocation."""
+        with self.assertRaises(RuntimeError) as context:
+            tort.tort_mod.torture(1, [0])
+        
+        # Error message should be helpful
+        self.assertIn("allocate_nodes", str(context.exception).lower())
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_set_neighbours_empty_list(self):
+        """Test set_neighbours with empty neighbour list."""
+        tort.tort_mod.allocate_nodes(2, 1)
+        # Should not crash - empty neighbour list is valid
+        tort.tort_mod.set_neighbours(0, 0, 0, [])
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_set_neighbours_mismatched_count(self):
+        """Test set_neighbours with mismatched count and list length."""
+        tort.tort_mod.allocate_nodes(4, 2)
+        # What happens when count doesn't match list length?
+        # This might crash or behave unexpectedly
+        try:
+            tort.tort_mod.set_neighbours(0, 0, 2, [1])  # count=2, list has 1 element
+        except (RuntimeError, IndexError, ValueError):
+            pass  # Expected to fail
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_torture_empty_uc_nodes(self):
+        """Test torture with empty uc_nodes list."""
+        tort.tort_mod.allocate_nodes(2, 1)
+        tort.tort_mod.set_neighbours(0, 0, 1, [1])
+        # Should not crash - empty list is valid
+        tort.tort_mod.torture(0, [])
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_tear_down_without_allocation(self):
+        """Test tear_down without prior allocation."""
+        # Should not crash - tear_down should be safe to call anytime
+        tort.tort_mod.tear_down()
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_double_tear_down(self):
+        """Test calling tear_down twice."""
+        tort.tort_mod.allocate_nodes(2, 1)
+        tort.tort_mod.tear_down()
+        # Second tear_down should not crash
+        tort.tort_mod.tear_down()
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_set_neighbours_checks_allocation_state(self):
+        """Test that set_neighbours properly checks for prior allocation."""
+        # This tests that set_neighbours() checks the state correctly
+        
+        # Should fail when not allocated
+        with self.assertRaises(RuntimeError) as context:
+            tort.tort_mod.set_neighbours(0, 0, 1, [1])
+        self.assertIn("allocate_nodes", str(context.exception).lower())
+        
+        # Should work after allocation
+        tort.tort_mod.allocate_nodes(2, 1)
+        tort.tort_mod.set_neighbours(0, 0, 1, [1])  # Should not raise
+        
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_init_sets_not_allocated_state(self):
+        """Test that __init__ initializes _is_allocated to False."""
+        self.assertFalse(tort.tort_mod._is_allocated)
+        
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")  
+    def test_allocate_nodes_sets_allocated_state(self):
+        """Test that allocate_nodes sets _is_allocated to True."""
+        self.assertFalse(tort.tort_mod._is_allocated)  # Initially False
+        tort.tort_mod.allocate_nodes(2, 1)
+        self.assertTrue(tort.tort_mod._is_allocated)   # True after allocation
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_tear_down_clears_allocated_state(self):
+        """Test that tear_down sets _is_allocated to False."""
+        tort.tort_mod.allocate_nodes(2, 1)
+        self.assertTrue(tort.tort_mod._is_allocated)   # Should be True
+        
+        tort.tort_mod.tear_down()
+        self.assertFalse(tort.tort_mod._is_allocated)  # Should be False after tear_down
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_set_neighbours_checks_allocated_state(self):
+        """Test that set_neighbours validates _is_allocated."""
+        # When _is_allocated is False, should raise error
+        self.assertFalse(tort.tort_mod._is_allocated)
+        with self.assertRaises(RuntimeError) as context:
+            tort.tort_mod.set_neighbours(0, 0, 1, [1])
+        self.assertIn("allocate_nodes", str(context.exception).lower())
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_torture_checks_allocated_state(self):
+        """Test that torture validates _is_allocated."""
+        # When _is_allocated is False, should raise error
+        self.assertFalse(tort.tort_mod._is_allocated)
+        with self.assertRaises(RuntimeError) as context:
+            tort.tort_mod.torture(1, [0])
+        self.assertIn("allocate_nodes", str(context.exception).lower())
 
 
 class TestTortAvailability(unittest.TestCase):

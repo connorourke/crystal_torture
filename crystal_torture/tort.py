@@ -87,6 +87,7 @@ class Tort_Mod:
         if not _FORT_AVAILABLE:
             raise ImportError("Fortran extensions not available. Use torture_py() instead.")
         self._uc_tort_data: list[int] | None = None
+        self._is_allocated = False
     
     def allocate_nodes(self, n: int, n2: int) -> None:
         """Allocate space for nodes and unit cell node tortuosity.
@@ -98,6 +99,7 @@ class Tort_Mod:
         if _tort_lib is None:
             raise RuntimeError("Fortran library not available")
         _tort_lib.allocate_nodes(n, n2)
+        self._is_allocated = True
     
     def tear_down(self) -> None:
         """Free up space used to store nodes, tortuosity and neighbours."""
@@ -105,6 +107,7 @@ class Tort_Mod:
             raise RuntimeError("Fortran library not available")
         _tort_lib.tear_down()
         self._uc_tort_data = None
+        self._is_allocated = False
     
     def set_neighbours(self, ind: int, uc_ind: int, n: int, neigh: list[int]) -> None:
         """Set the neighbour list and unit cell index for graph nodes.
@@ -117,6 +120,8 @@ class Tort_Mod:
         """
         if _tort_lib is None:
             raise RuntimeError("Fortran library not available")
+        if not self._is_allocated:
+            raise RuntimeError("Must call allocate_nodes() before set_neighbours()")
         # Convert Python list to ctypes array
         neigh_array = (ctypes.c_int * len(neigh))(*neigh)
         _tort_lib.set_neighbours(ind, uc_ind, n, neigh_array)
@@ -134,6 +139,8 @@ class Tort_Mod:
         """
         if _tort_lib is None:
             raise RuntimeError("Fortran library not available")
+        if not self._is_allocated:
+            raise RuntimeError("Must call allocate_nodes() before torture()")
         # Convert Python list to ctypes array
         uc_nodes_array = (ctypes.c_int * len(uc_nodes))(*uc_nodes)
         _tort_lib.torture(n, uc_nodes_array)
