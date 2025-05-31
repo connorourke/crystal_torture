@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from pathlib import Path
 from crystal_torture import Node, Cluster, tort
 from crystal_torture.pymatgen_interface import (
@@ -7,6 +7,7 @@ from crystal_torture.pymatgen_interface import (
     clusters_from_file,
     clusters_from_structure,
     graph_from_structure,
+    graph_from_file
 )
 from pymatgen.core import Structure, Lattice
 from copy import deepcopy
@@ -102,6 +103,55 @@ class PymatgenTestCase(unittest.TestCase):
 
         self.assertEqual(len(clusters1), 1)
         self.assertEqual(len(clusters2), 2)
+        
+    @patch('crystal_torture.pymatgen_interface.clusters_from_structure')
+    @patch('crystal_torture.pymatgen_interface.Structure.from_file')
+    def test_clusters_from_file_delegates_to_clusters_from_structure(
+        self, mock_from_file, mock_clusters_from_structure
+    ):
+        """Test that clusters_from_file delegates to clusters_from_structure (target behaviour)."""
+        mock_structure = Mock()
+        mock_clusters = {Mock(), Mock()}
+        mock_from_file.return_value = mock_structure
+        mock_clusters_from_structure.return_value = mock_clusters
+        
+        filename = 'test.cif'
+        rcut = 3.0
+        elements = {'Li', 'O'}
+        
+        result = clusters_from_file(filename, rcut, elements)
+        
+        # Should load structure from file
+        mock_from_file.assert_called_once_with(filename)
+        
+        # Should delegate to clusters_from_structure with loaded structure
+        mock_clusters_from_structure.assert_called_once_with(
+            structure=mock_structure,
+            rcut=rcut,
+            elements=elements
+        )
+        
+        # Should return what clusters_from_structure returned
+        self.assertEqual(result, mock_clusters)
+        
+    def test_clusters_from_structure_does_not_modify_input_structure(self):
+        """Test that clusters_from_structure doesn't modify the input structure (target behaviour)."""
+        from copy import deepcopy
+        from pymatgen.core import Structure, Lattice
+        
+        lattice = Lattice.cubic(4.0)
+        structure = Structure(lattice, ["Li", "Li", "O"], [[0, 0, 0], [0.5, 0.5, 0.5], [0.25, 0.25, 0.25]])
+        original_structure = deepcopy(structure)
+        
+        # Mock downstream calls so we're only testing immutability
+        with patch('crystal_torture.pymatgen_interface.nodes_from_structure'), \
+             patch('crystal_torture.pymatgen_interface.set_fort_nodes'), \
+             patch('crystal_torture.pymatgen_interface.Structure.from_sites'), \
+             patch('crystal_torture.pymatgen_interface.set_cluster_periodic'):
+             
+            clusters_from_structure(structure, 3.0, {'Li'})
+            
+            self.assertEqual(structure, original_structure)
 
     def test_cluster_from_structure(self):
 
@@ -243,6 +293,52 @@ class PymatgenTestCase(unittest.TestCase):
             supercell_index = 27 * base
             result = _python_shift_index(supercell_index, [0, 0, 0])
             self.assertEqual(result, supercell_index)
+            
+    # Add these test methods to the existing GraphTestCase class in test_graph.py:
+    
+    @patch('crystal_torture.pymatgen_interface.Graph')
+    @patch('crystal_torture.pymatgen_interface.clusters_from_structure')
+    def test_graph_from_structure_delegates_cleanly(
+        self, mock_clusters_from_structure, mock_graph_class
+    ):
+        """Test that graph_from_structure delegates to clusters_from_structure without duplication."""
+        # Arrange
+        mock_structure = Mock()
+        mock_clusters = Mock()
+        mock_graph = Mock()
+        mock_clusters_from_structure.return_value = mock_clusters
+        mock_graph_class.return_value = mock_graph
+        
+        # Act
+        result = graph_from_structure(mock_structure, 3.0, {'Li', 'O'})
+        
+        # Assert - should delegate cleanly without any processing
+        mock_clusters_from_structure.assert_called_once_with(mock_structure, 3.0, {'Li', 'O'})
+        mock_graph_class.assert_called_once_with(clusters=mock_clusters, structure=mock_structure)
+        self.assertEqual(result, mock_graph)
+    
+    @patch('crystal_torture.pymatgen_interface.Graph')
+    @patch('crystal_torture.pymatgen_interface.clusters_from_structure')
+    def test_graph_from_structure_delegates_cleanly(
+        self, mock_clusters_from_structure, mock_graph_class
+    ):
+        """Test that graph_from_structure delegates cluster creation and handles structure filtering."""
+        # Arrange
+        mock_structure = Mock()
+        mock_structure.symbol_set = {'Li', 'O', 'P'}  # Make it iterable for legitimate filtering
+        mock_clusters = Mock()
+        mock_graph = Mock()
+        mock_clusters_from_structure.return_value = mock_clusters
+        mock_graph_class.return_value = mock_graph
+        
+        # Act
+        result = graph_from_structure(mock_structure, 3.0, {'Li', 'O'})
+        
+        # Assert - should delegate cluster creation (the expensive part)
+        mock_clusters_from_structure.assert_called_once_with(mock_structure, 3.0, {'Li', 'O'})
+        # Graph creation with filtered structure is legitimate
+        mock_graph_class.assert_called_once()
+        self.assertEqual(result, mock_graph)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ __pycache__/
 *.so
 *.egg
 *.egg-info/
+*.ipynb_checkpoints
 ENV*
 
 # Build artifacts

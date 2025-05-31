@@ -318,50 +318,15 @@ def set_fort_nodes(nodes: set[Node]) -> None:
         )
 
 
-def clusters_from_file(filename: str, rcut: float, elements: set[str]) -> set[Cluster]:
-    """Take a pymatgen compatible file and convert it to a cluster object.
-
-    Args:
-        filename: Name of file to set up graph from.
-        rcut: Cut-off radii for node-node connections in forming clusters.
-        elements: Set of elements to include in setting up graph.
-
-    Returns:
-        Set of clusters.
-        
-    Raises:
-        ValueError: If the element set is not a subset of the elements in the file.
-    """
+def clusters_from_file(filename: str,
+        rcut: float,
+        elements: set[str]) -> set[Cluster]:
     structure = Structure.from_file(filename)
-    symbols = set([species for species in structure.symbol_set])
-    if set(elements).issubset(symbols):
-
-        all_elements = set([species for species in structure.symbol_set])
-        remove_elements = [x for x in all_elements if x not in elements]
-
-        structure.remove_species(remove_elements)
-        folded_structure = Structure.from_sites(structure.sites, to_unit_cell=True)
-        nodes = nodes_from_structure(folded_structure, rcut, get_halo=True)
-        set_fort_nodes(nodes)
-
-        clusters = set()
-
-        uc_nodes = set([node for node in nodes if node.labels["Halo"] == False])
-
-        while uc_nodes:
-            node = uc_nodes.pop()
-            if node.labels["Halo"] == False:
-                cluster = Cluster({node})
-                cluster.grow_cluster()
-                uc_nodes.difference_update(cluster.nodes)
-                clusters.add(cluster)
-                set_cluster_periodic(cluster)
-
-        return clusters
-    else:
-        raise ValueError(
-            "The element set fed to 'clusters_from_file' is not a subset of the elements in the file"
-        )
+    return clusters_from_structure(
+        structure=structure,
+        rcut=rcut,
+        elements=elements
+    )
 
 
 def clusters_from_structure(structure: Structure, rcut: float, elements: set[str]) -> set[Cluster]:
@@ -378,15 +343,16 @@ def clusters_from_structure(structure: Structure, rcut: float, elements: set[str
     Raises:
         ValueError: If the element set is not a subset of the elements in the structure.
     """
-    symbols = set([species for species in structure.symbol_set])
+    working_structure = deepcopy(structure)
+    symbols = set([species for species in working_structure.symbol_set])
 
-    if elements.issubset(structure.symbol_set):
+    if elements.issubset(working_structure.symbol_set):
 
-        all_elements = set([species for species in structure.symbol_set])
+        all_elements = set([species for species in working_structure.symbol_set])
         remove_elements = [x for x in all_elements if x not in elements]
 
-        structure.remove_species(remove_elements)
-        folded_structure = Structure.from_sites(structure.sites, to_unit_cell=True)
+        working_structure.remove_species(remove_elements)
+        folded_structure = Structure.from_sites(working_structure.sites, to_unit_cell=True)
 
         nodes = nodes_from_structure(folded_structure, rcut, get_halo=True)
         set_fort_nodes(nodes)
@@ -412,45 +378,16 @@ def clusters_from_structure(structure: Structure, rcut: float, elements: set[str
 
 
 def graph_from_structure(structure: Structure, rcut: float, elements: set[str]) -> Graph:
-    """Take a pymatgen compatible file and convert it to a graph object.
-
-    Args:
-        structure: Pymatgen Structure object to set up graph from.
-        rcut: Cut-off radius node-node connections in forming clusters.
-        elements: Set of elements to include in setting up graph.
-
-    Returns:
-        Graph object for structure.
-    """
-    clusters = clusters_from_structure(
-        structure=structure, rcut=rcut, elements=elements
-    )
-    all_elements = set([species for species in structure.symbol_set])
+    clusters = clusters_from_structure(structure, rcut, elements)
+    
+    # Filter structure for the Graph (this is necessary, not redundant!)
+    filtered_structure = deepcopy(structure)
+    all_elements = set([species for species in filtered_structure.symbol_set])
     remove_elements = [x for x in all_elements if x not in elements]
-    structure.remove_species(remove_elements)
-    graph = Graph(clusters=clusters, structure=structure)
-
-    return graph
-
+    filtered_structure.remove_species(remove_elements)
+    
+    return Graph(clusters=clusters, structure=filtered_structure)
 
 def graph_from_file(filename: str, rcut: float, elements: set[str]) -> Graph:
-    """Take a pymatgen compatible file and convert it to a graph object.
-
-    Args:
-        filename: Name of file to set up graph from.
-        rcut: Cut-off radius node-node connections in forming clusters.
-        elements: Set of elements to include in setting up graph.
-
-    Returns:
-        Graph object for structure.
-    """
-    clusters = clusters_from_file(filename=filename, rcut=rcut, elements=elements)
     structure = Structure.from_file(filename)
-
-    all_elements = set([species for species in structure.symbol_set])
-    remove_elements = [x for x in all_elements if x not in elements]
-
-    structure.remove_species(remove_elements)
-    graph = Graph(clusters=clusters, structure=structure)
-
-    return graph
+    return graph_from_structure(structure, rcut, elements)

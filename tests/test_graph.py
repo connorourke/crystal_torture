@@ -1,6 +1,6 @@
 import unittest
 import os
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from pathlib import Path
 from pymatgen.core import Structure, Lattice
 from crystal_torture import Cluster, Graph, Node, tort
