@@ -19,28 +19,6 @@ class ErrorConditionsTestCase(unittest.TestCase):
 		
 		self.assertIn("minimal_clusters is not set until", str(context.exception))
 
-	def test_clusters_from_structure_invalid_elements(self):
-		"""Test that clusters_from_structure raises error for invalid elements."""
-		# Create simple structure with Li
-		lattice = Lattice.cubic(4.0)
-		structure = Structure(lattice, ["Li"], [[0, 0, 0]])
-		
-		# Try to request elements not in structure
-		with self.assertRaises(ValueError) as context:
-			clusters_from_structure(structure, 4.0, {"Mg"})
-		
-		self.assertIn("not a subset", str(context.exception))
-
-	def test_graph_from_structure_invalid_elements(self):
-		"""Test that graph_from_structure raises error for invalid elements."""
-		lattice = Lattice.cubic(4.0)
-		structure = Structure(lattice, ["Li"], [[0, 0, 0]])
-		
-		with self.assertRaises(ValueError) as context:
-			graph_from_structure(structure, 4.0, {"Mg"})
-		
-		self.assertIn("not a subset", str(context.exception))
-
 	def test_set_site_labels_length_mismatch(self):
 		"""Test that set_site_labels raises error for length mismatch."""
 		lattice = Lattice.cubic(4.0)

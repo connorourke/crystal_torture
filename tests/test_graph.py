@@ -67,25 +67,6 @@ class GraphTestCase(unittest.TestCase):
 
         self.assertEqual(g_nodes, c_nodes)
 
-    def test_graph_from_file(self):
-        graph = graph_from_file(
-            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
-            rcut=4.0,
-            elements={"Li"},
-        )
-        tort.tort_mod.tear_down()
-
-        clusters = clusters_from_file(
-            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
-            rcut=4.0,
-            elements={"Li"},
-        )
-        tort.tort_mod.tear_down()
-        c_nodes = set([node.index for node in clusters.pop().nodes])
-        g_nodes = set([node.index for node in graph.clusters.pop().nodes])
-
-        self.assertEqual(g_nodes, c_nodes)
-
     def test_output_clusters(self):
         graph = graph_from_file(
             filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),

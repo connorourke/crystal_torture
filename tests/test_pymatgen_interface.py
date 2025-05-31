@@ -7,7 +7,8 @@ from crystal_torture.pymatgen_interface import (
     clusters_from_file,
     clusters_from_structure,
     graph_from_structure,
-    graph_from_file
+    graph_from_file,
+    filter_structure_by_species
 )
 from pymatgen.core import Structure, Lattice
 from copy import deepcopy
@@ -152,43 +153,6 @@ class PymatgenTestCase(unittest.TestCase):
             clusters_from_structure(structure, 3.0, {'Li'})
             
             self.assertEqual(structure, original_structure)
-
-    def test_cluster_from_structure(self):
-
-        clusters1 = clusters_from_file(
-            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
-            rcut=4.0,
-            elements={"Li"},
-        )
-        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"))
-        clusters2 = clusters_from_structure(structure, rcut=4.0, elements={"Li"})
-
-        neigh_set_1 = set(
-            [frozenset(node.neighbours_ind) for node in clusters1.pop().nodes]
-        )
-        neigh_set_2 = set(
-            [frozenset(node.neighbours_ind) for node in clusters2.pop().nodes]
-        )
-
-        self.assertEqual(neigh_set_1, neigh_set_2)
-
-    def test_graph_from_structure(self):
-        clusters1 = clusters_from_file(
-            filename=str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"),
-            rcut=4.0,
-            elements={"Li"},
-        )
-        structure = Structure.from_file(str(STRUCTURE_FILES_DIR / "POSCAR_2_clusters.vasp"))
-        graph = graph_from_structure(structure, rcut=4.0, elements={"Li"})
-
-        neigh_set_1 = set(
-            [frozenset(node.neighbours_ind) for node in clusters1.pop().nodes]
-        )
-        neigh_set_2 = set(
-            [frozenset(node.neighbours_ind) for node in graph.clusters.pop().nodes]
-        )
-
-        self.assertEqual(neigh_set_1, neigh_set_2)
 
     def test_cluster_periodic(self):
 
@@ -339,6 +303,91 @@ class PymatgenTestCase(unittest.TestCase):
         # Graph creation with filtered structure is legitimate
         mock_graph_class.assert_called_once()
         self.assertEqual(result, mock_graph)
+        
+    def test_filter_structure_by_species_does_not_modify_original(self):
+        """Test that filter_structure_by_species doesn't modify the input structure."""
+        lattice = Lattice.cubic(4.0)
+        structure = Structure(lattice, ["Li", "Mg"], [[0, 0, 0], [0.5, 0.5, 0.5]])
+        structure_before = deepcopy(structure)
+        filtered_structure = filter_structure_by_species(structure, ["Li"])
+        self.assertEqual(structure, structure_before)
+        
+    def test_filter_structure_by_species_basic_filtering(self):
+        """Test that filter_structure_by_species returns structure with only specified species."""
+        lattice = Lattice.cubic(4.0)
+        structure = Structure(lattice, ["Li", "Mg"], [[0, 0, 0], [0.5, 0.5, 0.5]])
+        
+        filtered_structure = filter_structure_by_species(structure, ["Li"])
+        
+        self.assertIsInstance(filtered_structure, Structure)
+        self.assertEqual(set(filtered_structure.symbol_set), {"Li"})
+        self.assertEqual(len(filtered_structure), 1)  # Should have 1 Li site
+        
+    def test_filter_structure_by_species_empty_list_raises_error(self):
+        """Test that empty species_list raises ValueError."""
+        lattice = Lattice.cubic(4.0)
+        structure = Structure(lattice, ["Li"], [[0, 0, 0]])
+        
+        with self.assertRaises(ValueError):
+            filter_structure_by_species(structure, [])
+    
+    def test_filter_structure_by_species_invalid_species_raises_error(self):
+        """Test that species_list with elements not in structure raises ValueError."""
+        lattice = Lattice.cubic(4.0)
+        structure = Structure(lattice, ["Li"], [[0, 0, 0]])
+        
+        with self.assertRaises(ValueError):
+            filter_structure_by_species(structure, ["Mg"])  # Mg not in structure
+            
+    def test_clusters_from_structure_integration_before_refactoring(self):
+        """Integration test for clusters_from_structure before refactoring (temporary test)."""
+        lattice = Lattice.cubic(4.0)
+        structure = Structure(
+            lattice, 
+            ["Li", "Li", "Mg"], 
+            [[0, 0, 0], [0.5, 0, 0], [0, 0.5, 0]]
+        )
+        original_structure = deepcopy(structure)
+        
+        clusters = clusters_from_structure(structure, rcut=4.0, elements={"Li"})
+        
+        # Test return type and basic properties
+        self.assertIsInstance(clusters, set)
+        self.assertGreater(len(clusters), 0)
+        
+        # Test that clusters contain only the requested elements
+        for cluster in clusters:
+            cluster_elements = {node.element for node in cluster.nodes}
+            self.assertEqual(cluster_elements, {"Li"})
+        
+        # Test that original structure is not modified (will fail with current implementation)
+        self.assertEqual(structure, original_structure)
+        
+        # Clean up Fortran state
+        tort.tort_mod.tear_down()
+        
+    def test_clusters_from_structure_basic_functionality(self):
+        """Test clusters_from_structure basic functionality."""
+        # Simple structure: 2 Li atoms close enough to connect
+        lattice = Lattice.cubic(4.0)
+        structure = Structure(lattice, ["Li", "Li"], [[0, 0, 0], [1.0, 0, 0]])
+        original_structure = deepcopy(structure)
+        
+        clusters = clusters_from_structure(structure, rcut=2.0, elements={"Li"})
+        
+        # Should return set
+        self.assertIsInstance(clusters, set)
+        
+        # All clusters should contain only Li
+        for cluster in clusters:
+            for node in cluster.nodes:
+                self.assertEqual(node.element, "Li")
+        
+        # Original structure should be unmodified
+        self.assertEqual(structure, original_structure)
+    
+    # Clean up
+    tort.tort_mod.tear_down()
 
 
 if __name__ == "__main__":

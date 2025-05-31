@@ -331,50 +331,31 @@ def clusters_from_file(filename: str,
 
 def clusters_from_structure(structure: Structure, rcut: float, elements: set[str]) -> set[Cluster]:
     """Take a pymatgen structure and convert it to a graph object.
-
     Args:
         structure: Pymatgen structure object to set up graph from.
         rcut: Cut-off radii for node-node connections in forming clusters.
         elements: Set of element strings to include in setting up graph.
-
     Returns:
         Set of clusters.
         
     Raises:
         ValueError: If the element set is not a subset of the elements in the structure.
     """
-    working_structure = deepcopy(structure)
-    symbols = set([species for species in working_structure.symbol_set])
-
-    if elements.issubset(working_structure.symbol_set):
-
-        all_elements = set([species for species in working_structure.symbol_set])
-        remove_elements = [x for x in all_elements if x not in elements]
-
-        working_structure.remove_species(remove_elements)
-        folded_structure = Structure.from_sites(working_structure.sites, to_unit_cell=True)
-
-        nodes = nodes_from_structure(folded_structure, rcut, get_halo=True)
-        set_fort_nodes(nodes)
-
-        clusters = set()
-
-        uc_nodes = set([node for node in nodes if node.labels["Halo"] == False])
-
-        while uc_nodes:
-            node = uc_nodes.pop()
-            if node.labels["Halo"] == False:
-                cluster = Cluster({node})
-                cluster.grow_cluster()
-                uc_nodes.difference_update(cluster.nodes)
-                clusters.add(cluster)
-                set_cluster_periodic(cluster)
-
-        return clusters
-    else:
-        raise ValueError(
-            "The element set fed to 'clusters_from_file' is not a subset of the elements in the file"
-        )
+    working_structure = filter_structure_by_species(structure, list(elements))
+    folded_structure = Structure.from_sites(working_structure.sites, to_unit_cell=True)
+    nodes = nodes_from_structure(folded_structure, rcut, get_halo=True)
+    set_fort_nodes(nodes)
+    clusters = set()
+    uc_nodes = set([node for node in nodes if node.labels["Halo"] == False])
+    while uc_nodes:
+        node = uc_nodes.pop()
+        if node.labels["Halo"] == False:
+            cluster = Cluster({node})
+            cluster.grow_cluster()
+            uc_nodes.difference_update(cluster.nodes)
+            clusters.add(cluster)
+            set_cluster_periodic(cluster)
+    return clusters
 
 
 def graph_from_structure(structure: Structure, rcut: float, elements: set[str]) -> Graph:
@@ -391,3 +372,36 @@ def graph_from_structure(structure: Structure, rcut: float, elements: set[str]) 
 def graph_from_file(filename: str, rcut: float, elements: set[str]) -> Graph:
     structure = Structure.from_file(filename)
     return graph_from_structure(structure, rcut, elements)
+    
+def filter_structure_by_species(structure: Structure, species_list: list[str]) -> Structure:
+    """Filter structure to keep only specified species.
+    
+    Creates a new Structure containing only the sites with species that are
+    in the provided species list. The original structure is not modified.
+    
+    Args:
+        structure: Pymatgen Structure object to filter.
+        species_list: List of element symbols to keep in the filtered structure.
+            
+    Returns:
+        New Structure object containing only sites with species in species_list.
+        
+    Raises:
+        ValueError: If species_list is empty.
+        ValueError: If species_list contains elements not present in the structure.
+        
+    Example:
+        >>> structure = Structure(lattice, ["Li", "Mg", "O"], coords)
+        >>> filtered_structure = filter_structure_by_species(structure, ["Li", "O"])
+        >>> filtered_structure.symbol_set  # {"Li", "O"}
+    """
+    if not species_list:
+        raise ValueError("species_list cannot be empty")
+    invalid_species = [spec for spec in species_list if spec not in structure.symbol_set]
+    if invalid_species:
+        raise ValueError(f"Species {invalid_species} not found in structure")
+        
+    filtered_structure = deepcopy(structure)
+    species_to_remove = [spec for spec in structure.symbol_set if spec not in species_list]
+    filtered_structure.remove_species(species_to_remove)    
+    return filtered_structure
