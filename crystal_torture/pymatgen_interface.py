@@ -1,7 +1,7 @@
 """Functions for setting up a node, cluster and graph using pymatgen."""
 
 from crystal_torture.node import Node
-from crystal_torture.cluster import Cluster
+from crystal_torture.cluster import Cluster, clusters_from_nodes
 from crystal_torture.graph import Graph
 import numpy as np
 import itertools
@@ -345,28 +345,31 @@ def clusters_from_structure(structure: Structure, rcut: float, elements: set[str
     folded_structure = Structure.from_sites(working_structure.sites, to_unit_cell=True)
     nodes = nodes_from_structure(folded_structure, rcut, get_halo=True)
     set_fort_nodes(nodes)
-    clusters = set()
-    uc_nodes = set([node for node in nodes if node.labels["Halo"] == False])
-    while uc_nodes:
-        node = uc_nodes.pop()
-        if node.labels["Halo"] == False:
-            cluster = Cluster({node})
-            cluster.grow_cluster()
-            uc_nodes.difference_update(cluster.nodes)
-            clusters.add(cluster)
-            set_cluster_periodic(cluster)
+    clusters = clusters_from_nodes(nodes)
     return clusters
 
-
 def graph_from_structure(structure: Structure, rcut: float, elements: set[str]) -> Graph:
+    """Create a graph from a pymatgen structure.
+    
+    Creates a Graph object containing clusters of connected nodes and a filtered
+    structure. The clusters are formed by connecting sites within the cutoff
+    radius, and only sites with the specified elements are included.
+    
+    Args:
+        structure: Pymatgen Structure object to create graph from.
+        rcut: Cutoff radius for node-node connections in forming clusters.
+        elements: Set of element strings to include in the graph.
+        
+    Returns:
+        Graph object containing clusters and filtered structure.
+        
+    Example:
+        >>> structure = Structure(lattice, ["Li", "Mg", "O"], coords)
+        >>> graph = graph_from_structure(structure, 3.0, {"Li", "O"})
+        >>> graph.clusters  # Clusters containing only Li and O sites
+    """
     clusters = clusters_from_structure(structure, rcut, elements)
-    
-    # Filter structure for the Graph (this is necessary, not redundant!)
-    filtered_structure = deepcopy(structure)
-    all_elements = set([species for species in filtered_structure.symbol_set])
-    remove_elements = [x for x in all_elements if x not in elements]
-    filtered_structure.remove_species(remove_elements)
-    
+    filtered_structure = filter_structure_by_species(structure, list(elements))
     return Graph(clusters=clusters, structure=filtered_structure)
 
 def graph_from_file(filename: str, rcut: float, elements: set[str]) -> Graph:

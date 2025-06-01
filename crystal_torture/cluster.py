@@ -208,3 +208,73 @@ class Cluster:
         uc_nodes = self.return_key_nodes(key="Halo", value=False)
         valid_tortuosities = [node.tortuosity for node in uc_nodes if node.tortuosity is not None]
         self.tortuosity = sum(valid_tortuosities) / len(valid_tortuosities) if valid_tortuosities else 0.0
+        
+    def set_periodic(self) -> None:
+        """Set the periodicity of the cluster by counting UC nodes with same UC_index.
+        
+        Determines cluster periodicity by counting how many periodic images of the 
+        same unit cell site are connected in the cluster.
+        
+        Sets:
+            self.periodic: 0=isolated, 1=1D periodic, 2=2D periodic, 3=3D periodic
+        """
+        if not self.nodes:
+            self.periodic = 0
+            return
+            
+        # Get any node to find its UC_index
+        node = next(iter(self.nodes))
+        uc_index = node.uc_index
+        
+        # Count nodes with same UC_index
+        no_images = len([n for n in self.nodes if n.uc_index == uc_index])
+        
+        if no_images == 27:
+            self.periodic = 3
+        elif no_images == 9:
+            self.periodic = 2
+        elif no_images == 3:
+            self.periodic = 1
+        else:
+            self.periodic = 0
+        
+def clusters_from_nodes(nodes: set[Node]) -> set[Cluster]:
+    """Create clusters from a set of nodes using connected components algorithm.
+    
+    Forms clusters by growing from unit cell nodes (is_halo=False) using graph 
+    traversal to find all connected nodes. Each cluster represents one connected
+    component in the node graph.
+    
+    Args:
+        nodes: Set of Node objects with neighbour relationships established.
+        
+    Returns:
+        Set of Cluster objects, each containing one connected component.
+        
+    Algorithm:
+        1. Identify all unit cell nodes (is_halo=False) as potential seeds
+        2. For each unprocessed UC node:
+           - Create cluster with that node as seed
+           - Use graph traversal to find all connected nodes
+           - Calculate cluster periodicity
+           - Add to results
+    """
+    
+    if not nodes:
+        return set()
+    
+    clusters = set()
+    # Get all unit cell nodes (only these seed clusters)
+    uc_nodes = set([node for node in nodes if node.is_halo == False])
+    
+    while uc_nodes:
+        node = uc_nodes.pop()
+        if not node.is_halo:  # Double-check (should always be true here)
+            cluster = Cluster({node})
+            cluster.grow_cluster()
+            # Remove all nodes in this cluster from unprocessed set
+            uc_nodes.difference_update(cluster.nodes)
+            clusters.add(cluster)
+            cluster.set_periodic()
+    
+    return clusters

@@ -10,6 +10,7 @@ from crystal_torture.pymatgen_interface import (
     graph_from_file,
     filter_structure_by_species
 )
+from crystal_torture.graph import Graph
 from pymatgen.core import Structure, Lattice
 from copy import deepcopy
 
@@ -338,57 +339,71 @@ class PymatgenTestCase(unittest.TestCase):
         
         with self.assertRaises(ValueError):
             filter_structure_by_species(structure, ["Mg"])  # Mg not in structure
-            
-    def test_clusters_from_structure_integration_before_refactoring(self):
-        """Integration test for clusters_from_structure before refactoring (temporary test)."""
+        
+    @patch('crystal_torture.pymatgen_interface.clusters_from_structure')
+    def test_graph_from_structure_delegates_and_filters_structure(self, mock_clusters_from_structure):
+        """Test that graph_from_structure delegates cluster creation and filters structure for Graph."""
+        # Arrange
         lattice = Lattice.cubic(4.0)
-        structure = Structure(
-            lattice, 
-            ["Li", "Li", "Mg"], 
-            [[0, 0, 0], [0.5, 0, 0], [0, 0.5, 0]]
-        )
-        original_structure = deepcopy(structure)
+        structure = Structure(lattice, ["Li", "Mg"], [[0, 0, 0], [1.0, 0, 0]])
+        mock_clusters = {Mock(), Mock()}
+        mock_clusters_from_structure.return_value = mock_clusters
         
-        clusters = clusters_from_structure(structure, rcut=4.0, elements={"Li"})
+        # Act
+        graph = graph_from_structure(structure, 2.0, {"Li"})
         
-        # Test return type and basic properties
-        self.assertIsInstance(clusters, set)
-        self.assertGreater(len(clusters), 0)
+        # Assert - should delegate cluster creation
+        mock_clusters_from_structure.assert_called_once_with(structure, 2.0, {"Li"})
         
-        # Test that clusters contain only the requested elements
-        for cluster in clusters:
-            cluster_elements = {node.element for node in cluster.nodes}
-            self.assertEqual(cluster_elements, {"Li"})
+        # Should return Graph with the clusters
+        self.assertIsInstance(graph, Graph)
+        self.assertEqual(graph.clusters, mock_clusters)
         
-        # Test that original structure is not modified (will fail with current implementation)
-        self.assertEqual(structure, original_structure)
-        
-        # Clean up Fortran state
-        tort.tort_mod.tear_down()
-        
-    def test_clusters_from_structure_basic_functionality(self):
-        """Test clusters_from_structure basic functionality."""
-        # Simple structure: 2 Li atoms close enough to connect
-        lattice = Lattice.cubic(4.0)
-        structure = Structure(lattice, ["Li", "Li"], [[0, 0, 0], [1.0, 0, 0]])
-        original_structure = deepcopy(structure)
-        
-        clusters = clusters_from_structure(structure, rcut=2.0, elements={"Li"})
-        
-        # Should return set
-        self.assertIsInstance(clusters, set)
-        
-        # All clusters should contain only Li
-        for cluster in clusters:
-            for node in cluster.nodes:
-                self.assertEqual(node.element, "Li")
+        # Graph's structure should be filtered to only contain Li
+        self.assertEqual(set(graph.structure.symbol_set), {"Li"})
         
         # Original structure should be unmodified
-        self.assertEqual(structure, original_structure)
-    
-    # Clean up
-    tort.tort_mod.tear_down()
+        original_symbols = set(structure.symbol_set)
+        self.assertEqual(original_symbols, {"Li", "Mg"})
 
+    @patch('crystal_torture.pymatgen_interface.filter_structure_by_species')
+    @patch('crystal_torture.pymatgen_interface.clusters_from_structure')
+    def test_graph_from_structure_delegates_to_both_functions(self, mock_clusters_from_structure, mock_filter):
+        """Test that graph_from_structure delegates to both clusters_from_structure and filter_structure_by_species."""
+        # Arrange
+        lattice = Lattice.cubic(4.0)
+        structure = Structure(lattice, ["Li", "Mg"], [[0, 0, 0], [1.0, 0, 0]])
+        mock_clusters = {Mock(), Mock()}
+        mock_filtered_structure = Mock()
+        mock_clusters_from_structure.return_value = mock_clusters
+        mock_filter.return_value = mock_filtered_structure
+        
+        graph = graph_from_structure(structure, 2.0, {"Li"})
+        
+        mock_clusters_from_structure.assert_called_once_with(structure, 2.0, {"Li"})
+        mock_filter.assert_called_once_with(structure, ["Li"])
+        
+        self.assertIsInstance(graph, Graph)
+        self.assertEqual(graph.clusters, mock_clusters)
+        self.assertEqual(graph.structure, mock_filtered_structure)
+        
+    @patch('crystal_torture.pymatgen_interface.clusters_from_nodes')
+    @patch('crystal_torture.pymatgen_interface.set_fort_nodes') 
+    def test_clusters_from_structure_delegates_correctly(self, mock_set_fort, mock_clusters_from_nodes):
+        """Test that clusters_from_structure delegates to clusters_from_nodes correctly."""
+        # Arrange
+        lattice = Lattice.cubic(4.0)
+        structure = Structure(lattice, ["Li", "Mg"], [[0, 0, 0], [1.0, 0, 0]])
+        mock_clusters = {Mock(), Mock()}
+        mock_clusters_from_nodes.return_value = mock_clusters
+        
+        # Act  
+        result = clusters_from_structure(structure, 2.0, {"Li"})
+        
+        # Assert
+        mock_clusters_from_nodes.assert_called_once()
+        mock_set_fort.assert_called_once()
+        self.assertEqual(result, mock_clusters)
 
 if __name__ == "__main__":
     unittest.main()

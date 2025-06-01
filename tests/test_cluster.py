@@ -7,6 +7,7 @@ from crystal_torture.pymatgen_interface import (
     graph_from_file,
 )
 from crystal_torture import Cluster, Node, tort, Graph
+from crystal_torture.cluster import clusters_from_nodes
 from ddt import ddt, data, unpack
 # from crystal_torture.cluster import Cluster
 
@@ -179,6 +180,162 @@ class ClusterTestCase(unittest.TestCase):
         with patch('crystal_torture.tort.tort_mod.torture') as mock_torture:
             with self.assertRaises(RuntimeError) as context:
                 cluster.torture_fort()
+                
+    def test_clusters_from_nodes_single_connected_component(self):
+        """Test clusters_from_nodes with all nodes in one connected component."""
+        # Create 3 connected UC nodes using new API
+        node0 = Node(0, "Li", uc_index=0, is_halo=False, neighbours_ind={1, 2})
+        node1 = Node(1, "Li", uc_index=1, is_halo=False, neighbours_ind={0, 2}) 
+        node2 = Node(2, "Li", uc_index=2, is_halo=False, neighbours_ind={0, 1})
+        
+        # Set up neighbour relationships
+        nodes = [node0, node1, node2]
+        for node in nodes:
+            node.neighbours = {n for n in nodes if n.index in node.neighbours_ind}
+        
+        clusters = clusters_from_nodes(set(nodes))
+        
+        # Should get exactly one cluster containing all nodes
+        self.assertEqual(len(clusters), 1)
+        cluster = clusters.pop()
+        self.assertEqual(len(cluster.nodes), 3)
+    
+    def test_clusters_from_nodes_multiple_disconnected_components(self):
+        """Test clusters_from_nodes with multiple disconnected components."""
+        # Create two disconnected pairs using new API
+        node0 = Node(0, "Li", uc_index=0, is_halo=False, neighbours_ind={1})
+        node1 = Node(1, "Li", uc_index=0, is_halo=True, neighbours_ind={0})
+        node2 = Node(2, "Li", uc_index=1, is_halo=False, neighbours_ind={3})
+        node3 = Node(3, "Li", uc_index=1, is_halo=True, neighbours_ind={2})
+        
+        # Set up neighbour relationships
+        node0.neighbours = {node1}
+        node1.neighbours = {node0}
+        node2.neighbours = {node3}
+        node3.neighbours = {node2}
+        
+        clusters = clusters_from_nodes({node0, node1, node2, node3})
+        
+        # Should get two clusters
+        self.assertEqual(len(clusters), 2)
+        cluster_sizes = {len(cluster.nodes) for cluster in clusters}
+        self.assertEqual(cluster_sizes, {2})  # Both clusters have 2 nodes
+    
+    def test_clusters_from_nodes_single_isolated_node(self):
+        """Test clusters_from_nodes with single isolated UC node."""
+        node0 = Node(0, "Li", uc_index=0, is_halo=False, neighbours_ind=set())
+        node0.neighbours = set()
+        
+        clusters = clusters_from_nodes({node0})
+        
+        # Should get one cluster with one node
+        self.assertEqual(len(clusters), 1)
+        cluster = clusters.pop()
+        self.assertEqual(len(cluster.nodes), 1)
+        self.assertEqual(cluster.nodes.pop(), node0)
+    
+    def test_clusters_from_nodes_mixed_halo_uc_nodes(self):
+        """Test that only UC nodes seed clusters but halo nodes join them."""
+        # UC node connected to halo node using new API
+        uc_node = Node(0, "Li", uc_index=0, is_halo=False, neighbours_ind={1})
+        halo_node = Node(1, "Li", uc_index=0, is_halo=True, neighbours_ind={0})
+        
+        uc_node.neighbours = {halo_node}
+        halo_node.neighbours = {uc_node}
+        
+        clusters = clusters_from_nodes({uc_node, halo_node})
+        
+        # Should get one cluster containing both nodes (seeded by UC node)
+        self.assertEqual(len(clusters), 1)
+        cluster = clusters.pop()
+        self.assertEqual(cluster.nodes, {uc_node, halo_node})
+    
+    def test_clusters_from_nodes_empty_set(self):
+        """Test clusters_from_nodes with empty node set."""
+        clusters = clusters_from_nodes(set())
+        
+        # Should return empty set
+        self.assertEqual(clusters, set())
+    
+    def test_clusters_from_nodes_only_halo_nodes(self):
+        """Test clusters_from_nodes with only halo nodes (no seeds)."""
+        halo1 = Node(0, "Li", uc_index=0, is_halo=True, neighbours_ind={1})
+        halo2 = Node(1, "Li", uc_index=0, is_halo=True, neighbours_ind={0})
+        
+        halo1.neighbours = {halo2}
+        halo2.neighbours = {halo1}
+        
+        clusters = clusters_from_nodes({halo1, halo2})
+        
+        # Should return empty set (no UC nodes to seed clusters)
+        self.assertEqual(clusters, set())
+        
+    def test_cluster_set_periodic_3d(self):
+        """Test set_periodic identifies 3D periodic cluster (27 images)."""
+        # Create 27 nodes with same uc_index (simulating 3x3x3 periodic images)
+        nodes = set()
+        for i in range(27):
+            node = Node(i, "Li", uc_index=0, is_halo=(i != 13), neighbours_ind=set())
+            nodes.add(node)
+        
+        cluster = Cluster(nodes)
+        cluster.set_periodic()
+        
+        self.assertEqual(cluster.periodic, 3)
+    
+    def test_cluster_set_periodic_2d(self):
+        """Test set_periodic identifies 2D periodic cluster (9 images)."""
+        # Create 9 nodes with same uc_index (simulating 3x3 periodic images)
+        nodes = set()
+        for i in range(9):
+            node = Node(i, "Li", uc_index=0, is_halo=(i != 4), neighbours_ind=set())
+            nodes.add(node)
+        
+        cluster = Cluster(nodes)
+        cluster.set_periodic()
+        
+        self.assertEqual(cluster.periodic, 2)
+    
+    def test_cluster_set_periodic_1d(self):
+        """Test set_periodic identifies 1D periodic cluster (3 images)."""
+        # Create 3 nodes with same uc_index (simulating linear periodic images)
+        nodes = set()
+        for i in range(3):
+            node = Node(i, "Li", uc_index=0, is_halo=(i != 1), neighbours_ind=set())
+            nodes.add(node)
+        
+        cluster = Cluster(nodes)
+        cluster.set_periodic()
+        
+        self.assertEqual(cluster.periodic, 1)
+    
+    def test_cluster_set_periodic_0d_single_node(self):
+        """Test set_periodic identifies isolated cluster (1 node)."""
+        node = Node(0, "Li", uc_index=0, is_halo=False, neighbours_ind=set())
+        cluster = Cluster({node})
+        cluster.set_periodic()
+        
+        self.assertEqual(cluster.periodic, 0)
+    
+    def test_cluster_set_periodic_0d_multiple_nodes(self):
+        """Test set_periodic identifies isolated cluster (multiple nodes, but not 3/9/27)."""
+        # Create 5 nodes with same uc_index (doesn't match any periodic pattern)
+        nodes = set()
+        for i in range(5):
+            node = Node(i, "Li", uc_index=0, is_halo=False, neighbours_ind=set())
+            nodes.add(node)
+        
+        cluster = Cluster(nodes)
+        cluster.set_periodic()
+        
+        self.assertEqual(cluster.periodic, 0)
+    
+    def test_cluster_set_periodic_empty_cluster(self):
+        """Test set_periodic handles empty cluster."""
+        cluster = Cluster(set())
+        cluster.set_periodic()
+        
+        self.assertEqual(cluster.periodic, 0)
 
 
 if __name__ == "__main__":
