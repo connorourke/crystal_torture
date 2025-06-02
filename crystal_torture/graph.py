@@ -32,18 +32,19 @@ class Graph:
             structure: The pymatgen Structure object the graph has been formed from.
         """
         self.clusters = clusters
-        self.tortuosity: dict[str, float] | None = None
+        self.tortuosity: dict[int, float] | None = None
         self.min_clusters: list[minimal_Cluster] | None = None
         self.structure = structure
 
     def set_site_tortuosity(self) -> None:
         """Set a dict containing the site by site tortuosity for sites in the graph unit cell."""
-        tortuosity: dict[str, float] = {}
+        tortuosity: dict[int, float] = {}
         for cluster in self.clusters:
-            for node in cluster.return_key_nodes(key="Halo", value=False):
+            for node in cluster.uc_nodes:
+                if node.uc_index is None:
+                    raise ValueError(f"Node {node.index} has uc_index=None. All nodes must have uc_index set.")
                 if node.tortuosity is not None:
-                    tortuosity[str(node.labels["UC_index"])] = node.tortuosity
-
+                    tortuosity[node.uc_index] = node.tortuosity
         self.tortuosity = tortuosity
 
     def set_minimal_clusters(self) -> None:
@@ -51,39 +52,41 @@ class Graph:
         
         Cycles through the halo clusters, gets a set unique cluster sites and sets up 
         minimal_Cluster object to store and access the data.
-
+        
         Sets:
             self.min_clusters: A list of minimal_Cluster objects for unit cell in graph.
         """
         site_sets: list[frozenset[int]] = []
         for cluster in self.clusters:
-            indices = frozenset(
-                [int(node.labels["UC_index"]) for node in cluster.nodes]
-            )
+            # Validate uc_index before creating frozenset
+            for node in cluster.nodes:
+                if node.uc_index is None:
+                    raise ValueError(f"Node {node.index} has uc_index=None. All nodes must have uc_index set.")
+            
+            indices = frozenset([node.uc_index for node in cluster.nodes])
             site_sets.append(indices)
-
+        
         unique_site_sets = set(site_sets)
-
+        
         self.min_clusters = []
-
+        
         for sites in unique_site_sets:
             self.min_clusters.append(
                 minimal_Cluster(site_indices=list(sites), size=len(sites))
             )
-
+        
         for cluster in self.clusters:
             for min_clus in self.min_clusters:
-                if min_clus.site_indices[0] in set(
-                    [int(node.labels["UC_index"]) for node in cluster.nodes]
-                ):
+                # Validation already done above, so this is safe
+                if min_clus.site_indices[0] in set([node.uc_index for node in cluster.nodes]):
                     min_clus.periodic = cluster.periodic
-
+        
         for min_clus in self.min_clusters:
             if min_clus.periodic is not None and min_clus.periodic > 0:
                 min_clus.tortuosity = 0
                 for site_index in min_clus.site_indices:
-                    if self.tortuosity is not None and str(site_index) in self.tortuosity:
-                        min_clus.tortuosity += self.tortuosity[str(site_index)]
+                    if self.tortuosity is not None and site_index in self.tortuosity:
+                        min_clus.tortuosity += self.tortuosity[site_index]
                 min_clus.tortuosity = min_clus.tortuosity / min_clus.size
 
     def torture(self) -> None:
@@ -134,12 +137,12 @@ class Graph:
                 if cluster.periodic is not None and cluster.periodic > 0:
                     site_sets.append(
                         frozenset(
-                            [int(node.labels["UC_index"]) for node in cluster.nodes]
+                            [node.uc_index for node in cluster.nodes]
                         )
                     )
             else:
                 site_sets.append(
-                    frozenset([int(node.labels["UC_index"]) for node in cluster.nodes])
+                    frozenset([node.uc_index for node in cluster.nodes])
                 )
 
         unique_site_sets = set(site_sets)
@@ -181,7 +184,7 @@ class Graph:
         for cluster in self.clusters:
             if cluster.periodic is not None and cluster.periodic > 0:
                 site_sets.append(
-                    frozenset([int(node.labels["UC_index"]) for node in cluster.nodes])
+                    frozenset([node.uc_index for node in cluster.nodes])
                 )
 
         unique_site_sets = set(site_sets)
@@ -221,10 +224,10 @@ class Graph:
 
         for cluster in self.clusters:
 
-            total_nodes += len(cluster.return_key_nodes(key="Halo", value=False))
+            total_nodes += len(cluster.uc_nodes)
 
             if cluster.periodic is not None and cluster.periodic > 0:
-                periodic_nodes += len(cluster.return_key_nodes(key="Halo", value=False))
+                periodic_nodes += len(cluster.uc_nodes)
 
         return periodic_nodes / total_nodes if total_nodes > 0 else 0.0
 

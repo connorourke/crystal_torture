@@ -216,7 +216,6 @@ def create_halo(structure: Structure, neighbours: list[list[tuple]]) -> tuple[St
     
     return structure, neighbours_mapped
 
-
 def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = False) -> set[Node]:
     """Take a pymatgen structure object and convert to Nodes for interrogation."""
     working_structure = deepcopy(structure)
@@ -224,14 +223,14 @@ def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = Fal
         "UC_index", [str(i) for i in range(len(working_structure.sites))]
     )
     neighbours = get_all_neighbors_and_image(working_structure, rcut, include_index=True)
-    nodes: list[Node] = []  # Type annotation added
+    nodes: list[Node] = []
     
     no_nodes = len(working_structure.sites)
     if get_halo == True:
         working_structure, neighbours_mapped = create_halo(working_structure, neighbours)
         uc_index = set([((index * 27) + 13) for index in range(no_nodes)])
     else:
-        uc_index = set(range(no_nodes))  # Fixed: was set([range(no_nodes)])
+        uc_index = set(range(no_nodes))
         neighbours_temp: list[list[int]] = []
         for index, neigh in enumerate(neighbours):
             neighbours_temp.append([neigh_ind[2] for neigh_ind in neigh])
@@ -240,7 +239,6 @@ def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = Fal
     append = nodes.append
     
     for index, site in enumerate(working_structure.sites):
-    
         if index in uc_index:
             halo_node = False
         else:
@@ -250,7 +248,8 @@ def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = Fal
             Node(
                 index=index,
                 element=site.species_string,
-                labels={"UC_index": site.properties["UC_index"], "Halo": halo_node},
+                uc_index=int(site.properties["UC_index"]),
+                is_halo=halo_node,
                 neighbours_ind=node_neighbours_ind,
             )
         )
@@ -261,7 +260,6 @@ def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = Fal
             node.neighbours.add(nodes[neighbour_ind])
     
     return set(nodes)
-
 
 def set_cluster_periodic(cluster: Cluster) -> None:
     """Set the periodicity of the cluster by counting through the number of labelled UC nodes it contains.

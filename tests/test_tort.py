@@ -88,13 +88,15 @@ class TestTortModule(unittest.TestCase):
         node0 = Node(
             index=0,
             element="Li",
-            labels={"UC_index": "0", "Halo": False},
+            uc_index=0,
+            is_halo=False,
             neighbours_ind=[1]
         )
         node1 = Node(
             index=1,
-            element="Li", 
-            labels={"UC_index": "0", "Halo": True},
+            element="Li",
+            uc_index=0,
+            is_halo=True,
             neighbours_ind=[0]
         )
         
@@ -127,13 +129,14 @@ class TestTortModule(unittest.TestCase):
         # Create 4-node system: two disconnected pairs
         nodes = []
         for i in range(4):
-            uc_index = str(i // 2)  # nodes 0,1 have UC_index="0", nodes 2,3 have UC_index="1"
+            uc_index = i // 2  # nodes 0,1 have UC_index="0", nodes 2,3 have UC_index="1"
             is_halo = (i % 2 == 1)  # nodes 1,3 are halo nodes
             
             node = Node(
                 index=i,
                 element="Li",
-                labels={"UC_index": uc_index, "Halo": is_halo},
+                uc_index=uc_index,
+                is_halo=is_halo,
                 neighbours_ind=[1-i if i < 2 else 5-i]  # 0↔1, 2↔3
             )
             nodes.append(node)
@@ -149,7 +152,7 @@ class TestTortModule(unittest.TestCase):
         # Test Python version
         cluster_py = Cluster(set(nodes))
         cluster_py.torture_py()
-        python_results = [node.tortuosity for node in nodes if not node.labels["Halo"]]
+        python_results = [node.tortuosity for node in nodes if not node.is_halo]
         
         # Reset for Fortran test
         for node in nodes:
@@ -158,7 +161,7 @@ class TestTortModule(unittest.TestCase):
         # Test Fortran version
         cluster_fort = Cluster(set(nodes))
         cluster_fort.torture_fort()
-        fortran_results = [node.tortuosity for node in nodes if not node.labels["Halo"]]
+        fortran_results = [node.tortuosity for node in nodes if not node.is_halo]
         
         # Should give same results
         self.assertEqual(python_results, fortran_results)
@@ -196,13 +199,15 @@ class TestTortModule(unittest.TestCase):
         node0 = Node(
             index=0,
             element="Li",
-            labels={"UC_index": "0", "Halo": False},
+            uc_index=0,
+            is_halo=False,
             neighbours_ind=[1]
         )
         node1 = Node(
             index=1,
-            element="Li", 
-            labels={"UC_index": "0", "Halo": True},
+            element="Li",
+            uc_index=0,
+            is_halo=True,
             neighbours_ind=[0]
         )
         

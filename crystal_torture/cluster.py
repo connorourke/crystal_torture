@@ -91,31 +91,76 @@ class Cluster:
                 add(node)
 
         self.nodes = visited
-
+        
+    @property
+    def uc_nodes(self) -> set[Node]:
+        """Return unit cell nodes (is_halo=False).
+        
+        Raises:
+            ValueError: If any node has is_halo=None.
+        """
+        for node in self.nodes:
+            if node.is_halo is None:
+                raise ValueError(f"Node {node.index} has is_halo=None. All nodes in cluster must have is_halo set.")
+        
+        return {node for node in self.nodes if not node.is_halo}
+    
+    @property  
+    def halo_nodes(self) -> set[Node]:
+        """Return halo nodes (is_halo=True).
+        
+        Raises:
+            ValueError: If any node has is_halo=None.
+        """
+        for node in self.nodes:
+            if node.is_halo is None:
+                raise ValueError(f"Node {node.index} has is_halo=None. All nodes in cluster must have is_halo set.")
+        
+        return {node for node in self.nodes if node.is_halo}
+    
     def return_key_nodes(self, key: str, value: str | bool) -> set[Node]:
         """Return the nodes in a cluster corresponding to a particular label.
-
+    
         Args:
            key: Dictionary key for filtering nodes.
            value: Value held in dictionary for label key.
-
+    
         Returns:
            Set of nodes in cluster for which (node.labels[key] == value).
+           
+        .. deprecated:: 
+            Use uc_nodes or halo_nodes properties for Halo-based filtering.
         """
+        import warnings
+        if key == "Halo":
+            warnings.warn(
+                "return_key_nodes with key='Halo' is deprecated. Use cluster.uc_nodes or cluster.halo_nodes instead.",
+                DeprecationWarning,
+                stacklevel=2
+            )
+        
         key_nodes = set([node for node in self.nodes if node.labels[key] == value])
         return key_nodes
 
-    def return_uc_indices(self) -> set[int]:
+    @property
+    def uc_indices(self) -> set[int]:
         """Return the unit-cell indices of nodes in a cluster.
         
         Reduces the full list of uc_indices included in the unit-cell and the halo 
         to contain the indices only once.
-
+        
         Returns:
             Set of unit-cell indices for nodes in cluster.
+            
+        Raises:
+            ValueError: If any node has uc_index=None.
         """
-        uc_indices = set([node.uc_index for node in self.nodes])
-        return uc_indices
+        validated_indices: set[int] = set()
+        for node in self.nodes:
+            if node.uc_index is None:
+                raise ValueError(f"Node {node.index} has uc_index=None. All nodes in cluster must have uc_index set.")
+            validated_indices.add(node.uc_index)
+        return validated_indices
 
     def return_index_node(self, index: int) -> Node:
         """Return the node with the specified index.
@@ -125,50 +170,51 @@ class Cluster:
             
         Returns:
             Node with the specified index.
+            
+        Raises:
+            ValueError: If no node with the specified index is found.
         """
-        index_node = [node for node in self.nodes if node.index == index]
-        return index_node[0]
+        try:
+            return next(node for node in self.nodes if node.index == index)
+        except StopIteration:
+            raise ValueError(f"No node found with index {index}")
 
     def torture_py(self) -> None:
         """Perform tortuosity analysis on nodes in cluster in pure Python using BFS.
         
         Calculates the integer number of node-node steps it requires to get from a 
         node to its periodic image.
-
+        
         Sets:
-           node.tortuosity: Tortuosity for each node.
-           self.tortuosity: Average tortuosity for cluster.
+        node.tortuosity: Tortuosity for each node.
+        self.tortuosity: Average tortuosity for cluster.
         """
-        uc = self.return_key_nodes(key="Halo", value=False)
+        uc = self.uc_nodes  # Changed from return_key_nodes
         while uc:
-
             node_stack = [uc.pop()]
-
             visited = set()
-            uc_index = node_stack[0].labels["UC_index"]
+            uc_index = node_stack[0].uc_index  # Changed from labels["UC_index"]
             index = node_stack[0].index
             root_node = node_stack[0]
-
+        
             for node in self.nodes:
                 node.dist = 0
-
+        
             while node_stack:
-
                 node = node_stack.pop(0)
                 next_dist = node.dist + 1
                 if node not in visited:
-
                     if node.neighbours is not None:
                         for neigh in node.neighbours:
                             if neigh.dist == 0:
                                 neigh.dist = next_dist
                                 node_stack.append(neigh)
-                if (node.labels["UC_index"] == uc_index) and (node.index != index):
+                if (node.uc_index == uc_index) and (node.index != index):  # Changed from labels["UC_index"]
                     root_node.tortuosity = next_dist - 1
                     break
                 visited.add(node)
-
-        uc_nodes = self.return_key_nodes(key="Halo", value=False)
+        
+        uc_nodes = self.uc_nodes  # Changed from return_key_nodes
         valid_tortuosities = [node.tortuosity for node in uc_nodes if node.tortuosity is not None]
         self.tortuosity = sum(valid_tortuosities) / len(valid_tortuosities) if valid_tortuosities else 0.0
 
@@ -196,16 +242,16 @@ class Cluster:
                             "Use graph_from_structure() or call set_fort_nodes() first.")
         
         # Get the UC node indices for this cluster
-        uc_node_indices = [node.index for node in self.return_key_nodes(key="Halo", value=False)]
+        uc_node_indices = [node.index for node in self.uc_nodes]  # Changed from return_key_nodes
         
         # Run the torture algorithm
         tort.tort_mod.torture(len(uc_node_indices), uc_node_indices)
         
         # Get results
-        for node in self.return_key_nodes(key="Halo", value=False):
-            node.tortuosity = tort.tort_mod.uc_tort[int(node.labels["UC_index"])]
+        for node in self.uc_nodes:  # Changed from return_key_nodes
+            node.tortuosity = tort.tort_mod.uc_tort[node.uc_index]  # Changed from int(node.labels["UC_index"])
         
-        uc_nodes = self.return_key_nodes(key="Halo", value=False)
+        uc_nodes = self.uc_nodes  # Changed from return_key_nodes
         valid_tortuosities = [node.tortuosity for node in uc_nodes if node.tortuosity is not None]
         self.tortuosity = sum(valid_tortuosities) / len(valid_tortuosities) if valid_tortuosities else 0.0
         

@@ -4,55 +4,71 @@ from typing import Union
 
 
 class Node:
-    """Node class representing a site in a crystal structure."""
+    """A node representing an atomic site in a crystal structure for percolation analysis.
+    
+    Each Node represents one atomic site from the input crystal structure. To properly
+    handle periodic boundary conditions, the analysis uses a 3×3×3 supercell containing
+    the original unit cell surrounded by 26 periodic images. This creates nodes for
+    both the original sites and their periodic copies.
+    
+    Every Node has a unique index in the supercell. Multiple nodes share the same
+    uc_index because they represent the same original unit cell site in different
+    locations. The is_halo flag distinguishes between sites in the central unit cell
+    (is_halo=False) and their periodic images (is_halo=True). Only unit cell sites
+    are used to seed cluster formation during the percolation analysis.
+    
+    Nodes are connected to other nodes within a cutoff distance, forming the graph
+    used for percolation analysis. The tortuosity value represents the minimum number
+    of edges traversed for a unit cell node to reach one of its periodic images.
+    
+    Attributes:
+        index: Unique node identifier in the supercell.
+        element: Chemical element symbol ('Li', 'Mg', 'O', etc.).
+        uc_index: Original unit cell site index this node represents.
+        is_halo: True if periodic image, False if central unit cell site.
+        neighbours_ind: Set of connected node indices.
+        neighbours: Set of connected Node objects.
+        tortuosity: Minimum edges traversed to reach a periodic image (set by analysis).
+        dist: Temporary distance for graph algorithms.
+    """
 
     def __init__(
         self, 
         index: int, 
         element: str, 
-        labels: dict[str | int, str | bool] | None = None,
+        uc_index: int,
+        is_halo: bool,
         neighbours_ind: set[int] | None = None, 
-        neighbours: set['Node'] | None = None,
-        # New optional parameters  
-        uc_index: int | None = None,
-        is_halo: bool | None = None
+        neighbours: set['Node'] | None = None
     ) -> None:
+        """Create a Node representing a site in the crystal structure.
+        
+        Args:
+            index: Unique identifier for this node in the supercell.
+            element: Chemical element symbol.
+            uc_index: Index of the original unit cell site this represents.
+            is_halo: True if this is a periodic image, False if unit cell site.
+            neighbours_ind: Set of connected node indices.
+            neighbours: Set of connected Node objects.
+        """
         self.index = index
         self.element = element
+        self.uc_index: int = uc_index
+        self.is_halo: bool = is_halo
         self.neighbours_ind = neighbours_ind or set()
         self.neighbours = neighbours
         self.tortuosity: float | None = None
         self.dist: int = 0
-        
-        # Fix type annotations to allow None
-        self.uc_index: int | None
-        self.is_halo: bool | None
-        
-        # Set uc_index and is_halo (prefer new params, fall back to labels, then None)
-        if uc_index is not None:
-            self.uc_index = uc_index
-        elif labels and "UC_index" in labels:
-            self.uc_index = int(labels["UC_index"])
-        else:
-            self.uc_index = None
-            
-        if is_halo is not None:
-            self.is_halo = is_halo
-        elif labels and "Halo" in labels:
-            self.is_halo = bool(labels["Halo"])  # Explicit cast to bool
-        else:
-            self.is_halo = None
-        
-        # Keep original labels for backward compatibility
-        self._original_labels = labels
 
     @property  
     def labels(self) -> dict:
-        """Legacy labels interface (deprecated)."""
-        result = dict(self._original_labels or {})
-        if self.uc_index is not None:
-            result["UC_index"] = str(self.uc_index)
-        if self.is_halo is not None:
-            result["Halo"] = self.is_halo
-        return result
+        """Legacy labels interface for backward compatibility.
+        
+        Returns:
+            Dictionary containing UC_index and Halo values for compatibility with legacy code.
+        """
+        return {
+            "UC_index": str(self.uc_index),
+            "Halo": self.is_halo
+        }
         

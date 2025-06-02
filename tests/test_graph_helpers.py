@@ -9,21 +9,13 @@ class GraphHelpersTestCase(unittest.TestCase):
 
 	def setUp(self):
 		# Create mock nodes with tortuosity data
-		self.node1 = Mock(spec=Node)
-		self.node1.labels = {"UC_index": "0", "Halo": False}
-		self.node1.tortuosity = 2.0
-		
-		self.node2 = Mock(spec=Node)
-		self.node2.labels = {"UC_index": "1", "Halo": False}
-		self.node2.tortuosity = 3.0
-		
-		self.node3 = Mock(spec=Node)
-		self.node3.labels = {"UC_index": "0", "Halo": True}
-		self.node3.tortuosity = None
+		self.node1 = Mock(spec=Node, uc_index=0, is_halo=False, tortuosity=2.0)
+		self.node2 = Mock(spec=Node, uc_index=1, is_halo=False, tortuosity=3.0)
+		self.node3 = Mock(spec=Node, uc_index=0, is_halo=True, tortuosity=None)
 		
 		# Create mock cluster
 		self.cluster = Mock(spec=Cluster)
-		self.cluster.return_key_nodes.return_value = {self.node1, self.node2}
+		self.cluster.uc_nodes = {self.node1, self.node2}
 		
 		# Create minimal structure
 		lattice = Lattice.cubic(4.0)
@@ -35,7 +27,7 @@ class GraphHelpersTestCase(unittest.TestCase):
 		"""Test that site tortuosity is set correctly."""
 		self.graph.set_site_tortuosity()
 		
-		expected_tortuosity = {"0": 2.0, "1": 3.0}
+		expected_tortuosity = {0: 2.0, 1: 3.0}
 		self.assertEqual(self.graph.tortuosity, expected_tortuosity)
 
 	def test_return_periodic_structure_no_structure_raises_error(self):
@@ -69,7 +61,7 @@ class GraphHelpersTestCase(unittest.TestCase):
 	def test_return_frac_percolating_empty_clusters(self):
 		"""Test fraction percolating calculation with empty clusters."""
 		empty_cluster = Mock(spec=Cluster)
-		empty_cluster.return_key_nodes.return_value = set()
+		empty_cluster.uc_nodes = set()
 		empty_cluster.periodic = 0
 		
 		graph = Graph({empty_cluster}, self.structure)

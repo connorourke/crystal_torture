@@ -71,31 +71,38 @@ class ClusterTestCase(unittest.TestCase):
 
         self.cluster1.grow_cluster()
         self.assertEqual(self.cluster1.nodes, self.cluster.nodes)
-
-    def test_return_uc_indices(self):
-
-        graph = graph_from_file(
-            filename=str(STRUCTURE_FILES_DIR / "POSCAR_SPINEL.vasp"),
-            rcut=4.0,
-            elements={"Mg"},
-        )
-        self.assertEqual(
-            graph.clusters.pop().return_uc_indices(),
-            {0, 1, 2, 3, 4, 5, 6, 7},
-        )
-
-    def test_return_index_node(self):
-
-        nodes = set(
-            [
-                self.cluster1.return_index_node(0),
-                self.cluster1.return_index_node(1),
-                self.cluster1.return_index_node(2),
-                self.cluster1.return_index_node(3),
-            ]
-        )
-
-        self.assertEqual(nodes, self.cluster1.nodes)
+        
+    def test_uc_indices_with_valid_indices(self):
+        """Test uc_indices works correctly when all nodes have valid uc_index."""
+        node1 = Mock(spec=Node)
+        node1.uc_index = 0
+        node2 = Mock(spec=Node)  
+        node2.uc_index = 1
+        node3 = Mock(spec=Node)
+        node3.uc_index = 0  # Duplicate uc_index
+        
+        cluster = Cluster({node1, node2, node3})
+        result = cluster.uc_indices
+        
+        self.assertEqual(result, {0, 1})
+    
+    def test_uc_indices_with_none_uc_index_raises_error(self):
+        """Test uc_indices raises error when any node has uc_index=None."""
+        valid_node = Mock(spec=Node)
+        valid_node.uc_index = 0
+        valid_node.index = 0
+        
+        invalid_node = Mock(spec=Node)
+        invalid_node.uc_index = None
+        invalid_node.index = 1
+        
+        cluster = Cluster({valid_node, invalid_node})
+        
+        with self.assertRaises(ValueError) as context:
+            cluster.uc_indices
+        
+        self.assertIn("uc_index", str(context.exception).lower())
+        self.assertIn(str(invalid_node.index), str(context.exception).lower())
 
     def test_grow_cluster_key(self):
 
@@ -122,7 +129,7 @@ class ClusterTestCase(unittest.TestCase):
             set(
                 [
                     node.tortuosity
-                    for node in clusterf.return_key_nodes(key="Halo", value=False)
+                    for node in clusterf.uc_nodes
                 ]
             ),
             set([4, 3, 3, 3, 3, 3, 3, 3]),
@@ -168,8 +175,8 @@ class ClusterTestCase(unittest.TestCase):
     def test_torture_fort_without_allocation_raises_error(self):
         """Test that torture_fort raises error when Fortran module not allocated."""
         
-        node0 = Mock(index=0, labels={"UC_index": "0"}, neighbours_ind=[1])
-        node1 = Mock(index=1, labels={"UC_index": "0"}, neighbours_ind=[0])
+        node0 = Mock(index=0, uc_index=0, neighbours_ind=[1])
+        node1 = Mock(index=1, uc_index=0, neighbours_ind=[0])
         
         cluster = Cluster({node0, node1})
         
@@ -336,6 +343,71 @@ class ClusterTestCase(unittest.TestCase):
         cluster.set_periodic()
         
         self.assertEqual(cluster.periodic, 0)
+        
+    def test_return_index_node_found(self):
+        """Test return_index_node returns correct node when index exists."""
+        node1 = Mock(spec=Node)
+        node1.index = 5
+        node2 = Mock(spec=Node)
+        node2.index = 10
+        node3 = Mock(spec=Node)
+        node3.index = 15
+        
+        cluster = Cluster({node1, node2, node3})
+        result = cluster.return_index_node(10)
+        
+        self.assertEqual(result, node2)
+    
+    def test_return_index_node_not_found_raises_error(self):
+        """Test return_index_node raises ValueError when index doesn't exist."""
+        node1 = Mock(spec=Node)
+        node1.index = 5
+        node2 = Mock(spec=Node)
+        node2.index = 10
+        
+        cluster = Cluster({node1, node2})
+        
+        with self.assertRaises(ValueError) as context:
+            cluster.return_index_node(99)
+        
+        self.assertIn("No node found with index 99", str(context.exception))
+    
+    def test_return_index_node_empty_cluster_raises_error(self):
+        """Test return_index_node raises ValueError when cluster is empty."""
+        cluster = Cluster(set())
+        
+        with self.assertRaises(ValueError) as context:
+            cluster.return_index_node(1)
+        
+        self.assertIn("No node found with index 1", str(context.exception))
+        
+    def test_uc_nodes_property(self):
+        """Test uc_nodes property returns only UC nodes."""
+        uc_node1 = Mock(spec=Node)
+        uc_node1.is_halo = False
+        uc_node2 = Mock(spec=Node) 
+        uc_node2.is_halo = False
+        halo_node = Mock(spec=Node)
+        halo_node.is_halo = True
+        
+        cluster = Cluster({uc_node1, uc_node2, halo_node})
+        result = cluster.uc_nodes
+        
+        self.assertEqual(result, {uc_node1, uc_node2})
+    
+    def test_halo_nodes_property(self):
+        """Test halo_nodes property returns only halo nodes."""
+        uc_node = Mock(spec=Node)
+        uc_node.is_halo = False
+        halo_node1 = Mock(spec=Node)
+        halo_node1.is_halo = True
+        halo_node2 = Mock(spec=Node)
+        halo_node2.is_halo = True
+        
+        cluster = Cluster({uc_node, halo_node1, halo_node2})
+        result = cluster.halo_nodes
+        
+        self.assertEqual(result, {halo_node1, halo_node2})
 
 
 if __name__ == "__main__":

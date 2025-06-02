@@ -191,13 +191,15 @@ class TestBackwardCompatibility:
 		node0 = Node(
 			index=0,
 			element="Li",
-			labels={"UC_index": "0", "Halo": False},
+			uc_index=0,
+			is_halo=False,
 			neighbours_ind=[1]
 		)
 		node1 = Node(
 			index=1,
-			element="Li", 
-			labels={"UC_index": "0", "Halo": True},
+			element="Li",
+			uc_index=0,
+			is_halo=True,
 			neighbours_ind=[0]
 		)
 		
@@ -211,7 +213,7 @@ class TestBackwardCompatibility:
 			cluster.torture_py()  # This should always work
 			
 			# Should have tortuosity values for unit cell nodes
-			uc_nodes = list(cluster.return_key_nodes(key="Halo", value=False))
+			uc_nodes = list(cluster.uc_nodes)
 			for node in uc_nodes:
 				assert hasattr(node, 'tortuosity'), f"Node {node.index} should have tortuosity after torture_py"
 				assert node.tortuosity is not None, f"Node {node.index} tortuosity should not be None"
@@ -239,13 +241,15 @@ class TestIntegrationCorrectness:
 		node0 = Node(
 			index=0,
 			element="Li",
-			labels={"UC_index": "0", "Halo": False},
+			uc_index=0,
+			is_halo=False,
 			neighbours_ind=[1]
 		)
 		node1 = Node(
 			index=1,
 			element="Li",
-			labels={"UC_index": "0", "Halo": True}, 
+			uc_index=0,
+			is_halo=True,
 			neighbours_ind=[0]
 		)
 		
