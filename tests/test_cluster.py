@@ -81,7 +81,7 @@ class ClusterTestCase(unittest.TestCase):
         )
         self.assertEqual(
             graph.clusters.pop().return_uc_indices(),
-            {"0", "1", "2", "3", "4", "5", "6", "7"},
+            {0, 1, 2, 3, 4, 5, 6, 7},
         )
 
     def test_return_index_node(self):

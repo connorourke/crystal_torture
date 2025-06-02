@@ -105,7 +105,7 @@ class Cluster:
         key_nodes = set([node for node in self.nodes if node.labels[key] == value])
         return key_nodes
 
-    def return_uc_indices(self) -> set[str]:
+    def return_uc_indices(self) -> set[int]:
         """Return the unit-cell indices of nodes in a cluster.
         
         Reduces the full list of uc_indices included in the unit-cell and the halo 
@@ -114,7 +114,7 @@ class Cluster:
         Returns:
             Set of unit-cell indices for nodes in cluster.
         """
-        uc_indices = set([cast(str, node.labels["UC_index"]) for node in self.nodes])
+        uc_indices = set([node.uc_index for node in self.nodes])
         return uc_indices
 
     def return_index_node(self, index: int) -> Node:

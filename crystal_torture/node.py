@@ -2,8 +2,10 @@
 import warnings
 from typing import Union
 
+
 class Node:
-    
+    """Node class representing a site in a crystal structure."""
+
     def __init__(
         self, 
         index: int, 
@@ -22,6 +24,10 @@ class Node:
         self.tortuosity: float | None = None
         self.dist: int = 0
         
+        # Fix type annotations to allow None
+        self.uc_index: int | None
+        self.is_halo: bool | None
+        
         # Set uc_index and is_halo (prefer new params, fall back to labels, then None)
         if uc_index is not None:
             self.uc_index = uc_index
@@ -33,20 +39,20 @@ class Node:
         if is_halo is not None:
             self.is_halo = is_halo
         elif labels and "Halo" in labels:
-            self.is_halo = labels["Halo"]
+            self.is_halo = bool(labels["Halo"])  # Explicit cast to bool
         else:
             self.is_halo = None
         
         # Keep original labels for backward compatibility
         self._original_labels = labels
-    
+
     @property  
     def labels(self) -> dict:
         """Legacy labels interface (deprecated)."""
-        # warnings.warn("Node.labels is deprecated. Use Node.uc_index and Node.is_halo instead.", DeprecationWarning, stacklevel=2)
         result = dict(self._original_labels or {})
         if self.uc_index is not None:
             result["UC_index"] = str(self.uc_index)
         if self.is_halo is not None:
             result["Halo"] = self.is_halo
         return result
+        

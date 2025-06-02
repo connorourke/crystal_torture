@@ -331,15 +331,14 @@ def clusters_from_file(filename: str,
 
 def clusters_from_structure(structure: Structure, rcut: float, elements: set[str]) -> set[Cluster]:
     """Take a pymatgen structure and convert it to a graph object.
+    
     Args:
         structure: Pymatgen structure object to set up graph from.
         rcut: Cut-off radii for node-node connections in forming clusters.
         elements: Set of element strings to include in setting up graph.
+        
     Returns:
         Set of clusters.
-        
-    Raises:
-        ValueError: If the element set is not a subset of the elements in the structure.
     """
     working_structure = filter_structure_by_species(structure, list(elements))
     folded_structure = Structure.from_sites(working_structure.sites, to_unit_cell=True)
