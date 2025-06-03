@@ -266,7 +266,7 @@ class TestIntegrationCorrectness:
 			cluster.torture_fort()
 			
 			# Should have tortuosity values for unit cell nodes
-			uc_nodes = [n for n in [node0, node1] if not n.labels["Halo"]]
+			uc_nodes = [n for n in [node0, node1] if not n.is_halo]
 			for node in uc_nodes:
 				assert hasattr(node, 'tortuosity'), f"Node {node.index} should have tortuosity after torture_fort"
 				assert node.tortuosity is not None, f"Node {node.index} tortuosity should not be None"

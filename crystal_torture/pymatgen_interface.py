@@ -280,7 +280,7 @@ def set_fort_nodes(nodes: set[Node]) -> None:
         raise ImportError("Fortran extensions not available. Cannot set up Fortran nodes.")
     
     tort.tort_mod.allocate_nodes(
-        len(nodes), len([node for node in nodes if node.labels["Halo"] == False])
+        len(nodes), len([node for node in nodes if node.is_halo == False])
     )
     for node in nodes:
         tort.tort_mod.set_neighbours(

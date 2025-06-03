@@ -37,35 +37,13 @@ class NodeTestCase(unittest.TestCase):
             neighbours_ind={1, 3}
         )
         
-        labels = node.labels
+        # Suppress deprecation warning for this test since we're specifically testing functionality
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            labels = node.labels
         
         self.assertEqual(labels["UC_index"], "2")
         self.assertEqual(labels["Halo"], True)
-    
-    def test_node_new_vs_old_api_consistency(self):
-        """Test that new and old APIs give consistent values."""
-        test_cases = [
-            (0, False),
-            (5, True), 
-            (999, False)
-        ]
-        
-        for uc_index, is_halo in test_cases:
-            node = Node(
-                index=10,
-                element="Mg",
-                uc_index=uc_index,
-                is_halo=is_halo,
-                neighbours_ind={1, 2}
-            )
-            
-            # New API
-            self.assertEqual(node.uc_index, uc_index)
-            self.assertEqual(node.is_halo, is_halo)
-            
-            # Old API
-            self.assertEqual(int(node.labels["UC_index"]), uc_index)
-            self.assertEqual(node.labels["Halo"], is_halo)
             
     def test_node_with_default_parameters(self):
         """Test that optional parameters default correctly."""
@@ -97,6 +75,29 @@ class NodeTestCase(unittest.TestCase):
         
         self.assertEqual(node.neighbours_ind, set())
         self.assertEqual(node.neighbours, set())
+        
+    def test_node_labels_deprecation_warning(self):
+        """Test that accessing labels property raises deprecation warning."""
+        node = Node(0, "Li", uc_index=1, is_halo=False, neighbours_ind=set())
+        
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+            
+            # Access the deprecated property
+            labels = node.labels
+            
+            # Should have raised exactly one deprecation warning
+            self.assertEqual(len(warning_list), 1)
+            warning = warning_list[0]
+            
+            # Check warning properties
+            self.assertTrue(issubclass(warning.category, DeprecationWarning))
+            self.assertIn("labels is deprecated", str(warning.message))
+            self.assertIn("node.uc_index and node.is_halo", str(warning.message))
+            
+            # Property should still work for backward compatibility
+            self.assertEqual(labels["UC_index"], "1")
+            self.assertEqual(labels["Halo"], False)
 
 
 if __name__ == "__main__":

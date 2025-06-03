@@ -64,9 +64,20 @@ class Node:
     def labels(self) -> dict:
         """Legacy labels interface for backward compatibility.
         
+        Deprecated:
+            The labels interface is deprecated and will be removed in v2.0. 
+            Use node.uc_index and node.is_halo directly instead.
+        
         Returns:
             Dictionary containing UC_index and Halo values for compatibility with legacy code.
         """
+        import warnings
+        warnings.warn(
+            "Node.labels is deprecated and will be removed in v2.0. "
+            "Use node.uc_index and node.is_halo directly instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         return {
             "UC_index": str(self.uc_index),
             "Halo": self.is_halo
