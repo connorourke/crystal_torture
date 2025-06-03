@@ -1,6 +1,7 @@
 """Cluster class for representing groups of connected nodes within a graph."""
 
 from crystal_torture.node import Node
+from crystal_torture.exceptions import FortranNotAvailableError
 import copy
 import sys
 from queue import Queue
@@ -165,11 +166,11 @@ class Cluster:
         self.tortuosity: Average tortuosity for cluster.
         
         Raises:
-            ImportError: If Fortran extensions are not available.
+            FortranNotAvailableError: If Fortran extensions are not available.
             RuntimeError: If Fortran nodes have not been allocated.
         """
         if tort is None or tort.tort_mod is None:
-            raise ImportError("Fortran extensions not available. Use torture_py() instead.")
+            raise FortranNotAvailableError()
         
         # Check if nodes are allocated
         if not tort.tort_mod._is_allocated:

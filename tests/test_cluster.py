@@ -379,6 +379,68 @@ class ClusterTestCase(unittest.TestCase):
         result = cluster.halo_nodes
         
         self.assertEqual(result, {halo_node1, halo_node2})
+        
+    def test_torture_fort_raises_fortran_not_available_error_when_unavailable(self):
+        """Test that torture_fort raises FortranNotAvailableError when Fortran unavailable."""
+        from crystal_torture.exceptions import FortranNotAvailableError
+        from crystal_torture import Node, Cluster
+        
+        # Create a simple cluster
+        node = Node(0, "Li", uc_index=0, is_halo=False, neighbours_ind=set())
+        cluster = Cluster({node})
+        
+        # Mock Fortran as unavailable
+        with patch('crystal_torture.cluster.tort', None):
+            with self.assertRaises(FortranNotAvailableError):
+                cluster.torture_fort()
+                
+    def test_return_index_node_basic(self):
+        """Test return_index_node returns correct node."""
+        node1 = Mock(spec=Node)
+        node1.index = 5
+        node2 = Mock(spec=Node)
+        node2.index = 10
+        
+        cluster = Cluster({node1, node2})
+        result = cluster.return_index_node(5)
+        
+        self.assertEqual(result, node1)
+    
+    def test_cluster_merge_creates_union(self):
+        """Test that cluster merge creates union of nodes."""
+        node1 = Mock(spec=Node)
+        node2 = Mock(spec=Node)
+        node3 = Mock(spec=Node)
+        
+        cluster1 = Cluster({node1, node2})
+        cluster2 = Cluster({node2, node3})
+        
+        merged = cluster1.merge(cluster2)
+        
+        self.assertEqual(merged.nodes, {node1, node2, node3})
+    
+    def test_cluster_is_neighbour_with_shared_nodes(self):
+        """Test that clusters with shared nodes are neighbours."""
+        shared_node = Mock(spec=Node)
+        node1 = Mock(spec=Node)
+        node2 = Mock(spec=Node)
+        
+        cluster1 = Cluster({shared_node, node1})
+        cluster2 = Cluster({shared_node, node2})
+        
+        self.assertTrue(cluster1.is_neighbour(cluster2))
+    
+    def test_cluster_is_neighbour_without_shared_nodes(self):
+        """Test that clusters without shared nodes are not neighbours."""
+        node1 = Mock(spec=Node)
+        node2 = Mock(spec=Node)
+        node3 = Mock(spec=Node)
+        node4 = Mock(spec=Node)
+        
+        cluster1 = Cluster({node1, node2})
+        cluster2 = Cluster({node3, node4})
+        
+        self.assertFalse(cluster1.is_neighbour(cluster2))
 
 
 if __name__ == "__main__":

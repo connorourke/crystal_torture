@@ -2,8 +2,10 @@
 Unit tests for crystal_torture/tort.py module.
 """
 import unittest
+from unittest.mock import patch
 from crystal_torture import tort, Node, Cluster
 from crystal_torture.pymatgen_interface import set_fort_nodes
+from crystal_torture.exceptions import FortranNotAvailableError
 
 
 class TestTortModule(unittest.TestCase):
@@ -16,8 +18,6 @@ class TestTortModule(unittest.TestCase):
                 tort.tort_mod.tear_down()
             except:
                 pass  # Ignore cleanup errors
-    
-    # === BASIC INTERFACE TESTS (Step 1) ===
     
     @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
     def test_allocate_nodes_exists(self):
@@ -78,8 +78,6 @@ class TestTortModule(unittest.TestCase):
         tort.tort_mod.allocate_nodes(2, 1)
         # Should not raise exception
         tort.tort_mod.tear_down()
-
-    # === CONSISTENCY TESTS (Step 2) ===
     
     @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
     def test_torture_vs_python_simple_case(self):
@@ -165,8 +163,6 @@ class TestTortModule(unittest.TestCase):
         
         # Should give same results
         self.assertEqual(python_results, fortran_results)
-
-    # === FIXED EXPECTED VALUES (Step 3) ===
     
     @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
     def test_allocate_nodes_array_size(self):
@@ -248,8 +244,6 @@ class TestTortModule(unittest.TestCase):
             expected_size = 2 * (2 + i)
             self.assertEqual(len(result), expected_size)
             tort.tort_mod.tear_down()
-
-    # === ERROR CONDITIONS & TDD TESTS ===
     
     @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
     def test_allocate_nodes_zero_values(self):
@@ -259,23 +253,53 @@ class TestTortModule(unittest.TestCase):
         result = tort.tort_mod.uc_tort
         self.assertEqual(len(result), 0)
     
+    # Replace the existing problematic tests with these 4 clear tests:
+    
     @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
-    def test_set_neighbours_without_allocation_raises_error(self):
-        """Test that set_neighbours raises clear error without prior allocation."""
+    def test_set_neighbours_raises_fortran_not_available_error_when_library_unavailable(self):
+        """Test that set_neighbours raises FortranNotAvailableError when Fortran library not loaded."""
+        from crystal_torture.exceptions import FortranNotAvailableError
+        
+        # Mock the Fortran library as not available
+        with patch('crystal_torture.tort._tort_lib', None):
+            with self.assertRaises(FortranNotAvailableError):
+                tort.tort_mod.set_neighbours(0, 0, 1, [1])
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
+    def test_set_neighbours_raises_runtime_error_when_not_allocated(self):
+        """Test that set_neighbours raises RuntimeError when Fortran available but not allocated."""
+        # Ensure clean state (not allocated, but Fortran library available)
+        tort.tort_mod.tear_down()
+        
         with self.assertRaises(RuntimeError) as context:
             tort.tort_mod.set_neighbours(0, 0, 1, [1])
         
-        # Error message should be helpful
-        self.assertIn("allocate_nodes", str(context.exception).lower())
+        # Should have helpful guidance about proper setup
+        message = str(context.exception)
+        self.assertIn("graph_from_structure", message)
     
-    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
-    def test_torture_without_allocation_raises_error(self):
-        """Test that torture raises clear error without prior allocation."""
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")  
+    def test_torture_raises_fortran_not_available_error_when_library_unavailable(self):
+        """Test that torture raises FortranNotAvailableError when Fortran library not loaded."""
+        from crystal_torture.exceptions import FortranNotAvailableError
+        
+        # Mock the Fortran library as not available
+        with patch('crystal_torture.tort._tort_lib', None):
+            with self.assertRaises(FortranNotAvailableError):
+                tort.tort_mod.torture(1, [0])
+    
+    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")  
+    def test_torture_raises_runtime_error_when_not_allocated(self):
+        """Test that torture raises RuntimeError when Fortran available but not allocated."""
+        # Ensure clean state (not allocated, but Fortran library available)
+        tort.tort_mod.tear_down()
+        
         with self.assertRaises(RuntimeError) as context:
             tort.tort_mod.torture(1, [0])
         
-        # Error message should be helpful
-        self.assertIn("allocate_nodes", str(context.exception).lower())
+        # Should have helpful guidance about proper setup
+        message = str(context.exception)
+        self.assertIn("graph_from_structure", message)
     
     @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
     def test_set_neighbours_empty_list(self):
@@ -318,18 +342,11 @@ class TestTortModule(unittest.TestCase):
         tort.tort_mod.tear_down()
     
     @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
-    def test_set_neighbours_checks_allocation_state(self):
-        """Test that set_neighbours properly checks for prior allocation."""
-        # This tests that set_neighbours() checks the state correctly
-        
-        # Should fail when not allocated
-        with self.assertRaises(RuntimeError) as context:
-            tort.tort_mod.set_neighbours(0, 0, 1, [1])
-        self.assertIn("allocate_nodes", str(context.exception).lower())
-        
-        # Should work after allocation
+    def test_set_neighbours_works_after_allocation(self):
+        """Test that set_neighbours works correctly when properly allocated."""
         tort.tort_mod.allocate_nodes(2, 1)
-        tort.tort_mod.set_neighbours(0, 0, 1, [1])  # Should not raise
+        # Should not raise any exception
+        tort.tort_mod.set_neighbours(0, 0, 1, [1])
         
     @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
     def test_init_sets_not_allocated_state(self):
@@ -351,24 +368,6 @@ class TestTortModule(unittest.TestCase):
         
         tort.tort_mod.tear_down()
         self.assertFalse(tort.tort_mod._is_allocated)  # Should be False after tear_down
-    
-    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
-    def test_set_neighbours_checks_allocated_state(self):
-        """Test that set_neighbours validates _is_allocated."""
-        # When _is_allocated is False, should raise error
-        self.assertFalse(tort.tort_mod._is_allocated)
-        with self.assertRaises(RuntimeError) as context:
-            tort.tort_mod.set_neighbours(0, 0, 1, [1])
-        self.assertIn("allocate_nodes", str(context.exception).lower())
-    
-    @unittest.skipIf(tort.tort_mod is None, "Fortran not available")
-    def test_torture_checks_allocated_state(self):
-        """Test that torture validates _is_allocated."""
-        # When _is_allocated is False, should raise error
-        self.assertFalse(tort.tort_mod._is_allocated)
-        with self.assertRaises(RuntimeError) as context:
-            tort.tort_mod.torture(1, [0])
-        self.assertIn("allocate_nodes", str(context.exception).lower())
 
 
 class TestTortAvailability(unittest.TestCase):
@@ -379,6 +378,14 @@ class TestTortAvailability(unittest.TestCase):
         # This should work whether Fortran is available or not
         from crystal_torture import tort
         # tort.tort_mod might be None, but import should succeed
+        
+    def test_tort_mod_init_raises_fortran_not_available_error_when_unavailable(self):
+        """Test that Tort_Mod.__init__ raises FortranNotAvailableError when Fortran unavailable."""
+        with patch('crystal_torture.tort._FORT_AVAILABLE', False):
+            from crystal_torture.tort import Tort_Mod
+            
+            with self.assertRaises(FortranNotAvailableError):
+                Tort_Mod()
 
 
 if __name__ == "__main__":

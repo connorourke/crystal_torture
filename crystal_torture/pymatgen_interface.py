@@ -3,6 +3,7 @@
 from crystal_torture.node import Node
 from crystal_torture.cluster import Cluster, clusters_from_nodes
 from crystal_torture.graph import Graph
+from crystal_torture.exceptions import FortranNotAvailableError
 import numpy as np
 import itertools
 import math
@@ -265,7 +266,7 @@ def set_fort_nodes(nodes: set[Node]) -> None:
     """Set up a copy of the nodes and the neighbour indices in the tort.f90 Fortran module.
     
     This allows access if using the Fortran tortuosity routines.
-
+    
     Args:
        nodes: Set of Node objects to set up in Fortran module.
        
@@ -274,10 +275,10 @@ def set_fort_nodes(nodes: set[Node]) -> None:
        tort.tort_mod.uc_tort: Allocates space to hold unit cell node tortuosity for full graph.
        
     Raises:
-        ImportError: If Fortran extensions are not available.
+        FortranNotAvailableError: If Fortran extensions are not available.
     """
     if tort is None:
-        raise ImportError("Fortran extensions not available. Cannot set up Fortran nodes.")
+        raise FortranNotAvailableError()
     
     tort.tort_mod.allocate_nodes(
         len(nodes), len([node for node in nodes if node.is_halo == False])

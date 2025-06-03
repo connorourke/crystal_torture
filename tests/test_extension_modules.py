@@ -77,16 +77,6 @@ class TortModuleTestCase(unittest.TestCase):
 			self.assertTrue(hasattr(tort.tort_mod, 'torture'))
 			self.assertTrue(hasattr(tort.tort_mod, 'uc_tort'))
 
-	@patch('crystal_torture.tort._FORT_AVAILABLE', False)
-	def test_tort_mod_class_raises_import_error_when_unavailable(self):
-		"""Test that Tort_Mod class raises ImportError when Fortran unavailable."""
-		from crystal_torture.tort import Tort_Mod
-		
-		with self.assertRaises(ImportError) as context:
-			Tort_Mod()
-		
-		self.assertIn("Fortran extensions not available", str(context.exception))
-
 
 if __name__ == "__main__":
 	unittest.main()

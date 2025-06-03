@@ -9,6 +9,7 @@ import logging
 import ctypes
 import ctypes.util
 from pathlib import Path
+from crystal_torture.exceptions import FortranNotAvailableError
 
 _tort_lib: ctypes.CDLL | None
 _FORT_AVAILABLE: bool
@@ -82,10 +83,10 @@ class Tort_Mod:
         """Initialise the Tort_Mod wrapper.
         
         Raises:
-            ImportError: If Fortran extensions are not available.
+            FortranNotAvailableError: If Fortran extensions are not available.
         """
         if not _FORT_AVAILABLE:
-            raise ImportError("Fortran extensions not available. Use torture_py() instead.")
+            raise FortranNotAvailableError()
         self._uc_tort_data: list[int] | None = None
         self._is_allocated = False
     
@@ -117,11 +118,18 @@ class Tort_Mod:
             uc_ind: Unit cell index label for node.
             n: Number of neighbours for the node.
             neigh: List containing neighbour indices for node.
+            
+        Raises:
+            FortranNotAvailableError: If Fortran extensions are not available.
+            RuntimeError: If Fortran nodes not properly initialized.
         """
         if _tort_lib is None:
-            raise RuntimeError("Fortran library not available")
+            raise FortranNotAvailableError()  # Changed from RuntimeError
         if not self._is_allocated:
-            raise RuntimeError("Must call allocate_nodes() before set_neighbours()")
+            raise RuntimeError(
+                "Fortran nodes not properly initialized. Use graph_from_structure() "
+                "or clusters_from_structure() to set up tortuosity analysis properly."
+            )
         # Convert Python list to ctypes array
         neigh_array = (ctypes.c_int * len(neigh))(*neigh)
         _tort_lib.set_neighbours(ind, uc_ind, n, neigh_array)
@@ -136,11 +144,18 @@ class Tort_Mod:
         Args:
             n: Number of nodes in original unit cell.
             uc_nodes: List containing the indices of unit cell nodes in cluster.
+            
+        Raises:
+            FortranNotAvailableError: If Fortran extensions are not available.
+            RuntimeError: If Fortran nodes not properly initialized.
         """
         if _tort_lib is None:
-            raise RuntimeError("Fortran library not available")
+            raise FortranNotAvailableError()  # Changed from RuntimeError
         if not self._is_allocated:
-            raise RuntimeError("Must call allocate_nodes() before torture()")
+            raise RuntimeError(
+                "Fortran nodes not properly initialized. Use graph_from_structure() "
+                "or clusters_from_structure() to set up tortuosity analysis properly."
+            )
         # Convert Python list to ctypes array
         uc_nodes_array = (ctypes.c_int * len(uc_nodes))(*uc_nodes)
         _tort_lib.torture(n, uc_nodes_array)

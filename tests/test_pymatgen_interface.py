@@ -403,6 +403,21 @@ class PymatgenTestCase(unittest.TestCase):
         mock_clusters_from_nodes.assert_called_once()
         mock_set_fort.assert_called_once()
         self.assertEqual(result, mock_clusters)
+        
+    def test_set_fort_nodes_raises_fortran_not_available_error_when_unavailable(self):
+        """Test that set_fort_nodes raises FortranNotAvailableError when Fortran unavailable."""
+        from crystal_torture.exceptions import FortranNotAvailableError
+        from crystal_torture.pymatgen_interface import set_fort_nodes
+        from crystal_torture import Node
+        
+        # Create a simple node set
+        node = Node(0, "Li", uc_index=0, is_halo=False, neighbours_ind=set())
+        nodes = {node}
+        
+        # Mock Fortran as unavailable
+        with patch('crystal_torture.pymatgen_interface.tort', None):
+            with self.assertRaises(FortranNotAvailableError):
+                set_fort_nodes(nodes)
 
 if __name__ == "__main__":
     unittest.main()
