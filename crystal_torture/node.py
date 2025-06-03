@@ -1,6 +1,5 @@
 """Node class for representing sites in crystal structures."""
 import warnings
-from typing import Union
 
 
 class Node:

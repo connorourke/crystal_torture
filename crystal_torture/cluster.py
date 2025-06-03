@@ -1,4 +1,5 @@
 """Cluster class for representing groups of connected nodes within a graph."""
+from __future__ import annotations
 
 from crystal_torture.node import Node
 from crystal_torture.exceptions import FortranNotAvailableError
@@ -33,7 +34,7 @@ class Cluster:
         self.periodic: int | None = None
         self.tortuosity: float | None = None
 
-    def merge(self, other_cluster: 'Cluster') -> 'Cluster':
+    def merge(self, other_cluster: Cluster) -> Cluster:
         """Merge two clusters into one.
  
         Args:
@@ -45,7 +46,7 @@ class Cluster:
         new_cluster = Cluster(self.nodes | other_cluster.nodes)
         return new_cluster
 
-    def is_neighbour(self, other_cluster: 'Cluster') -> bool:
+    def is_neighbour(self, other_cluster: Cluster) -> bool:
         """Check if one cluster of nodes is connected to another.
         
         Args:
