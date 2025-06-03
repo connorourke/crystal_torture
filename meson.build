@@ -69,6 +69,7 @@ python_sources = [
   'crystal_torture/pymatgen_doping.py',
   'crystal_torture/tort.py',
   'crystal_torture/dist.py',
+  'crystal_torture/exceptions.py',
   'crystal_torture/version.py'
 ]
 
