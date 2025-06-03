@@ -85,35 +85,6 @@ class ClusterTestCase(unittest.TestCase):
         result = cluster.uc_indices
         
         self.assertEqual(result, {0, 1})
-    
-    def test_uc_indices_with_none_uc_index_raises_error(self):
-        """Test uc_indices raises error when any node has uc_index=None."""
-        valid_node = Mock(spec=Node)
-        valid_node.uc_index = 0
-        valid_node.index = 0
-        
-        invalid_node = Mock(spec=Node)
-        invalid_node.uc_index = None
-        invalid_node.index = 1
-        
-        cluster = Cluster({valid_node, invalid_node})
-        
-        with self.assertRaises(ValueError) as context:
-            cluster.uc_indices
-        
-        self.assertIn("uc_index", str(context.exception).lower())
-        self.assertIn(str(invalid_node.index), str(context.exception).lower())
-
-    def test_grow_cluster_key(self):
-
-        self.cluster1.grow_cluster(key="site label", value="A")
-        indices = set(
-            [
-                node.index
-                for node in self.cluster1.return_key_nodes(key="site label", value="A")
-            ]
-        )
-        self.assertEqual(indices, {0, 3})
 
     @data("POSCAR_2_clusters.vasp")
     def test_torture_cluster(self, value):

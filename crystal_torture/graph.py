@@ -41,8 +41,6 @@ class Graph:
         tortuosity: dict[int, float] = {}
         for cluster in self.clusters:
             for node in cluster.uc_nodes:
-                if node.uc_index is None:
-                    raise ValueError(f"Node {node.index} has uc_index=None. All nodes must have uc_index set.")
                 if node.tortuosity is not None:
                     tortuosity[node.uc_index] = node.tortuosity
         self.tortuosity = tortuosity
@@ -58,11 +56,6 @@ class Graph:
         """
         site_sets: list[frozenset[int]] = []
         for cluster in self.clusters:
-            # Validate uc_index before creating frozenset
-            for node in cluster.nodes:
-                if node.uc_index is None:
-                    raise ValueError(f"Node {node.index} has uc_index=None. All nodes must have uc_index set.")
-            
             indices = frozenset([node.uc_index for node in cluster.nodes])
             site_sets.append(indices)
         
@@ -77,7 +70,6 @@ class Graph:
         
         for cluster in self.clusters:
             for min_clus in self.min_clusters:
-                # Validation already done above, so this is safe
                 if min_clus.site_indices[0] in set([node.uc_index for node in cluster.nodes]):
                     min_clus.periodic = cluster.periodic
         

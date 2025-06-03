@@ -148,8 +148,7 @@ class PymatgenTestCase(unittest.TestCase):
         # Mock downstream calls so we're only testing immutability
         with patch('crystal_torture.pymatgen_interface.nodes_from_structure'), \
              patch('crystal_torture.pymatgen_interface.set_fort_nodes'), \
-             patch('crystal_torture.pymatgen_interface.Structure.from_sites'), \
-             patch('crystal_torture.pymatgen_interface.set_cluster_periodic'):
+             patch('crystal_torture.pymatgen_interface.Structure.from_sites'):
              
             clusters_from_structure(structure, 3.0, {'Li'})
             

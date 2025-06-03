@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock, patch
 import numpy as np
 from crystal_torture.pymatgen_interface import (
-	_python_dist, _python_shift_index, map_index, set_cluster_periodic
+	_python_dist, _python_shift_index, map_index
 )
 from crystal_torture import Cluster, Node
 
@@ -57,73 +57,6 @@ class InterfaceHelpersTestCase(unittest.TestCase):
 		# Each sublist should contain neighbour indices
 		for neighbours in result:
 			self.assertIsInstance(neighbours, list)
-
-	def test_set_cluster_periodic_3d(self):
-		"""Test setting cluster periodicity for 3D periodic cluster."""
-		# Create nodes with same UC_index appearing 27 times (3x3x3)
-		nodes = set()
-		for i in range(27):
-			node = Mock(spec=Node)
-			node.labels = {"UC_index": "0"}
-			nodes.add(node)
-		
-		cluster = Mock(spec=Cluster)
-		cluster.nodes = nodes
-		cluster.return_key_nodes.return_value = nodes
-		
-		set_cluster_periodic(cluster)
-		
-		self.assertEqual(cluster.periodic, 3)
-
-	def test_set_cluster_periodic_2d(self):
-		"""Test setting cluster periodicity for 2D periodic cluster."""
-		# Create 9 nodes (3x3 for 2D)
-		nodes = set()
-		for i in range(9):
-			node = Mock(spec=Node)
-			node.labels = {"UC_index": "0"}
-			nodes.add(node)
-		
-		cluster = Mock(spec=Cluster)
-		cluster.nodes = nodes
-		cluster.return_key_nodes.return_value = nodes
-		
-		set_cluster_periodic(cluster)
-		
-		self.assertEqual(cluster.periodic, 2)
-
-	def test_set_cluster_periodic_1d(self):
-		"""Test setting cluster periodicity for 1D periodic cluster."""
-		# Create 3 nodes for 1D
-		nodes = set()
-		for i in range(3):
-			node = Mock(spec=Node)
-			node.labels = {"UC_index": "0"}
-			nodes.add(node)
-		
-		cluster = Mock(spec=Cluster)
-		cluster.nodes = nodes
-		cluster.return_key_nodes.return_value = nodes
-		
-		set_cluster_periodic(cluster)
-		
-		self.assertEqual(cluster.periodic, 1)
-
-	def test_set_cluster_periodic_0d(self):
-		"""Test setting cluster periodicity for non-periodic cluster."""
-		# Create 1 node (non-periodic)
-		node = Mock(spec=Node)
-		node.labels = {"UC_index": "0"}
-		nodes = {node}
-		
-		cluster = Mock(spec=Cluster)
-		cluster.nodes = nodes
-		cluster.return_key_nodes.return_value = nodes
-		
-		set_cluster_periodic(cluster)
-		
-		self.assertEqual(cluster.periodic, 0)
-
 
 if __name__ == "__main__":
 	unittest.main()

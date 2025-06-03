@@ -261,31 +261,6 @@ def nodes_from_structure(structure: Structure, rcut: float, get_halo: bool = Fal
     
     return set(nodes)
 
-def set_cluster_periodic(cluster: Cluster) -> None:
-    """Set the periodicity of the cluster by counting through the number of labelled UC nodes it contains.
-
-    Args:
-        cluster: Cluster object to set periodicity for.
-
-    Sets:
-        cluster.periodic: Periodicity of the cluster (1=1D, 2=2D, 3=3D).
-    """
-    node = cluster.nodes.pop()
-    cluster.nodes.add(node)
-
-    key = node.labels["UC_index"]
-    no_images = len(cluster.return_key_nodes("UC_index", key))
-
-    if no_images == 27:
-        cluster.periodic = 3
-    elif no_images == 9:
-        cluster.periodic = 2
-    elif no_images == 3:
-        cluster.periodic = 1
-    else:
-        cluster.periodic = 0
-
-
 def set_fort_nodes(nodes: set[Node]) -> None:
     """Set up a copy of the nodes and the neighbour indices in the tort.f90 Fortran module.
     
@@ -310,7 +285,7 @@ def set_fort_nodes(nodes: set[Node]) -> None:
     for node in nodes:
         tort.tort_mod.set_neighbours(
             node.index,
-            int(node.labels["UC_index"]),
+            node.uc_index,
             len(node.neighbours_ind),
             [ind for ind in node.neighbours_ind],
         )

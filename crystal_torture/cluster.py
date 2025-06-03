@@ -55,112 +55,47 @@ class Cluster:
         """
         return bool(self.nodes & other_cluster.nodes)
 
-    def grow_cluster(self, key: str | None = None, value: str | None = None) -> None:
-        """Grow cluster by adding neighbours.
- 
-        Args:
-            key: Label key to selectively choose nodes in cluster.
-            value: Value for label to selectively choose nodes in cluster.
+    def grow_cluster(self) -> None:
+        """Grow cluster by adding all connected neighbours.
+        
+        Uses breadth-first search to find all nodes connected to the current cluster
+        and adds them to the cluster. This expands the cluster to include the full
+        connected component in the graph.
         """
-        nodes_to_visit = set([self.nodes.pop()])
-
+        if not self.nodes:
+            return
+        
+        # Start BFS from any node in the current cluster
+        nodes_to_visit = {self.nodes.pop()}
         visited: set[Node] = set()
-        add = visited.add
-
-        if key:
-            while nodes_to_visit:
-                node = nodes_to_visit.pop()
-                if node.neighbours is not None:
-                    nodes_to_visit = nodes_to_visit.union(
-                        set(
-                            [
-                                neigh
-                                for neigh in node.neighbours
-                                if (neigh not in visited and neigh.labels[key] == value)
-                            ]
-                        )
-                    )
-                add(node)
-        else:
-            while nodes_to_visit:
-                node = nodes_to_visit.pop()
-                if node.neighbours is not None:
-                    nodes_to_visit = nodes_to_visit.union(
-                        set([neigh for neigh in node.neighbours if neigh not in visited])
-                    )
-                add(node)
-
+        
+        while nodes_to_visit:
+            current_node = nodes_to_visit.pop()
+            
+            if current_node not in visited:
+                visited.add(current_node)
+                
+                # Add all unvisited neighbours to the queue
+                if current_node.neighbours is not None:
+                    unvisited_neighbours = current_node.neighbours - visited
+                    nodes_to_visit.update(unvisited_neighbours)
+        
         self.nodes = visited
         
     @property
     def uc_nodes(self) -> set[Node]:
-        """Return unit cell nodes (is_halo=False).
-        
-        Raises:
-            ValueError: If any node has is_halo=None.
-        """
-        for node in self.nodes:
-            if node.is_halo is None:
-                raise ValueError(f"Node {node.index} has is_halo=None. All nodes in cluster must have is_halo set.")
-        
+        """Return unit cell nodes (is_halo=False)."""
         return {node for node in self.nodes if not node.is_halo}
     
     @property  
     def halo_nodes(self) -> set[Node]:
-        """Return halo nodes (is_halo=True).
-        
-        Raises:
-            ValueError: If any node has is_halo=None.
-        """
-        for node in self.nodes:
-            if node.is_halo is None:
-                raise ValueError(f"Node {node.index} has is_halo=None. All nodes in cluster must have is_halo set.")
-        
+        """Return halo nodes (is_halo=True)."""
         return {node for node in self.nodes if node.is_halo}
-    
-    def return_key_nodes(self, key: str, value: str | bool) -> set[Node]:
-        """Return the nodes in a cluster corresponding to a particular label.
-    
-        Args:
-           key: Dictionary key for filtering nodes.
-           value: Value held in dictionary for label key.
-    
-        Returns:
-           Set of nodes in cluster for which (node.labels[key] == value).
-           
-        .. deprecated:: 
-            Use uc_nodes or halo_nodes properties for Halo-based filtering.
-        """
-        import warnings
-        if key == "Halo":
-            warnings.warn(
-                "return_key_nodes with key='Halo' is deprecated. Use cluster.uc_nodes or cluster.halo_nodes instead.",
-                DeprecationWarning,
-                stacklevel=2
-            )
-        
-        key_nodes = set([node for node in self.nodes if node.labels[key] == value])
-        return key_nodes
 
     @property
     def uc_indices(self) -> set[int]:
-        """Return the unit-cell indices of nodes in a cluster.
-        
-        Reduces the full list of uc_indices included in the unit-cell and the halo 
-        to contain the indices only once.
-        
-        Returns:
-            Set of unit-cell indices for nodes in cluster.
-            
-        Raises:
-            ValueError: If any node has uc_index=None.
-        """
-        validated_indices: set[int] = set()
-        for node in self.nodes:
-            if node.uc_index is None:
-                raise ValueError(f"Node {node.index} has uc_index=None. All nodes in cluster must have uc_index set.")
-            validated_indices.add(node.uc_index)
-        return validated_indices
+        """Return the unit-cell indices of nodes in a cluster."""
+        return {node.uc_index for node in self.nodes}
 
     def return_index_node(self, index: int) -> Node:
         """Return the node with the specified index.
@@ -189,11 +124,11 @@ class Cluster:
         node.tortuosity: Tortuosity for each node.
         self.tortuosity: Average tortuosity for cluster.
         """
-        uc = self.uc_nodes  # Changed from return_key_nodes
+        uc = self.uc_nodes
         while uc:
             node_stack = [uc.pop()]
             visited = set()
-            uc_index = node_stack[0].uc_index  # Changed from labels["UC_index"]
+            uc_index = node_stack[0].uc_index
             index = node_stack[0].index
             root_node = node_stack[0]
         
@@ -214,7 +149,7 @@ class Cluster:
                     break
                 visited.add(node)
         
-        uc_nodes = self.uc_nodes  # Changed from return_key_nodes
+        uc_nodes = self.uc_nodes
         valid_tortuosities = [node.tortuosity for node in uc_nodes if node.tortuosity is not None]
         self.tortuosity = sum(valid_tortuosities) / len(valid_tortuosities) if valid_tortuosities else 0.0
 
@@ -242,16 +177,16 @@ class Cluster:
                             "Use graph_from_structure() or call set_fort_nodes() first.")
         
         # Get the UC node indices for this cluster
-        uc_node_indices = [node.index for node in self.uc_nodes]  # Changed from return_key_nodes
+        uc_node_indices = [node.index for node in self.uc_nodes]
         
         # Run the torture algorithm
         tort.tort_mod.torture(len(uc_node_indices), uc_node_indices)
         
         # Get results
-        for node in self.uc_nodes:  # Changed from return_key_nodes
-            node.tortuosity = tort.tort_mod.uc_tort[node.uc_index]  # Changed from int(node.labels["UC_index"])
+        for node in self.uc_nodes:
+            node.tortuosity = tort.tort_mod.uc_tort[node.uc_index]
         
-        uc_nodes = self.uc_nodes  # Changed from return_key_nodes
+        uc_nodes = self.uc_nodes
         valid_tortuosities = [node.tortuosity for node in uc_nodes if node.tortuosity is not None]
         self.tortuosity = sum(valid_tortuosities) / len(valid_tortuosities) if valid_tortuosities else 0.0
         
