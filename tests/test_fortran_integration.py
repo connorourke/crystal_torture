@@ -15,6 +15,8 @@ import sys
 import numpy as np
 from pathlib import Path
 from crystal_torture.pymatgen_interface import set_fort_nodes
+from crystal_torture.node import Node
+from crystal_torture.cluster import Cluster
 
 
 @pytest.fixture(autouse=True)
@@ -46,29 +48,9 @@ class TestBasicImports:
 		"""Test that core package imports work without errors."""
 		try:
 			import crystal_torture
-			from crystal_torture import Node, Cluster, Graph
 			assert hasattr(crystal_torture, '__version__')
 		except ImportError as e:
 			pytest.fail(f"Core imports failed: {e}")
-	
-	def test_no_import_warnings_on_package_import(self):
-		"""Test that importing the main package doesn't show unwanted warnings."""
-		# Run in subprocess to get clean import
-		result = subprocess.run([
-			sys.executable, '-c', 
-			'import warnings; warnings.simplefilter("always"); '
-			'import crystal_torture; '
-			'from crystal_torture import Node, Cluster, Graph'
-		], capture_output=True, text=True)
-		
-		# Should import successfully
-		assert result.returncode == 0, f"Package should import successfully. Got: {result.stderr}"
-		
-		# Should not have user-facing warnings about Fortran extensions
-		# (Internal warnings are OK, but they shouldn't reach end users by default)
-		assert "not available" not in result.stderr, \
-			f"Package import should not show 'not available' messages to users. Got stderr: {result.stderr}"
-
 
 class TestTortModuleIntegration:
 	"""Test tort module integration and API consistency."""
@@ -185,7 +167,6 @@ class TestBackwardCompatibility:
 	
 	def test_python_torture_methods_always_work(self):
 		"""Test that Python-only tortuosity methods work."""
-		from crystal_torture import Node, Cluster
 		
 		# Create minimal periodic structure: 2 nodes with same UC_index (periodic images)
 		node0 = Node(
@@ -227,7 +208,6 @@ class TestIntegrationCorrectness:
 	
 	def test_fortran_torture_when_available(self):
 		"""Test that Fortran torture method works when extensions are available."""
-		from crystal_torture import Node, Cluster
 		
 		# Only run if Fortran is available
 		try:

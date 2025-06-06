@@ -1,14 +1,17 @@
 import unittest
 from unittest.mock import Mock, patch
 from pathlib import Path
+from crystal_torture import tort
 from crystal_torture.pymatgen_interface import (
     nodes_from_structure,
     clusters_from_file,
     graph_from_file,
 )
-from crystal_torture import Cluster, Node, tort, Graph
-from crystal_torture.cluster import clusters_from_nodes
+from crystal_torture.cluster import Cluster, clusters_from_nodes
+from crystal_torture.node import Node
+from crystal_torture.graph import Graph
 from ddt import ddt, data, unpack
+from crystal_torture.exceptions import FortranNotAvailableError
 # from crystal_torture.cluster import Cluster
 
 # Get the directory containing this test file
@@ -382,8 +385,6 @@ class ClusterTestCase(unittest.TestCase):
         
     def test_torture_fort_raises_fortran_not_available_error_when_unavailable(self):
         """Test that torture_fort raises FortranNotAvailableError when Fortran unavailable."""
-        from crystal_torture.exceptions import FortranNotAvailableError
-        from crystal_torture import Node, Cluster
         
         # Create a simple cluster
         node = Node(0, "Li", uc_index=0, is_halo=False, neighbours_ind=set())

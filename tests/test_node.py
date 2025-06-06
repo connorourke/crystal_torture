@@ -1,5 +1,5 @@
 import unittest
-from crystal_torture import Node
+from crystal_torture.node import Node
 import warnings
 
 

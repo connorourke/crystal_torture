@@ -3,7 +3,9 @@ Unit tests for crystal_torture/tort.py module.
 """
 import unittest
 from unittest.mock import patch
-from crystal_torture import tort, Node, Cluster
+from crystal_torture import tort
+from crystal_torture.node import Node
+from crystal_torture.cluster import Cluster
 from crystal_torture.pymatgen_interface import set_fort_nodes
 from crystal_torture.exceptions import FortranNotAvailableError
 

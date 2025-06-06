@@ -4,7 +4,8 @@ import numpy as np
 from crystal_torture.pymatgen_interface import (
 	_python_dist, _python_shift_index, map_index
 )
-from crystal_torture import Cluster, Node
+from crystal_torture.cluster import Cluster
+from crystal_torture.node import Node
 
 
 class InterfaceHelpersTestCase(unittest.TestCase):

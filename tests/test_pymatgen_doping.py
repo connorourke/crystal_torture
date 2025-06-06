@@ -2,7 +2,9 @@ import unittest
 import copy
 from unittest.mock import Mock
 from pathlib import Path
-from crystal_torture import Node, Cluster, tort
+from crystal_torture.node import Node
+from crystal_torture.cluster import Cluster
+from crystal_torture import tort
 from crystal_torture.pymatgen_doping import (
     count_sites,
     dope_structure,

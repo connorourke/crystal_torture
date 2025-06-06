@@ -1,14 +1,18 @@
 import unittest
 from unittest.mock import Mock, patch
 from pathlib import Path
-from crystal_torture import Node, Cluster, tort
+from crystal_torture.exceptions import FortranNotAvailableError
+from crystal_torture.node import Node
+from crystal_torture.cluster import Cluster
+from crystal_torture import tort
 from crystal_torture.pymatgen_interface import (
     nodes_from_structure,
     clusters_from_file,
     clusters_from_structure,
     graph_from_structure,
     graph_from_file,
-    filter_structure_by_species
+    filter_structure_by_species,
+    set_fort_nodes
 )
 from crystal_torture.graph import Graph
 from pymatgen.core import Structure, Lattice
@@ -406,9 +410,6 @@ class PymatgenTestCase(unittest.TestCase):
         
     def test_set_fort_nodes_raises_fortran_not_available_error_when_unavailable(self):
         """Test that set_fort_nodes raises FortranNotAvailableError when Fortran unavailable."""
-        from crystal_torture.exceptions import FortranNotAvailableError
-        from crystal_torture.pymatgen_interface import set_fort_nodes
-        from crystal_torture import Node
         
         # Create a simple node set
         node = Node(0, "Li", uc_index=0, is_halo=False, neighbours_ind=set())

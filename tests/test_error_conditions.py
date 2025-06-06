@@ -1,7 +1,9 @@
 import unittest
 from unittest.mock import Mock, patch
 from pymatgen.core import Structure, Lattice
-from crystal_torture import Graph, Cluster, Node
+from crystal_torture.graph import Graph
+from crystal_torture.cluster import Cluster
+from crystal_torture.node import Node
 from crystal_torture.pymatgen_interface import clusters_from_structure, graph_from_structure
 from crystal_torture.pymatgen_doping import set_site_labels
 

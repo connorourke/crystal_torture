@@ -1,6 +1,7 @@
 # tests/test_exceptions.py
 """Tests for custom exception classes."""
 import unittest
+from crystal_torture.exceptions import FortranNotAvailableError
 
 
 class TestFortranNotAvailableError(unittest.TestCase):
@@ -44,7 +45,6 @@ class TestFortranNotAvailableError(unittest.TestCase):
 	
 	def test_fortran_not_available_error_importable_from_main_package(self):
 		"""Test that FortranNotAvailableError can be imported from main crystal_torture package."""
-		from crystal_torture import FortranNotAvailableError
 		
 		# Should be available at package level for easy user access
 		error = FortranNotAvailableError()

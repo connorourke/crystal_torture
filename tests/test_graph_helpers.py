@@ -1,7 +1,9 @@
 import unittest
 from unittest.mock import Mock
 from pymatgen.core import Structure, Lattice
-from crystal_torture import Graph, Cluster, Node
+from crystal_torture.graph import Graph
+from crystal_torture.cluster import Cluster
+from crystal_torture.node import Node
 
 
 class GraphHelpersTestCase(unittest.TestCase):

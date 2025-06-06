@@ -3,7 +3,10 @@ import os
 from unittest.mock import Mock, patch
 from pathlib import Path
 from pymatgen.core import Structure, Lattice
-from crystal_torture import Cluster, Graph, Node, tort
+from crystal_torture.cluster import Cluster
+from crystal_torture.graph import Graph
+from crystal_torture.node import Node
+from crystal_torture import tort
 from crystal_torture.pymatgen_interface import (
     graph_from_file, 
     clusters_from_file, 
