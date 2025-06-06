@@ -40,16 +40,12 @@ def _python_dist(coord1: npt.NDArray[np.floating], coord2: npt.NDArray[np.floati
     Returns:
         Distance matrix.
     """
-    dist_matrix = np.zeros((n, n))
-    for i in range(n):
-        for j in range(n):
-            dist_matrix[i, j] = np.sqrt(
-                (coord1[i, 0] - coord2[j, 0])**2 + 
-                (coord1[i, 1] - coord2[j, 1])**2 + 
-                (coord1[i, 2] - coord2[j, 2])**2
-            )
-    return dist_matrix
-
+    # Use numpy broadcasting for vectorized calculation
+    # coord1[:, None, :] creates shape (n, 1, 3)
+    # coord2[None, :, :] creates shape (1, n, 3)  
+    # Subtraction creates shape (n, n, 3)
+    # np.linalg.norm computes distances along axis=2
+    return np.linalg.norm(coord1[:, None, :] - coord2[None, :, :], axis=2)
 
 def _python_shift_index(index_n: int, shift: list[int]) -> int:
     """Pure Python fallback for index shifting when Fortran dist module is not available.

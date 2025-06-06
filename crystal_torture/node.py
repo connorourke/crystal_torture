@@ -30,6 +30,8 @@ class Node:
         tortuosity: Minimum edges traversed to reach a periodic image (set by analysis).
         dist: Temporary distance for graph algorithms.
     """
+    __slots__ = ['index', 'element', 'uc_index', 'is_halo', 
+     'neighbours_ind', 'neighbours', 'tortuosity', 'dist']
 
     def __init__(
         self, 

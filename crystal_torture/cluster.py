@@ -10,6 +10,7 @@ from threading import Thread
 import numpy as np
 from types import ModuleType
 from typing import cast
+from collections import deque
 
 # Module variable with proper type hint
 tort: ModuleType | None
@@ -128,24 +129,24 @@ class Cluster:
         """
         uc = self.uc_nodes
         while uc:
-            node_stack = [uc.pop()]
+            node_queue = deque([uc.pop()])
             visited = set()
-            uc_index = node_stack[0].uc_index
-            index = node_stack[0].index
-            root_node = node_stack[0]
+            uc_index = node_queue[0].uc_index
+            index = node_queue[0].index
+            root_node = node_queue[0]
         
             for node in self.nodes:
                 node.dist = 0
         
-            while node_stack:
-                node = node_stack.pop(0)
+            while node_queue:
+                node = node_queue.popleft()
                 next_dist = node.dist + 1
                 if node not in visited:
                     if node.neighbours is not None:
                         for neigh in node.neighbours:
                             if neigh.dist == 0:
                                 neigh.dist = next_dist
-                                node_stack.append(neigh)
+                                node_queue.append(neigh)
                 if (node.uc_index == uc_index) and (node.index != index):  # Changed from labels["UC_index"]
                     root_node.tortuosity = next_dist - 1
                     break
