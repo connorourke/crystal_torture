@@ -11,7 +11,7 @@ build-backend = "mesonpy"
 name = "crystal-torture"
 version = "1.2.0"
 description = "Crystal Tortuosity Analysis with Fortran Extensions"
-readme = "README.rst"
+readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [

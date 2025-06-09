@@ -2,7 +2,7 @@
 [![DOI](https://zenodo.org/badge/139595328.svg)](https://zenodo.org/badge/latestdoi/139595328)
 [![PyPI version](https://badge.fury.io/py/crystal-torture.svg)](https://badge.fury.io/py/crystal-torture)
 [![build-and-test](https://github.com/connorourke/crystal_torture/actions/workflows/build.yml/badge.svg)](https://github.com/connorourke/crystal_torture/actions/workflows/build.yml)
-[![Coverage Status](https://coveralls.io/repos/github/connorourke/crystal_torture/badge.svg?branch=master&service=github)](https://coveralls.io/github/connorourke/crystal_torture?branch=master&service=github)
+[![Coverage Status](https://coveralls.io/repos/github/connorourke/crystal_torture/badge.svg?branch=main&service=github)](https://coveralls.io/github/connorourke/crystal_torture?branch=main&service=github)
 [![Documentation Status](https://readthedocs.org/projects/crystal-torture/badge/?version=latest)](https://crystal-torture.readthedocs.io/en/latest/?badge=latest)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -118,7 +118,7 @@ pytest tests/test_node.py -v
 
 ## Examples
 
-Examples on how to use `crystal_torture` can be found in a Jupyter notebook in the `examples` directory [crystal_torture_examples.ipynb](http://nbviewer.jupyter.org/github/connorourke/crystal_torture/blob/master/examples/crystal_torture_examples.ipynb)
+Examples on how to use `crystal_torture` can be found in a Jupyter notebook in the `examples` directory [crystal_torture_examples.ipynb](http://nbviewer.jupyter.org/github/connorourke/crystal_torture/blob/main/examples/crystal_torture_examples.ipynb)
 
 ## Documentation
 
