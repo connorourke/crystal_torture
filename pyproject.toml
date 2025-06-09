@@ -54,6 +54,13 @@ dev = [
     "meson",
     "ninja",
 ]
+docs = [
+    "Sphinx>=4.0.0",
+    "myst-parser>=0.18.0",
+    "myst-nb>=0.17.0",
+    "alabaster",
+    "sphinxcontrib-websupport",
+]
 
 [project.urls]
 Homepage = "https://github.com/connorourke/crystal_torture"
