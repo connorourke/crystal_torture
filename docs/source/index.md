@@ -71,6 +71,8 @@ The code has been tested with Python versions 3.10, 3.11, 3.12, and 3.13.
 :maxdepth: 2
 :caption: Documentation
 
+installation
+quickstart
 API Reference <modules>
 ```
 
