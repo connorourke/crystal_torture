@@ -1,5 +1,0 @@
-coverage
-ddt
-numpy
-#f90wrap need to install from git for bug fix - change back when pypi updated
-pymatgen>=2022.0.0

@@ -1,51 +1,68 @@
-name: build
+name: build-and-test
 
-# Controls when the action will run. 
 on: [push, pull_request]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  tests:
-      runs-on: ubuntu-latest
-      timeout-minutes: 30
-      strategy:
-        matrix:
-          python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
-      steps:
-        - uses: actions/checkout@v2
-        - name: Set up Python ${{matrix.python-version}}
-          uses: actions/setup-python@v2
-          with:
-            python-version: ${{matrix.python-version}}
-        - name: Before install
-          run: |
-            sudo apt-get install gfortran
-            pip install coveralls
-        - name: Install Python dependencies
-          run: |
-            pip install --upgrade pip
-            pip install -U numpy
-            pip install -r requirements.txt
-            git clone https://github.com/jameskermode/f90wrap
-            pip install ./f90wrap
-            pip install -U numpy
-            pip install pytest
-            pip install pytest-cov
-            pip install .
-            pip list
-        - name: Before script
-          run: |
-            gfortran -v
-            cd crystal_torture
-            f2py -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m dist dist.f90
-            fortran -c -O3 -fPIC tort.f90
-            f2py-f90wrap -c --opt='-O3' --f90flags='-fopenmp' -lgomp -m _tort f90wrap_tort.f90 tort.o
-            cd ../  
-        - name: Run tests
-          run: |
-            pytest --cov-config=.coveragerc --cov=crystal_torture --cov-report lcov
-        - name: Coveralls GitHub Action
-          uses: coverallsapp/github-action@1.1.3
-          with:
-            path-to-lcov: ./coverage.lcov
-            github-token: ${{ secrets.GITHUB_TOKEN }}
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran build-essential
+      
+      - name: Install package and dev dependencies
+        run: |
+          pip install ."[dev]" --use-pep517 --verbose
+      
+      - name: Verify Fortran extensions loaded
+        run: |
+          cd /tmp
+          python << 'EOF'
+          from crystal_torture import tort, dist
+          print(f'tort.tort_mod: {tort.tort_mod}')
+          print(f'dist._DIST_AVAILABLE: {dist._DIST_AVAILABLE}')
+          if tort.tort_mod is not None:
+              print('✅ Fortran extensions loaded successfully')
+          else:
+              print('❌ Fortran extensions not loaded')
+              exit(1)
+          EOF
+      
+      - name: Run tests with coverage
+        run: |
+          cd /tmp
+          cp -r /home/runner/work/crystal_torture/crystal_torture/tests .
+          cp /home/runner/work/crystal_torture/crystal_torture/.coveragerc .
+          pytest --cov-config=.coveragerc --cov=crystal_torture --cov-report=lcov tests/ -v
+      
+      - name: Upload coverage to Coveralls (parallel)
+        uses: coverallsapp/github-action@v2
+        with:
+          file: /tmp/coverage.lcov
+          format: lcov
+          parallel: true
+          flag-name: python-${{ matrix.python-version }}
+
+  finish-coverage:
+    needs: test
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close parallel coverage reports
+        uses: coverallsapp/github-action@v2
+        with:
+          parallel-finished: true
+          carryforward: "python-3.10,python-3.11,python-3.12,python-3.13"

@@ -108,15 +108,15 @@ CONTAINS
      END SUBROUTINE enqueue_node
 
      SUBROUTINE dequeue_node(head)
-     ! Remove head node from queue of nodes
-     ! Args:
-     !   head(queued_node): head node of queue to remove
-
+    ! Remove head node from queue of nodes
+    ! Args:
+    !   head(queued_node): head node of queue to remove
 
         TYPE(queued_node),POINTER,INTENT(INOUT)::head
         TYPE(queued_node),POINTER:: h
 
-         
+        h => NULL()  ! Initialize pointer to NULL
+     
         IF (associated(head%next_node)) THEN
            h=>head
            head=>head%next_node
@@ -126,8 +126,7 @@ CONTAINS
            DEALLOCATE(h)
         END IF
 
-     END SUBROUTINE dequeue_node
-
+    END SUBROUTINE dequeue_node
 
      SUBROUTINE initialise_queue(head,tail)
      ! Set up a queue of nodes by allocating head and tail
@@ -182,8 +181,8 @@ CONTAINS
         INTEGER,DIMENSION(n),INTENT(IN)::uc_nodes
 
         TYPE(queued_node), POINTER:: stack_head, stack_tail
-        TYPE(queued_node), POINTER:: visited_head, visited_tail,temp
-        INTEGER:: node, current_node, neigh, uc_node, uc_index, root_node, next_dist
+        TYPE(queued_node), POINTER:: visited_head, visited_tail
+        INTEGER:: current_node, neigh, uc_node, uc_index, root_node, next_dist
         LOGICAL::check
 
         INTEGER,DIMENSION(size(NODES))::dist,visited

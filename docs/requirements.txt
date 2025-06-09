@@ -1,9 +1,2 @@
-Sphinx>=1.7.6
-sphinxcontrib-websupport
-alabaster
-bleach
-certifi
-docutils
-ddt
-coverage
--r ../requirements.txt
+# Install main package with documentation dependencies
+-e .[docs]

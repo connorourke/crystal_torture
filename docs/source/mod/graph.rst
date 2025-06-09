@@ -1,8 +1,8 @@
-crystal_torture\.Graph
-----------------------
+crystal_torture.graph.Graph
+----------------------------
 
-
-.. autoclass:: crystal_torture.Graph
+.. autoclass:: crystal_torture.graph.Graph
    :members:
    :undoc-members:
    :show-inheritance:
+   :no-index:
