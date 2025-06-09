@@ -1,7 +1,7 @@
 # crystal-torture: A crystal tortuosity module
 
 [![Build Status](https://github.com/connorourke/crystal_torture/actions/workflows/build.yml/badge.svg)](https://github.com/connorourke/crystal_torture/actions/workflows/build.yml)
-[![Test Coverage](https://coveralls.io/repos/github/connorourke/crystal_torture/badge.svg?branch=master)](https://coveralls.io/github/connorourke/crystal_torture?branch=master)
+[![Test Coverage](https://coveralls.io/repos/github/connorourke/crystal_torture/badge.svg?branch=main)](https://coveralls.io/github/connorourke/crystal_torture?branch=main)
 
 `crystal-torture` is a Python, Fortran, and OpenMP module for the analysis of diffusion networks in crystal structures. The module contains a set of classes that enable:
 
@@ -39,7 +39,7 @@ pip install . --use-pep517
 
 Documentation is [here](modules).
 
-Examples are provided in a Jupyter notebook [here](http://nbviewer.jupyter.org/github/connorourke/crystal_torture/blob/master/examples/crystal_torture_examples.ipynb)
+Examples are provided in a Jupyter notebook [here](http://nbviewer.jupyter.org/github/connorourke/crystal_torture/blob/main/examples/crystal_torture_examples.ipynb)
 
 Source code is available as a git repository at https://github.com/connorourke/crystal_torture.
 
