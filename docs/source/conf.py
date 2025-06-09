@@ -66,6 +66,8 @@ html_theme = 'alabaster'
 html_theme_options = {
     'github_user': 'connorourke',
     'github_repo': 'crystal_torture',
+    'github_button': False,        # Removes the watch button
+    'github_count': False,         # Removes the count
     'description': 'A crystal tortuosity module',
     'fixed_sidebar': True,
 }
