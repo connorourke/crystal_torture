@@ -10,9 +10,9 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
-    # Add system dependencies for Fortran compilation (optional)
-    # apt_packages:
-    #   - gfortran
+    # Add system dependencies for Fortran compilation
+    apt_packages:
+      - gfortran
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
