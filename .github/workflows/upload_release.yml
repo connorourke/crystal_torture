@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-13, macos-14]  # Skip Windows for now
+        os: [ubuntu-latest, macos-latest]  # Skip Windows for now
 
     steps:
       - name: Checkout code
