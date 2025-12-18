@@ -1,5 +1,6 @@
 # crystal-torture: A crystal tortuosity module
 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.01306/status.svg)](https://doi.org/10.21105/joss.01306)
 [![Build Status](https://github.com/connorourke/crystal_torture/actions/workflows/build.yml/badge.svg)](https://github.com/connorourke/crystal_torture/actions/workflows/build.yml)
 [![Test Coverage](https://coveralls.io/repos/github/connorourke/crystal_torture/badge.svg?branch=main)](https://coveralls.io/github/connorourke/crystal_torture?branch=main)
 

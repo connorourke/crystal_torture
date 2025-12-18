@@ -1,4 +1,4 @@
-[![status](http://joss.theoj.org/papers/c3d8e702ecfee04f16a0ad6f14d96419/status.svg)](http://joss.theoj.org/papers/c3d8e702ecfee04f16a0ad6f14d96419)
+[![paper](https://joss.theoj.org/papers/10.21105/joss.01306/status.svg)](https://doi.org/10.21105/joss.01306)
 [![DOI](https://zenodo.org/badge/139595328.svg)](https://zenodo.org/badge/latestdoi/139595328)
 [![PyPI version](https://badge.fury.io/py/crystal-torture.svg)](https://badge.fury.io/py/crystal-torture)
 [![build-and-test](https://github.com/connorourke/crystal_torture/actions/workflows/build.yml/badge.svg)](https://github.com/connorourke/crystal_torture/actions/workflows/build.yml)
