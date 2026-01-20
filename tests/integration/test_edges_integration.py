@@ -11,8 +11,6 @@ from pathlib import Path
 from pymatgen.core import Structure, Lattice
 
 from crystal_torture.edges import (
-    Edge,
-    EdgeData,
     load_edges,
     save_edges,
     edges_from_structure,
