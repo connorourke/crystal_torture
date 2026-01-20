@@ -62,13 +62,14 @@ dist_ext = py.extension_module('libdist',
 python_sources = [
   'crystal_torture/__init__.py',
   'crystal_torture/node.py',
-  'crystal_torture/cluster.py', 
+  'crystal_torture/cluster.py',
   'crystal_torture/graph.py',
   'crystal_torture/minimal_cluster.py',
   'crystal_torture/pymatgen_interface.py',
   'crystal_torture/pymatgen_doping.py',
   'crystal_torture/tort.py',
   'crystal_torture/dist.py',
+  'crystal_torture/edges.py',
   'crystal_torture/exceptions.py',
   'crystal_torture/version.py'
 ]

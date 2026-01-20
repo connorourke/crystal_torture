@@ -9,5 +9,6 @@ crystal_torture
    mod/cluster
    mod/node
    mod/minimal_cluster
+   mod/edges
    mod/pymatgen_interface
    mod/pymatgen_doping   

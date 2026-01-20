@@ -41,13 +41,18 @@ jobs:
               exit(1)
           EOF
       
-      - name: Run tests with coverage
+      - name: Run unit tests with coverage
         run: |
           cd /tmp
           cp -r /home/runner/work/crystal_torture/crystal_torture/tests .
           cp /home/runner/work/crystal_torture/crystal_torture/.coveragerc .
-          pytest --cov-config=.coveragerc --cov=crystal_torture --cov-report=lcov tests/ -v
-      
+          pytest --cov-config=.coveragerc --cov=crystal_torture --cov-report=lcov tests/ --ignore=tests/integration -v
+
+      - name: Run integration tests
+        run: |
+          cd /tmp
+          pytest tests/integration -v
+
       - name: Upload coverage to Coveralls (parallel)
         uses: coverallsapp/github-action@v2
         with:
