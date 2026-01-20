@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
     
     steps:
       - name: Checkout repository
@@ -41,13 +41,18 @@ jobs:
               exit(1)
           EOF
       
-      - name: Run tests with coverage
+      - name: Run unit tests with coverage
         run: |
           cd /tmp
           cp -r /home/runner/work/crystal_torture/crystal_torture/tests .
           cp /home/runner/work/crystal_torture/crystal_torture/.coveragerc .
-          pytest --cov-config=.coveragerc --cov=crystal_torture --cov-report=lcov tests/ -v
-      
+          pytest --cov-config=.coveragerc --cov=crystal_torture --cov-report=lcov tests/ --ignore=tests/integration -v
+
+      - name: Run integration tests
+        run: |
+          cd /tmp
+          pytest tests/integration -v
+
       - name: Upload coverage to Coveralls (parallel)
         uses: coverallsapp/github-action@v2
         with:
