@@ -197,14 +197,14 @@ def save_edges(edge_data: EdgeData, filename: str | Path) -> None:
 def edges_from_structure(
     structure: Structure,
     rcut: float,
-    weight_fn: Callable[[PeriodicSite, PeriodicSite, float], float] | None = None,
+    weight_fn: Callable[[PeriodicSite, PeriodicSite], float] | None = None,
 ) -> EdgeData:
     """Generate EdgeData from structure geometry.
 
     Args:
         structure: Pymatgen Structure.
         rcut: Cutoff radius for edges.
-        weight_fn: Function(site_i, site_j, distance) -> weight.
+        weight_fn: Function(site_i, site_j) -> weight.
                    Sites passed in canonical order (lower index first).
                    If None, edges have no weights (weight=None).
 
@@ -220,7 +220,7 @@ def edges_from_structure(
     for i, site_neighbours in enumerate(neighbours):
         for neighbour_info in site_neighbours:
             # neighbour_info is (PeriodicSite, distance, index, image)
-            neighbour_site, distance, j, _ = neighbour_info
+            _, _, j, _ = neighbour_info
             j = int(j)  # Convert numpy int64 to Python int
 
             # Skip self-edges
@@ -231,10 +231,10 @@ def edges_from_structure(
             if i < j:
                 edge_key = (i, j)
                 site_i = structure.sites[i]
-                site_j = neighbour_site
+                site_j = structure.sites[j]
             else:
                 edge_key = (j, i)
-                site_i = neighbour_site
+                site_i = structure.sites[j]
                 site_j = structure.sites[i]
 
             # Skip if we've already added this edge
@@ -244,7 +244,7 @@ def edges_from_structure(
 
             # Calculate weight if weight function provided
             if weight_fn is not None:
-                weight = weight_fn(site_i, site_j, distance)
+                weight = weight_fn(site_i, site_j)
             else:
                 weight = None
 
@@ -278,7 +278,7 @@ def edges_from_labels(
     Raises:
         KeyError: If a label pair is not found in label_weights (in either order).
     """
-    def weight_fn(site_i: PeriodicSite, site_j: PeriodicSite, d: float) -> float:
+    def weight_fn(site_i: PeriodicSite, site_j: PeriodicSite) -> float:
         label_i = site_i.properties["label"]
         label_j = site_j.properties["label"]
 

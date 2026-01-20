@@ -432,15 +432,14 @@ class TestEdgesFromStructure(unittest.TestCase):
 
     def test_edges_from_structure_applies_weight_fn(self):
         """Test that weight_fn is applied to edges."""
-        # Weight is just the distance
+        # Weight is a constant
         edge_data = edges_from_structure(
             self.simple_structure,
             rcut=3.0,
-            weight_fn=lambda s1, s2, d: d,
+            weight_fn=lambda s1, s2: 0.5,
         )
         self.assertTrue(edge_data.weighted)
-        # Distance should be approximately 2.5
-        self.assertAlmostEqual(edge_data.edges[0].weight, 2.5, places=5)
+        self.assertAlmostEqual(edge_data.edges[0].weight, 0.5, places=5)
 
     def test_edges_from_structure_canonical_ordering(self):
         """Test that edges have canonical ordering (i < j)."""
@@ -610,19 +609,25 @@ class TestGraphFromEdges(unittest.TestCase):
 
     def test_graph_from_edges_filtered_threshold_sweep(self):
         """Test threshold sweep with filtered edges."""
-        # Generate weighted edges
+        # Generate weighted edges using site indices to create varied weights
+        # Weight = (i + j) / 100 gives values between 0.01 and ~0.15
+        def index_weight(s1, s2):
+            i = self.li_structure.index(s1)
+            j = self.li_structure.index(s2)
+            return (i + j) / 100.0
+
         edge_data = edges_from_structure(
             self.li_structure,
             rcut=4.0,
-            weight_fn=lambda s1, s2, d: d,
+            weight_fn=index_weight,
         )
 
         # Check percolation at different thresholds
-        thresholds = [2.0, 3.0, 4.0, 5.0]
+        thresholds = [0.02, 0.05, 0.10, 0.15]
         percolation_fracs = []
 
         for threshold in thresholds:
-            filtered = edge_data.filter(lambda e: e.weight <= threshold)
+            filtered = edge_data.filter(lambda e, t=threshold: e.weight <= t)
             graph = graph_from_edges(self.li_structure, filtered)
             frac = graph.return_frac_percolating()
             percolation_fracs.append(frac)

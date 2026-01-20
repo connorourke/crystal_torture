@@ -37,49 +37,6 @@ frac = graph.return_frac_percolating()
 print(f"Fraction percolating: {frac:.3f}")
 ```
 
-### Weighted Edges
-
-Assign weights to edges using a weight function:
-
-```python
-# Weight = distance between sites
-edge_data = edges_from_structure(
-    li_structure,
-    rcut=5.0,
-    weight_fn=lambda site_i, site_j, distance: distance,
-)
-
-# Inspect edge weights
-for edge in edge_data.edges[:5]:
-    print(f"Edge {edge.nodes}: weight = {edge.weight:.3f}")
-```
-
-## Finding Percolation Thresholds
-
-The key application is sweeping across weight thresholds to find where percolation occurs:
-
-```python
-# Generate weighted edges
-edge_data = edges_from_structure(
-    li_structure,
-    rcut=5.0,
-    weight_fn=lambda s1, s2, d: d,
-)
-
-# Sweep thresholds
-thresholds = [2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
-
-for threshold in thresholds:
-    # Filter edges by weight threshold
-    filtered = edge_data.filter(lambda e: e.weight <= threshold)
-
-    # Build graph and check percolation
-    graph = graph_from_edges(li_structure, filtered)
-    frac = graph.return_frac_percolating()
-
-    print(f"Threshold {threshold:.1f} Å: {len(filtered.edges)} edges, {frac:.3f} percolating")
-```
-
 ## Label-Based Weights
 
 For structures with labelled sites (e.g., octahedral vs tetrahedral), assign weights based on site type pairs:
@@ -90,7 +47,7 @@ from crystal_torture import edges_from_labels
 # Structure must have 'label' site property
 # e.g., structure.add_site_property("label", ["Oct", "Tet", "Oct", ...])
 
-# Define weights for label pairs (e.g., migration barriers)
+# Define weights for label pairs (e.g., migration barriers in eV)
 label_weights = {
     ("Oct", "Oct"): 0.2,  # Easy Oct-Oct hop
     ("Oct", "Tet"): 0.5,  # Medium Oct-Tet hop
@@ -102,6 +59,30 @@ edge_data = edges_from_labels(
     rcut=3.0,
     label_weights=label_weights,
 )
+```
+
+## Finding Percolation Thresholds
+
+The key application is sweeping across weight thresholds to find where percolation occurs:
+
+```python
+from crystal_torture import edges_from_labels, graph_from_edges
+
+# Generate weighted edges from labelled structure
+edge_data = edges_from_labels(structure, rcut=4.0, label_weights=label_weights)
+
+# Sweep thresholds
+thresholds = [0.2, 0.5, 0.8]
+
+for threshold in thresholds:
+    # Filter edges by weight threshold
+    filtered = edge_data.filter(lambda e: e.weight <= threshold)
+
+    # Build graph and check percolation
+    graph = graph_from_edges(structure, filtered)
+    frac = graph.return_frac_percolating()
+
+    print(f"Threshold {threshold} eV: {len(filtered.edges)} edges, {frac:.3f} percolating")
 ```
 
 ## Saving and Loading Edge Data
@@ -133,18 +114,19 @@ The JSON format is human-readable:
 
 ## Custom Weight Functions
 
-Weight functions receive both sites and the distance, allowing flexible weight calculations:
+Weight functions receive both sites, allowing flexible weight calculations based on site properties:
 
 ```python
-def barrier_weight(site_i, site_j, distance):
-    """Example: weight based on distance and site properties."""
-    # Access site properties
+def barrier_weight(site_i, site_j):
+    """Example: weight based on site properties."""
     label_i = site_i.properties.get("label", "unknown")
     label_j = site_j.properties.get("label", "unknown")
 
-    # Calculate weight based on labels and distance
-    base_barrier = 0.3 if label_i == label_j else 0.5
-    return base_barrier + 0.1 * distance
+    # Return barrier based on site types
+    if label_i == label_j:
+        return 0.3
+    else:
+        return 0.5
 
 edge_data = edges_from_structure(
     structure,

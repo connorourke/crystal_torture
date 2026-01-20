@@ -120,15 +120,20 @@ class TestPercolationThresholdSweep(unittest.TestCase):
         )
         li_structure = filter_structure_by_species(structure, ["Li"])
 
-        # Generate weighted edges (weight = distance)
+        # Generate weighted edges (weight = sum of site indices / 10)
+        def index_weight(s1, s2):
+            i = li_structure.index(s1)
+            j = li_structure.index(s2)
+            return (i + j) / 10.0
+
         edge_data = edges_from_structure(
             li_structure,
             rcut=5.0,
-            weight_fn=lambda s1, s2, d: d,
+            weight_fn=index_weight,
         )
 
-        # Sweep thresholds
-        thresholds = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
+        # Sweep thresholds based on index weights
+        thresholds = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 5.0]
         results = []
 
         for threshold in thresholds:
@@ -160,19 +165,25 @@ class TestPercolationThresholdSweep(unittest.TestCase):
         )
         li_structure = filter_structure_by_species(structure, ["Li"])
 
+        # Generate weighted edges (weight = sum of site indices / 10)
+        def index_weight(s1, s2):
+            i = li_structure.index(s1)
+            j = li_structure.index(s2)
+            return (i + j) / 10.0
+
         edge_data = edges_from_structure(
             li_structure,
             rcut=5.0,
-            weight_fn=lambda s1, s2, d: d,
+            weight_fn=index_weight,
         )
 
         # Very low threshold - likely no percolation
-        low_filtered = edge_data.filter(lambda e: e.weight <= 1.0)
+        low_filtered = edge_data.filter(lambda e: e.weight <= 0.1)
         low_graph = graph_from_edges(li_structure, low_filtered)
         low_frac = low_graph.return_frac_percolating()
 
         # High threshold - all edges included
-        high_filtered = edge_data.filter(lambda e: e.weight <= 10.0)
+        high_filtered = edge_data.filter(lambda e: e.weight <= 100.0)
         high_graph = graph_from_edges(li_structure, high_filtered)
         high_frac = high_graph.return_frac_percolating()
 
@@ -351,11 +362,11 @@ class TestFullRoundTrip(unittest.TestCase):
         )
         li_structure = filter_structure_by_species(structure, ["Li"])
 
-        # Original weighted edges
+        # Original weighted edges (weight = constant)
         original_edges = edges_from_structure(
             li_structure,
             rcut=4.0,
-            weight_fn=lambda s1, s2, d: d * 0.5,
+            weight_fn=lambda s1, s2: 0.5,
         )
 
         # Round-trip
@@ -381,13 +392,19 @@ class TestFullRoundTrip(unittest.TestCase):
         )
         li_structure = filter_structure_by_species(structure, ["Li"])
 
+        # Generate weighted edges (weight = sum of site indices / 10)
+        def index_weight(s1, s2):
+            i = li_structure.index(s1)
+            j = li_structure.index(s2)
+            return (i + j) / 10.0
+
         # Generate, filter, save
         full_edges = edges_from_structure(
             li_structure,
             rcut=5.0,
-            weight_fn=lambda s1, s2, d: d,
+            weight_fn=index_weight,
         )
-        filtered_edges = full_edges.filter(lambda e: e.weight <= 3.5)
+        filtered_edges = full_edges.filter(lambda e: e.weight <= 1.0)
 
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".json", delete=False
